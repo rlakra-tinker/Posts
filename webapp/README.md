@@ -1,4 +1,4 @@
-# Posts
+# webapp
 
 
 ## Create Virtual Env
@@ -39,6 +39,23 @@ OR
 python3 -m pip install -r requirements.txt
 ```
 
+## Install Packages
+
+- Install Flask
+
+```shell
+pip install Flask
+```
 
 
+## Run Flask Application
+
+```shell
+flask --app webapp run
+```
+
+## Access Application
+```shell
+ http://127.0.0.1:5000
+```
 
