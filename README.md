@@ -39,6 +39,9 @@ OR
 python3 -m pip install -r requirements.txt
 ```
 
-
+## Save Requirements (Dependencies)
+```shell
+pip freeze > requirements.txt
+```
 
 
