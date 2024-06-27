@@ -1,5 +1,29 @@
 # Posts
 
+---
+
+The ```Posts``` repository contains the Posts python project.
+
+
+## Folder Structure Conventions
+
+---
+
+```
+    /
+    ├── modules                     # The modules
+    ├── Posts                       # The Posts Service
+    |    ├── posts-iws              # The IWS Service
+    |    ├── webapp                 # The WebApp Service
+    |    └── README.md
+    └── README.md
+```
+
+
+# Building Application
+
+---
+
 
 ## Create Virtual Env
 ```shell
@@ -45,3 +69,9 @@ pip freeze > requirements.txt
 ```
 
 
+
+# Author
+
+---
+
+- Rohtash Lakra
