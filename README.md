@@ -50,6 +50,10 @@ python3 -m venv venv
 
     ```shell
     source venv/bin/activate
+  
+  OR
+  
+    . ./venv/bin/activate
     ```
 
 
