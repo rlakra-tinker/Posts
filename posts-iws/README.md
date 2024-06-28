@@ -1,4 +1,26 @@
-# Posts Backend
+# Posts Backend Service
+
+---
+
+The ```posts-iws``` represents an internal web service.
+
+
+## Folder Structure Conventions
+
+---
+
+```
+    /
+    ├── modules                     # The modules
+    ├── posts-iws                   # The Posts backend service
+    |    └── README.md
+    └── README.md
+```
+
+
+# Building Application
+
+---
 
 
 ## Create Virtual Env
@@ -26,6 +48,10 @@ python3 -m venv venv
 
     ```shell
     source venv/bin/activate
+  
+  OR
+  
+    . ./venv/bin/activate  
     ```
 
 
@@ -45,3 +71,8 @@ pip freeze > requirements.txt
 ```
 
 
+# Author
+
+---
+
+- Rohtash Lakra
