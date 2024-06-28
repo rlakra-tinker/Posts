@@ -14,17 +14,19 @@ Each of them returns a string to indicate on which page you are on.
 By default, Flask expects your templates to be in a "templates/" directory. 
 """
 
-"""
-Index Page
-"""
+
 @bp.route("/")
 def index():
+    """
+    Index Page
+    """
     return render_template("views/index.html")
 
-"""
-About Us Page
-"""
+
 @bp.route("/about")
 def about():
+    """
+    About Us Page
+    """
     return render_template("views/about.html")
 
