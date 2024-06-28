@@ -3,26 +3,7 @@
 # Reference - https://realpython.com/flask-project/
 #
 import os
-from flask import Flask
-import api
-
-"""
-Create an application your application factory pattern.
-
-With an application factory, your project’s structure becomes more organized.
-It encourages you to separate different parts of your application, like routes, configurations, and initializations, 
-into different files later on. This encourages a cleaner and more maintainable codebase.
-"""
-def create_app():
-    # create flask application
-    app = Flask(__name__)
-
-    # register logger here root logger
-
-    # Connect the 'api' blueprint with your Flask project
-    app.register_blueprint(api.bp)
-
-    return app
+from api import create_app
 
 
 # init app by calling crate api function.
@@ -50,7 +31,7 @@ Main Application
 
 How to run:
 - python3 webapp.py
-- python -m flask --app board run --port 8000 --debug
+- python -m flask --app webapp run --port 8080 --debug
 
 """
 # App Main

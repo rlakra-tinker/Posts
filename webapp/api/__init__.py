@@ -1,28 +1,20 @@
-from flask import Blueprint
+from flask import Flask
+from api import views
 
 """
-Create an instance of it named bp. 
-The first argument, "api", is the name of your blueprint and identifies this blueprint in your Flask project.
-The second argument is the blueprint’s '__name__' and used later when you import api into' webapp.py'.
-"""
-bp = Blueprint("api", __name__)
+Create an application your application factory pattern.
 
+With an application factory, your project’s structure becomes more organized.
+It encourages you to separate different parts of your application, like routes, configurations, and initializations, 
+into different files later on. This encourages a cleaner and more maintainable codebase.
 """
-Then, you define two routes, one as the home view and the other as the about view. 
-Each of them returns a string to indicate on which page you are on.
-"""
+def create_app():
+    # create flask application
+    app = Flask(__name__)
 
-"""
-Index Page
-"""
-@bp.route("/")
-def index():
-    return "Hello, Home!"
+    # register logger here root logger
 
-"""
-About Us Page
-"""
-@bp.route("/about")
-def about():
-    return "Hello, About!"
+    # Connect the 'api' blueprint with your Flask project
+    app.register_blueprint(views.bp)
 
+    return app
