@@ -59,6 +59,13 @@ python3 -m venv venv
 
 The parenthesized (venv) in front of the prompt indicates that you’ve successfully activated the virtual environment.
 
+## Upgrade ```pip``` release
+
+```shell
+pip install --upgrade pip
+```
+
+
 ## Install Requirements
 
 **Note**: - You can ignore ```Install Packages``` steps if you've successfully run this section.
@@ -79,6 +86,12 @@ python3 -m pip install -r requirements.txt
 
 ```shell
 python3 -m pip install Flask
+```
+
+
+## Save Requirements (Dependencies)
+```shell
+pip freeze > requirements.txt
 ```
 
 
