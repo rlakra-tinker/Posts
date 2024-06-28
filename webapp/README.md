@@ -106,7 +106,7 @@ python3 webapp.py
 
 OR
 
-python -m flask --app webapp run --port 8000 --debug
+python -m flask --app webapp run --port 8080 --debug
 ```
 
 **Note**:- You can stop the development server by pressing ```Ctrl+C``` in your terminal.
