@@ -2,12 +2,12 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-project/
 #
+
 import os
-from . import create_app
+from webapp import create_app
 
 # init app by calling crate api function.
 app = create_app()
-
 
 """
 Run Web Application
@@ -15,9 +15,10 @@ Run Web Application
 Configure the app here.
 """
 
+
 def run_web_app():
     # localhost
-    host = os.getenv("APP_HOST_NAME", "0.0.0.0")
+    host = os.getenv("APP_HOST", "0.0.0.0")
     port = int(os.getenv("APP_PORT", 8080))
     debug = bool(os.getenv("DEBUG_ENABLED", True))
 

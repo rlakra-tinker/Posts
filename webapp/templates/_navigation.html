@@ -1,4 +1,4 @@
-<!-- Fixed navbar -->
+<!-- Fixed/Top Navbar -->
 <nav class="navbar navbar-default navbar-fixed-top">
   <div class="container">
     <div class="navbar-header">
@@ -15,11 +15,11 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <li class="active"><a href="{{ url_for('views.index') }}">Home</a></li>
-        <li><a href="{{ url_for('views.about') }}">About</a></li>
-        <li><a href="#">Services</a></li>
-        <li><a href="#">Clients</a></li>
-        <li><a href="#">Contact</a></li>
+        <li class="active"><a href="{{ url_for('webapp.views.index') }}">Home</a></li>
+        <li><a href="{{ url_for('webapp.views.about') }}">About</a></li>
+        <li><a href="{{ url_for('webapp.views.services') }}">Services</a></li>
+        <li><a href="{{ url_for('webapp.views.clients') }}">Clients</a></li>
+        <li><a href="{{ url_for('webapp.views.contact') }}">Contact</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
             aria-expanded="false">Dropdown <span class="caret"></span></a>
@@ -35,10 +35,10 @@
         </li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
-<!--        <li><a href="../navbar/">Default</a></li>-->
-<!--        <li><a href="../navbar-static-top/">Static top</a></li>-->
+        <!--        <li><a href="../navbar/">Default</a></li>-->
+        <!--        <li><a href="../navbar-static-top/">Static top</a></li>-->
         <li class="active"><a href="./">Fixed Top <span class="sr-only">(current)</span></a></li>
-        <li><a href="{{ url_for('views.index') }}">Logout</a></li>
+        <li><a href="{{ url_for('webapp.views.logout') }}">Logout</a></li>
       </ul>
     </div><!--/.nav-collapse -->
   </div>
@@ -47,8 +47,8 @@
 <!-- Sidebar -->
 <div id="sideNavBarDiv" class="sidenav">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-  <a href="{{ url_for('views.about') }}">About</a>
-  <a href="#">Services</a>
-  <a href="#">Clients</a>
-  <a href="#">Contact</a>
+  <a href="{{ url_for('webapp.views.about') }}">About</a>
+  <a href="{{ url_for('webapp.views.services') }}">Services</a>
+  <a href="{{ url_for('webapp.views.clients') }}">Clients</a>
+  <a href="{{ url_for('webapp.views.contact') }}">Contact</a>
 </div>

@@ -28,11 +28,6 @@ The ```webapp``` represents an external webapp service.
 
 ## Create Virtual Env
 ```shell
-python -m pip install virtualenv
-python -m venv venv
-
-OR
-
 python3 -m pip install virtualenv
 python3 -m venv venv
 ```
@@ -71,10 +66,6 @@ pip install --upgrade pip
 **Note**: - You can ignore ```Install Packages``` steps if you've successfully run this section.
 
 ```shell
-python -m pip install -r requirements.txt
-
-OR
-
 python3 -m pip install -r requirements.txt
 ```
 
@@ -98,15 +89,17 @@ pip freeze > requirements.txt
 ## Run Flask Application
 
 ```shell
-flask --app webapp run
+flask --app wsgi run
+
+http://127.0.0.1:5000/ews-posts
 
 OR
 
-python3 webapp.py
+python3 wsgi.py
 
 OR
 
-python -m flask --app webapp run --port 8080 --debug
+python -m flask --app wsgi run --port 8080 --debug
 ```
 
 **Note**:- You can stop the development server by pressing ```Ctrl+C``` in your terminal.
@@ -114,7 +107,8 @@ python -m flask --app webapp run --port 8080 --debug
 
 ## Access Application
 ```shell
- http://127.0.0.1:5000
+http://127.0.0.1:5000/ews-posts
+http://localhost:8080/ews-posts
 ```
 
 
