@@ -1,5 +1,5 @@
 from flask import Flask
-from api import views
+import views
 
 """
 Create an application your application factory pattern.

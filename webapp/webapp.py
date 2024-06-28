@@ -3,8 +3,7 @@
 # Reference - https://realpython.com/flask-project/
 #
 import os
-from api import create_app
-
+from . import create_app
 
 # init app by calling crate api function.
 app = create_app()
