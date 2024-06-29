@@ -26,7 +26,7 @@ def create_app():
     The first argument, "webapp", is the name of your blueprint and identifies this blueprint in your Flask project.
     The second argument is the blueprint’s '__name__' and used later when you import api into' webapp.py'.
     """
-    bp = Blueprint("webapp", __name__, url_prefix="/ews-posts")
+    bp = Blueprint("webapp", __name__, url_prefix="/posts-ews")
 
     # register more app's here.
     bp.register_blueprint(views.bp)
