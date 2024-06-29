@@ -1,5 +1,48 @@
 @import url("https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.min.css");
 
+/**
+ * Container
+ */
+
+.container {
+  padding-right: auto;
+  padding-left: auto;
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/**
+ * Fixed/Top Navbar
+ */
+
+.navbar-fixed-bottom,
+.navbar-fixed-top {
+  position: fixed;
+  left: auto;
+  right: auto;
+}
+
+/* When you mouse over the navigation links, change their color */
+.navbar-default .navbar-nav>li>a:hover,
+.navbar-default .navbar-nav>li>a:focus {
+  color: #781;
+  background-color: transparent;
+  font-size: 16px;
+}
+
+/* When the navigation links is active, change their color */
+.navbar-default .navbar-nav>.active>a,
+.navbar-default .navbar-nav>.active>a:hover,
+.navbar-default .navbar-nav>.active>a:focus {
+  color: #555;
+  background-color: #e7e7e7;
+}
+
+
+/**
+ * Side Navbar
+ */
+
 .sidenav {
   height: 100%;
   /* 100% Full-height */
@@ -47,7 +90,7 @@
 }
 
 section {
-    margin-top: 80px;
+  margin-top: 80px;
 }
 
 /* Style page content - use this if you want to push the page content to the right when you open the side navigation */

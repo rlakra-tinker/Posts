@@ -5,15 +5,30 @@
 {% endblock header %}
 
 {% block content %}
-<h2>Leverage Blueprints</h2>
-<p>
-  As your Flask project grows, you have lots of view functions and other related bits of code that work together.
-  Instead of adding all these directly to a basic app.py file, you can create blueprints that you register in your
-  application factory.
-</p>
-<p>
-  Blueprints are modules that contain related views that you can conveniently import in __init__.py. For example, you’ll
-  have a blueprint that stores the main pages of your project.
-</p>
+
+<h3>
+  You are now logged out. Thank you for visiting.
+</h3>
+
+<div>
+  <h4>Leverage Blueprints</h4>
+  <p>
+    What's it like to have a team work for you?
+  </p>
+  <p>
+    <a href="{{ url_for('webapp.views.services') }}">Find out more</a>
+  </p>
+
+</div>
+<div>
+  <p>For your security:</p>
+  <p>
+    We recommend closing your browser once you're through using our website. The account information screens will remain
+    in the browser's memory until the browser is closed.
+  </p>
+</div>
+<div>
+  <p>v:1.0.0</p>
+</div>
 
 {% endblock content %}
