@@ -104,6 +104,7 @@ APP_HOST = 0.0.0.0
 APP_PORT = 8080
 ```
 
+**By default**, Flask will run the application on **port 5000**.
 
 ## Run Flask Application
 
