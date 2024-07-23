@@ -1,0 +1,19 @@
+{% extends 'fragments/_base.html' %}
+
+{% block header %}
+<h2>
+  {% block title %}
+  Search - Product
+  {% endblock title %}
+</h2>
+{% endblock header %}
+
+{% block content %}
+
+<h2>Search Product</h2>
+<p>
+  <label>Search: </label>
+  <input type="text" name="search" />
+</p>
+
+{% endblock content %}
