@@ -49,7 +49,7 @@ class SqlAlchemy:
             san = User(
                 user_name="san@lakra.com",
                 password="San",
-                email="roh@lakra.com",
+                email="san@lakra.com",
                 first_name="Sangita",
                 last_name="Lakra",
                 admin=True,
@@ -73,6 +73,26 @@ class SqlAlchemy:
             # add users
             session.add_all([roh, san])
             session.commit()
+        print()
+
+    def fetch_roles(self):
+        print(f"fetch_roles\n")
+        # Simple SELECT
+        from sqlalchemy import select
+        session = Session(self.engine)
+        stmt = select(Role)
+        for role in session.scalars(stmt):
+            print(role)
+        print()
+
+    def fetch_users(self):
+        print(f"fetch_users\n")
+        # Simple SELECT
+        from sqlalchemy import select
+        session = Session(self.engine)
+        stmt = select(User)
+        for user in session.scalars(stmt):
+            print(user)
         print()
 
     def fetch_records(self):
@@ -162,6 +182,8 @@ if __name__ == '__main__':
     sqlAlchemy = SqlAlchemy()
     sqlAlchemy.create_database()
     sqlAlchemy.populate_database()
+    sqlAlchemy.fetch_roles()
+    sqlAlchemy.fetch_users()
     sqlAlchemy.fetch_records()
     sqlAlchemy.fetch_with_joins()
     sqlAlchemy.update_records()
