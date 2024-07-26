@@ -47,6 +47,22 @@ class BaseEntity(AbstractEntity):
     # ID - Primary Key
     id: Mapped[int] = mapped_column(primary_key=True)
 
+    def __init__(self, **kwargs):
+        """
+        Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
+        A constructor similar to that supplied by Declarative is illustrated:
+        """
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+
+    def set_attrs(self, **kwargs):
+        """
+        Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
+        A constructor similar to that supplied by Declarative is illustrated:
+        """
+        for key in kwargs:
+            setattr(self, key, kwargs[key])
+
     # def __repr__(self) -> str:
     #     return f"BaseEntity <id={self.id!r}>"
 
@@ -68,7 +84,6 @@ class Role(NamedEntity):
     """
     __tablename__ = "roles"
 
-    # name: Mapped[str] = mapped_column(String(64))
     active: Mapped[bool] = True
     meta_data: Mapped[Optional[str]] = mapped_column(String(256))
     created_at: Mapped[datetime] = mapped_column(insert_default=func.now())

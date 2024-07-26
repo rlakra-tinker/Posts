@@ -1,12 +1,14 @@
 #
 # Author: Rohtash Lakra
 #
+import datetime
+
 from sqlalchemy import create_engine
 from entity import AbstractEntity, Role, User, Address
 from sqlalchemy.orm import Session
 
 
-class SqlAlchemy:
+class SqlAlchemyTableObject:
 
     def __init__(self):
         # The echo=True parameter indicates that SQL emitted by connections will be logged to standard out.
@@ -177,14 +179,107 @@ class SqlAlchemy:
         print()
 
 
+class SqlAlchemyClassicalObject:
+
+    def create_role(self, roleName):
+        now = datetime.datetime.now()
+        return Role(name=roleName, created_at=now, updated_at=now)
+
+    def create_address(self, street1, city, state, country, zip):
+        return Address(
+            street1=street1,
+            city=city,
+            state=state,
+            country=country,
+            zip=zip
+        )
+
+    def create_user(self, userName, password, email, firstName, lastName, isAdmin, addresses: [Address]):
+        return User(
+            user_name="roh@lakra.com",
+            password="Roh",
+            email="roh@lakra.com",
+            first_name="Rohtash",
+            last_name="Lakra",
+            admin=True,
+            addresses=addresses,
+        )
+
+    def print_classical_objects(self):
+        print(f"print_classical_objects\n")
+        # create roles
+        roles = (self.create_role("ADMIN"), self.create_role("USER"), self.create_role("GUEST"))
+        print(f"roles:\n{roles}")
+        print()
+
+        # create user
+        roh_user = self.create_user(
+            "roh@lakra.com",
+            "Roh",
+            "roh@lakra.com",
+            "Rohtash",
+            "Lakra",
+            True,
+            [
+                self.create_address(
+                    "Tennison Rd",
+                    "Hayward",
+                    "Washington",
+                    "US",
+                    "94532"
+                )
+            ]
+        )
+
+        print(f"roh_user:\n{roh_user}")
+        print()
+
+        # create user
+        san_user = self.create_user(
+            "san@lakra.com",
+            "Sangita",
+            "san@lakra.com",
+            "Sangita",
+            "Lakra",
+            True,
+            [
+                self.create_address(
+                    "Tennison Blvd",
+                    "Hayward",
+                    "New York",
+                    "US",
+                    "94534"
+                ),
+                self.create_address(
+                    "Mission Blvd",
+                    "Hayward",
+                    "Utha",
+                    "US",
+                    "91534"
+                )
+            ]
+        )
+
+        print(f"san_user:\n{san_user}")
+        print()
+
+    def update_records(self):
+        pass
+
+
 if __name__ == '__main__':
     # sqlalchemy.__version__
-    sqlAlchemy = SqlAlchemy()
-    sqlAlchemy.create_database()
-    sqlAlchemy.populate_database()
-    sqlAlchemy.fetch_roles()
-    sqlAlchemy.fetch_users()
-    sqlAlchemy.fetch_records()
-    sqlAlchemy.fetch_with_joins()
-    sqlAlchemy.update_records()
-    sqlAlchemy.delete_record()
+    sqlAlchemyTableObject = SqlAlchemyTableObject()
+    sqlAlchemyTableObject.create_database()
+    sqlAlchemyTableObject.populate_database()
+    sqlAlchemyTableObject.fetch_roles()
+    sqlAlchemyTableObject.fetch_users()
+    sqlAlchemyTableObject.fetch_records()
+    sqlAlchemyTableObject.fetch_with_joins()
+    sqlAlchemyTableObject.update_records()
+    sqlAlchemyTableObject.delete_record()
+    print()
+    # sqlalchemy.__version__
+    sqlAlchemyClassicalObject = SqlAlchemyClassicalObject()
+    sqlAlchemyClassicalObject.print_classical_objects()
+    sqlAlchemyClassicalObject.update_records()
