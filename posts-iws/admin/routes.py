@@ -5,7 +5,7 @@
 import json
 from flask import Blueprint, render_template, make_response, jsonify, request, redirect, url_for
 from framework.utils import HTTPStatus
-from framework.entity import ErrorEntity
+from framework.entity.abstract import ErrorEntity
 
 """
 Making a Flask Blueprint:

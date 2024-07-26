@@ -7,9 +7,9 @@
 import json
 from flask import Blueprint, render_template, make_response, jsonify, request, session, g, redirect, url_for
 from framework.utils import HTTPStatus
-from framework.entity import ErrorEntity
-from framework.utils import HTTPMethod
-from service import AccountService
+from framework.model.abstract import ErrorEntity
+from rest.account.service import AccountService
+from .models import User
 
 """
 Making a Flask Blueprint:
@@ -54,18 +54,6 @@ When you register the Flask Blueprint in an application, you extend the applicat
 bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 accountService = AccountService()
 
-# holds accounts in memory
-accounts = []
-
-
-# Returns the next ID of the account
-def _find_next_id():
-    last_id = 0
-    if not accounts and len(accounts) > 0:
-        last_id = max(account["id"] for account in accounts)
-
-    return last_id + 1
-
 
 @bp.before_app_request
 def load_logged_in_user():
@@ -73,20 +61,22 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        g.user = accountService.find_by_id(user_id)
+        # g.user = accountService.find_by_id(user_id)
+        g.user = None
 
 
-@bp.post("/register")
-def post_register():
+@bp.post("/register/")
+def register():
     print(request)
     if request.is_json:
-        user = request.get_json()
-        user["id"] = _find_next_id()
-        accounts.append(user)
+        user = accountService.register()
+        user = User.model_construct(request.get_json())
+        accountService.add(user)
         return user, 201
     else:
         username = request.form['username']
         password = request.form['password']
+        user = accountService.register(username, password)
 
         # db = get_db()
         error = None
@@ -96,15 +86,19 @@ def post_register():
         elif not password:
             error = 'Password is required.'
 
+        response = None
         if error is None:
             try:
-                accountService.register()
+                response = accountService.register()
             except Exception as ex:
-                error = f"User {username} is already registered! ex:{ex}"
+                error = f"User '{username}' is already registered! ex:{ex}"
             else:
-                return redirect(url_for("auth.login"))
+                return redirect(url_for("iws.api.login"))
 
         # flash(error)
+
+        if response:
+            return response
 
     return make_response(ErrorEntity(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
 

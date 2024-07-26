@@ -1,32 +1,35 @@
 #
 # Author: Rohtash Lakra
 #
-from werkzeug.security import generate_password_hash, gen_salt
-from framework.db.sqlite import SQLite3Database
+from typing import List, Optional, Dict
+from framework.service import AbstractService
+from .models import User
 
 
-class AccountService(object):
+class AccountService(AbstractService):
 
     def __init__(self):
-        self.db = SQLite3Database()
+        self.accounts: Dict[int, User] = {}
+
+    def _find_next_id(self):
+        """
+        Returns the next ID of the account
+        """
+        last_id = super(AccountService, self)._find_next_id()
+        if not self.accounts and len(self.accounts) > 0:
+            last_id = max(account["id"] for account in self.accounts)
+
+        return last_id + 1
+
+    def add(self, user: User):
+        print(f"user: {user}")
+        user.id = self._find_next_id()
+        print(f"user.id: {user.id}")
+        self.accounts[user.id] = user
 
     def register(self, username, password):
-        register_query = '''
-        INSERT INTO users (username, password)
-        VALUES (?, ?)
-        '''
-
-        try:
-            self.db.execute(register_query, (username, generate_password_hash(password)), )
-            self.db.commit()
-        except self.db.IntegrityError:
-            error = f"User {username} is already registered."
-        # else:
-        #     return redirect(url_for("auth.login"))
-
-    def find_by_id(self, user_id):
-        find_query = '''
-        SELECT * FROM users
-        WHERE id = ?
-        '''
-        return self.db.execute(find_query, (user_id,)).fetchone()
+        user = User(username=username, password=password)
+        self.add(user)
+        return {
+            "user_name": "user_name"
+        }

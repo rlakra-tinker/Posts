@@ -2,10 +2,7 @@
 # Author: Rohtash Lakra
 #
 from flask import Blueprint
-from account.controller import bp as accounts_bp
-from admin.controller import bp as admin_bp
-from post import bp as post_bp
-from comment import bp as comment_bp
+from rest.account.routes import bp as accounts_bp
 
 
 """
@@ -17,6 +14,3 @@ bp = Blueprint("v1", __name__, url_prefix="/v1")
 
 # register end-points here
 bp.register_blueprint(accounts_bp)
-bp.register_blueprint(admin_bp)
-bp.register_blueprint(post_bp)
-bp.register_blueprint(comment_bp)

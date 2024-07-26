@@ -8,6 +8,7 @@ from pathlib import Path
 
 from .routes import bp as webapp_bp
 from api import bp as api_bp
+from rest import bp as rest_bp
 
 """
 Create WebApp class
@@ -37,6 +38,7 @@ def create_app():
     # register more app's here.
     bp.register_blueprint(webapp_bp)
     bp.register_blueprint(api_bp)
+    bp.register_blueprint(rest_bp)
 
     # Connect the 'ews-posts' blueprint with your Flask project
     app.register_blueprint(bp)

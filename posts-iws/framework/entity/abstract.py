@@ -1,10 +1,11 @@
 #
 # Author: Rohtash Lakra
+# Reference(s):
+#  - https://docs.pydantic.dev/latest/
 #
 import json
 from json import JSONEncoder, JSONDecoder
 from dataclasses import dataclass
-
 from flask import current_app, g, request
 
 
@@ -32,6 +33,9 @@ class AbstractEntity(JSONEncoder):
     def default(self, entity):
         return entity.__dict__
 
+    def json(self):
+        return self.model_dump()
+
 
 @dataclass
 # Named Entity
@@ -51,7 +55,7 @@ class NamedEntity(AbstractEntity):
 
 # Error Entity
 @dataclass
-class ErrorEntity:
+class ErrorEntity(object):
 
     @staticmethod
     def __new__(cls, *args, **kwargs):
@@ -78,10 +82,10 @@ class ErrorEntity:
         error = ErrorEntity(status, message if message is not None else str(exception), exception)
         # TODO: FIX ME!
         # error_json = json.dumps(error, lambda o: o.__dict__)
-        print(f"error_json:{error}")
+        print(f"error_json:{error.json()}")
 
         return {
-            'error': error
+            'error': error.json()
         }
 
     def __init__(self, status, message: str, exception: Exception = None):
@@ -89,5 +93,6 @@ class ErrorEntity:
         self.message = message
         self.exception = exception
 
-    def __repr__(self) -> str:
-        return f"{type(self).__name__} <status={self.status}, message={self.message}>"
+    # def __repr__(self) -> str:
+    #     # return f"{type(self).__name__} <status={self.status}, message={self.message}>"
+    #     return f"{type(self)} <status={self.status}, message={self.message}>"

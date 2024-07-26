@@ -77,7 +77,7 @@ class HTTPStatus(AutoName):
         return f"{self.name} <{self.status_code}, {self.message}>"
 
     def __str__(self):
-        return f"{self.name} <{self.status_code}, {self.message}>"
+        return self.__repr__()
 
 
 print()
