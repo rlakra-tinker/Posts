@@ -154,3 +154,4 @@ class Address(BaseEntity):
 
     def __repr__(self) -> str:
         return f"Address <id={self.id!r}, user_id={self.user_id!r}, street1={self.street1!r}, street2={self.street2!r}, city={self.city!r}, state={self.state!r}, country={self.country!r}, zip={self.zip!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+

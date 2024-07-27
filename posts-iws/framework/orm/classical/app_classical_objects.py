@@ -3,7 +3,7 @@
 #
 from datetime import datetime
 import json
-from model import Role, User, Address
+from entity import Role, User, Address
 
 
 class SqlAlchemyClassicalModel:
@@ -37,8 +37,8 @@ class SqlAlchemyClassicalModel:
 
         return user
 
-    def print_classical_objects(self):
-        print(f"print_classical_objects\n")
+    def print_objects(self):
+        print(f"print_objects\n")
         # create roles
         roles = (self.create_role("ADMIN"), self.create_role("USER"), self.create_role("GUEST"))
         print(f"roles:\n")
@@ -108,4 +108,4 @@ class SqlAlchemyClassicalModel:
 if __name__ == '__main__':
     print()
     sqlAlchemyClassicalModel = SqlAlchemyClassicalModel()
-    sqlAlchemyClassicalModel.print_classical_objects()
+    sqlAlchemyClassicalModel.print_objects()
