@@ -15,7 +15,7 @@ Create WebApp class
 """
 
 
-def create_app():
+def create_app(testMode=False):
     """
     Create an application your application factory pattern.
 
@@ -25,6 +25,9 @@ def create_app():
     """
     # create flask application
     app = Flask(__name__)
+
+    if testMode:
+        print("Running Test Application ...")
 
     # register logger here root logger
 

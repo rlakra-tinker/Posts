@@ -79,13 +79,21 @@ class HTTPStatus(AutoName):
     def __str__(self):
         return self.__repr__()
 
+    @staticmethod
+    def by_status(status: int):
+        for httpStatus in HTTPStatus:
+            if httpStatus.status_code == status:
+                return httpStatus
 
-print()
-get_method = HTTPMethod.GET
-print(get_method)
-print()
+        return None
 
-status = HTTPStatus.CREATED
-# print(f"status={status}, status_code={status.status_code}, message={status.message}")
-print(status)
-print()
+
+# print()
+# get_method = HTTPMethod.GET
+# print(get_method)
+# print()
+#
+# status = HTTPStatus.CREATED
+# # print(f"status={status}, status_code={status.status_code}, message={status.message}")
+# print(status)
+# print()
