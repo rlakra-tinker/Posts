@@ -263,9 +263,6 @@ class SqlAlchemyClassicalObject:
         print(f"san_user:\n{san_user}")
         print()
 
-    def update_records(self):
-        pass
-
 
 if __name__ == '__main__':
     # sqlalchemy.__version__
@@ -279,7 +276,6 @@ if __name__ == '__main__':
     sqlAlchemyTableObject.update_records()
     sqlAlchemyTableObject.delete_record()
     print()
-    # sqlalchemy.__version__
+
     sqlAlchemyClassicalObject = SqlAlchemyClassicalObject()
     sqlAlchemyClassicalObject.print_classical_objects()
-    sqlAlchemyClassicalObject.update_records()
