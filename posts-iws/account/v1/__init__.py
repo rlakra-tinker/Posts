@@ -7,6 +7,7 @@
 #
 from flask import Blueprint
 
+bp = Blueprint('v1_account', __name__, url_prefix='/accounts')
 """
 Making a Flask Blueprint:
 
@@ -47,4 +48,3 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-bp = Blueprint('v1_account', __name__, url_prefix='/accounts')

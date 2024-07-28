@@ -4,13 +4,14 @@
 # - https://realpython.com/flask-blueprint/
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
-import json
-from flask import Blueprint, render_template, make_response, jsonify, request, session, g, redirect, url_for
+from flask import Blueprint, make_response, request, session, g, redirect, url_for
 from framework.utils import HTTPStatus
 from framework.model.abstract import ErrorEntity
 from rest.account.service import AccountService
 from .models import User
 
+#
+bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 """
 Making a Flask Blueprint:
 
@@ -51,7 +52,8 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-bp = Blueprint("accounts", __name__, url_prefix="/accounts")
+
+# account's service
 accountService = AccountService()
 
 

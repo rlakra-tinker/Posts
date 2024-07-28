@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from typing import List, Optional, Dict
+from typing import Dict
 from framework.service import AbstractService
 from .models import User
 

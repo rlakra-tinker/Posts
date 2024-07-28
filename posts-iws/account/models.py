@@ -12,7 +12,7 @@ class User(AbstractEntity):
         return super().__new__(cls)
 
     def __init__(self, user_name, password=None, email=None, first_name=None, last_name=None, is_admin=False):
-        super.__init__(self)
+        super().__init__(self)
         self.user_name = user_name
         self.password = password
         self.first_name = first_name

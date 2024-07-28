@@ -2,10 +2,9 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-blueprint/
 #
-from flask import Blueprint, make_response, jsonify, render_template
+from flask import Blueprint, render_template
 
-
-
+bp = Blueprint("comments", __name__, url_prefix="/comments")
 """
 Making a Flask Blueprint:
 
@@ -46,7 +45,7 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-bp = Blueprint("comments", __name__, url_prefix="/comments")
+
 
 
 # display cart

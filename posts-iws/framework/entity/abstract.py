@@ -3,8 +3,12 @@
 # Reference(s):
 #  - https://docs.pydantic.dev/latest/
 #
-import json
-from json import JSONEncoder, JSONDecoder
+
+"""
+Abstract and reusable entities
+"""
+
+from json import JSONEncoder
 from dataclasses import dataclass
 from flask import current_app, g, request
 
@@ -46,7 +50,7 @@ class NamedEntity(AbstractEntity):
         return super().__new__(cls)
 
     def __init__(self, name: str = None):
-        super.__init__(self)
+        super().__init__(self)
         self.name = name
 
     def __repr__(self) -> str:

@@ -2,11 +2,16 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-blueprint/
 #
-import json
-from flask import Blueprint, render_template, make_response, jsonify, request, redirect, url_for
+
+"""
+Blueprint of accounts rest api.
+"""
+
+from flask import Blueprint, render_template, make_response, request, redirect, url_for
 from framework.utils import HTTPStatus
 from framework.model.abstract import ErrorEntity
 
+bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 """
 Making a Flask Blueprint:
 
@@ -47,7 +52,6 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 
 # holds accounts in memory
 accounts = []

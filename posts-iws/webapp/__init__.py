@@ -7,6 +7,8 @@ from .app import create_app
 
 # init app by calling crate api function.
 app = create_app()
+
+
 # app.app_context = app.app_context()
 
 def run_app():

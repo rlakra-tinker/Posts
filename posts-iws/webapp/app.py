@@ -2,7 +2,6 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-project/
 #
-import os
 from flask import Flask, Blueprint
 from pathlib import Path
 

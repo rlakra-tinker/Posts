@@ -1,8 +1,8 @@
 #
 # Author: Rohtash Lakra
 #
-from werkzeug.security import generate_password_hash, gen_salt
-from framework.db.sqlite import SQLite3Database
+# from werkzeug.security import generate_password_hash, gen_salt
+# from framework.db.sqlite import SQLite3Database
 from framework.repository import AbstractRepository
 
 

@@ -1,8 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from flask import request, g, render_template, make_response, jsonify
-from framework.utils import HTTPMethod, HTTPStatus
+from framework.utils import HTTPMethod
 from . import bp as v1_account
 
 
