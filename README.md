@@ -27,8 +27,16 @@ The ```Posts``` repository contains the Posts python project.
 ## Modules
 
 - [posts-iws](./posts-iws/README.md)
+
+
+[![Build post-iws](https://github.com/rlakra-tinker/Posts/actions/workflows/build-iws-app.yml/badge.svg)](https://github.com/rlakra-tinker/Posts/actions/workflows/build-iws-app.yml)
+
+
+
 - [webapp](./webapp/README.md)
 
+
+[![Build webapp](https://github.com/rlakra-tinker/Posts/actions/workflows/build-webapp.yml/badge.svg)](https://github.com/rlakra-tinker/Posts/actions/workflows/build-webapp.yml)
 
 
 # Author
