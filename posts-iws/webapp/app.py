@@ -8,6 +8,8 @@ from pathlib import Path
 from .routes import bp as webapp_bp
 from api import bp as api_bp
 from rest import bp as rest_bp
+from flask_log_request_id import RequestID, RequestIDLogFilter
+import logging
 
 """
 Create WebApp class
@@ -24,6 +26,13 @@ def create_app(testMode=False):
     """
     # create flask application
     app = Flask(__name__)
+    RequestID(app)
+
+    logFileName = 'posts-iws-service.log'
+    logHandler = logging.FileHandler(logFileName)
+    logging.Formatter("%(asctime)s:%(levelname)s:%(request_id)s - %(message)s") # make the format more compact
+    logHandler.addFilter(RequestIDLogFilter()) # Adds request-ID filter
+    # logging.getLogger().addHandler(logHandler)
 
     if testMode:
         print("Running Test Application ...")
