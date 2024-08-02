@@ -29,14 +29,14 @@ class UtilsTest(unittest.TestCase):
         with open('tests/data/app-configs.json', 'r') as app_config_file:
             # load key/values as options
             options = json.load(app_config_file)
-            if UtilsTest.logFileContents:
+            if cls.logFileContents:
                 print(json.dumps(options))
 
             # store key/values to easy access
             for key, value in options.items():
                 exec(f"cls.{key} = value")
                 # print(f"{key} = {value}")
-                if UtilsTest.logKeys:
+                if cls.logKeys:
                     print(key)
 
     def test_http_method(self):
