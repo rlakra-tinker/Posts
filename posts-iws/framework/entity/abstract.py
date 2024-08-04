@@ -10,7 +10,10 @@ Abstract and reusable entities
 import json
 from json import JSONEncoder
 
+
 class GetClassAttr(type):
+    """GetClassAttr returns the attribute of an object"""
+
     def __getitem__(cls, item):
         return getattr(cls, item)
 

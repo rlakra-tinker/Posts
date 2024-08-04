@@ -3,13 +3,11 @@
 #
 import unittest
 import json
-
 from tests.blueprints import app
 from framework.utils import HTTPMethod, HTTPStatus
 
 
 class UtilsTest(unittest.TestCase):
-
     logFileContents = False
     logKeys = False
 

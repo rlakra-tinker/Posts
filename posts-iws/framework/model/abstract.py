@@ -3,70 +3,90 @@
 # Reference(s):
 #  - https://docs.pydantic.dev/latest/
 #
-from flask import current_app, g, request
+from flask import current_app, request
 from pydantic import BaseModel, ConfigDict
 from framework.utils import HTTPStatus
 
 
-# AbstractConfig
+# AbstractModel
 class AbstractModel(BaseModel):
     """
     A base model for all other models inherit and provides basic configuration parameters.
     """
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
+    # def json(self):
+    #     return self.model_dump()
 
-# Base Entity
-# @dataclass
+    def __str__(self):
+        return self.__repr__()
+
+
+# Abstract Entity
 class AbstractEntity(AbstractModel):
     """
     A base model for all other models inherit and provides basic configuration parameters.
     """
     id: int = None
 
+    def get_id(self):
+        return self.id
+
     def json(self):
         return self.model_dump()
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__} <id={self.id}>"
 
 
 # Named Entity
 class NamedEntity(AbstractEntity):
+    """NamedEntity used an entity with name in it"""
     name: str
+
+    def get_name(self):
+        return self.name
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__} <id={self.get_id()}, name={self.name}>"
 
 
 # Error Entity
-# @dataclass
 class ErrorEntity(AbstractModel):
-    http_status: HTTPStatus
+    """ErrorEntity represents the error object"""
+    http_status: HTTPStatus = None
     message: str = None
     exception: Exception = None
 
-    @staticmethod
-    def get_error(status, message=None, is_critical=False, debug=None, exception: Exception = None):
-        current_app.logger.error('Headers:{}, Body:{}'.format(request.headers, request.get_data()))
-        current_app.logger.error('Message: {}'.format(message))
+    def get_http_status(self):
+        return self.http_status
 
-        if is_critical:
-            if exception is not None:
-                if debug is None:
-                    debug = {}
+    def get_message(self):
+        return self.message
 
-                debug['exception'] = exception
+    def get_exception(self):
+        return self.exception
 
-            current_app.logger.critical(
-                message,
-                exc_info=True,
-                extra={'debug': debug} if debug is not None else {}
-            )
-
-        error = ErrorEntity(http_status=status, message=message if message is not None else str(exception),
-                            exception=exception)
-        # TODO: FIX ME!
-        # error_json = json.dumps(error, lambda o: o.__dict__)
-        print(f"error_json:{error.json()}")
-
-        return {
-            'error': error.json()
-        }
+    def __repr__(self) -> str:
+        return f"{type(self).__name__} <http_status={self.http_status}, message={self.message}, exception={self.exception}>"
 
     def json(self):
         return self.model_dump()
+
+
+class ErrorResponse(AbstractModel):
+    """ErrorResponse represents error message"""
+    error: ErrorEntity = None
+
+    @staticmethod
+    def get_error(cls, status, message: str = None, isCritical: bool = False, debug=None, exception: Exception = None):
+        if isCritical:
+            if exception is not None:
+                if debug is None:
+                    debug = {}
+                debug['exception'] = exception
+
+        return ErrorEntity(status, message if message is not None else str(exception), exception)
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__} <error={self.error}>"
