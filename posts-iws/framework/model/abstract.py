@@ -15,8 +15,9 @@ class AbstractModel(BaseModel):
     """
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
-    # def json(self):
-    #     return self.model_dump()
+    def toJson(self):
+        """Returns the JSON representation of this object."""
+        return self.model_dump_json()
 
     def __str__(self):
         return self.__repr__()
@@ -32,8 +33,8 @@ class AbstractEntity(AbstractModel):
     def get_id(self):
         return self.id
 
-    def json(self):
-        return self.model_dump()
+    # def toJson(self):
+    #     return self.model_dump_json()
 
     def __repr__(self) -> str:
         return f"{type(self).__name__} <id={self.id}>"
@@ -70,8 +71,8 @@ class ErrorEntity(AbstractModel):
     def __repr__(self) -> str:
         return f"{type(self).__name__} <http_status={self.http_status}, message={self.message}, exception={self.exception}>"
 
-    def json(self):
-        return self.model_dump()
+    # def json(self):
+    #     return self.model_dump()
 
 
 class ErrorResponse(AbstractModel):

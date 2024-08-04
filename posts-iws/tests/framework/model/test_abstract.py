@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from framework.model.abstract import AbstractModel, AbstractEntity, NamedEntity, ErrorEntity, ErrorResponse
-from framework.utils import HTTPStatus, HTTPMethod
+from framework.utils import HTTPStatus
 from tests.framework.utils import AbstractTestCase
 
 
@@ -80,16 +80,16 @@ class TestAbstract(AbstractTestCase):
         print(f"entityObject: {entityObject}")
         self.assertEqual(100, entityObject.get_id())
         self.assertNotEqual("Lakra", entityObject.get_id())
-        entityObjectJson = entityObject.json()
+        entityObjectJson = entityObject.toJson()
         print(f"entityObjectJson: \n{entityObjectJson}")
-        self.assertEqual(entityObjectJson, entityObject.json())
+        self.assertEqual(entityObjectJson, entityObject.toJson())
 
         entityObject = NamedEntity(id=1600, name="R. Lakra")
         print(f"entityObject: {entityObject}")
         self.assertEqual(1600, entityObject.get_id())
         self.assertEqual("R. Lakra", entityObject.name)
         self.assertNotEqual("Lakra", entityObject.get_id())
-        entityObjectJson = entityObject.json()
+        entityObjectJson = entityObject.toJson()
         print(f"entityObjectJson: \n{entityObjectJson}")
 
         # valid object and expected results
@@ -109,7 +109,7 @@ class TestAbstract(AbstractTestCase):
         self.assertNotEqual(HTTPStatus.OK, errorEntity.http_status)
         self.assertIsNone(errorEntity.exception)
 
-        errorEntityJson = errorEntity.json()
+        errorEntityJson = errorEntity.toJson()
         print(f"errorEntityJson: \n{errorEntityJson}")
         print("-test_entity()")
 
@@ -130,6 +130,6 @@ class TestAbstract(AbstractTestCase):
         self.assertNotEqual(HTTPStatus.OK, errorResponse.error.http_status)
         self.assertIsNone(errorResponse.error.exception)
 
-        errorResponseJson = errorResponse.json()
+        errorResponseJson = errorResponse.toJson()
         print(f"errorResponseJson: \n{errorResponseJson}")
         print("-test_error_response()")

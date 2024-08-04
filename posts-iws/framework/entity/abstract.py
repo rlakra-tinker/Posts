@@ -79,20 +79,6 @@ class AbstractEntity(AbstractJSONHandler):
     # def __getitem__(self, item):
     #     return self.__class__[item]
 
-    # def default(self, entity):
-    #     """
-    #     Implement this method in a subclass such that it returns
-    #             a serializable object for ``o``, or calls the base implementation
-    #             (to raise a ``TypeError``).
-    #     """
-    #
-    #     # print(f"default -> entity: {type(entity)}")
-    #     if isinstance(entity, AbstractEntity):
-    #         return json.dumps(entity, default=lambda obj: obj.__dict__, indent=2)
-    #
-    #     # Let the base class default method raise the TypeError
-    #     return super().default(entity)
-
     def json(self):
         """Serialize this object as a JSON formatted stream to fp"""
         return self.default(self)
