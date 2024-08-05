@@ -8,8 +8,9 @@ Blueprint of accounts rest api.
 """
 
 from flask import Blueprint, render_template, make_response, request, redirect, url_for
-from framework.utils import HTTPStatus
-from framework.model.abstract import ErrorEntity
+from framework.utils import HTTPStatus, HTTPMethod
+from framework.model.abstract import ErrorEntity, ResponseEntity
+from .models import User
 
 bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 """
@@ -67,8 +68,9 @@ def _find_next_id():
 
 
 # register a new account
+# @bp.route("/register", methods=[HTTPMethod.GET, HTTPMethod.POST])
 @bp.get("/register")
-def register():
+def register_view():
     """
     register a new account
     """
@@ -76,20 +78,27 @@ def register():
 
 
 @bp.post("/register")
-def post_register():
+def register():
     print(request)
+    user = None
+    response_json = None
     if request.is_json:
-        user = request.get_json()
-        user["id"] = _find_next_id()
+        body = request.get_json()
+        user = User.from_json(body)
+        # user = User(**body)
+        user.id = _find_next_id()
         accounts.append(user)
-        return user, 201
+        # response_json = ResponseEntity.build_response_json(HTTPStatus.CREATED, user)
+        response_json = user.json()
+    else:
+        response_json = ResponseEntity.build_response_json(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, entity=user, message="Invalid JSON object!")
 
-    return make_response(ErrorEntity(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
+    return make_response(response_json)
 
 
 # login to an account
 @bp.get("/login")
-def login():
+def login_view():
     """
     login to an account
     """
@@ -97,7 +106,7 @@ def login():
 
 
 @bp.post("/login")
-def post_login():
+def login():
     print(request)
     if request.is_json:
         user = request.get_json()
@@ -115,7 +124,7 @@ def post_login():
 
 # view profile
 @bp.get("/profile")
-def profile():
+def profile_view():
     """
     view profile
     """

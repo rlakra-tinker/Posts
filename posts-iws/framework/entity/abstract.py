@@ -83,6 +83,14 @@ class AbstractEntity(AbstractJSONHandler):
         """Serialize this object as a JSON formatted stream to fp"""
         return self.default(self)
 
+    @classmethod
+    def from_json(cls, json_input):
+        if isinstance(json_input, str):
+            json_dict = json.loads(json_input)
+            return cls(**json_dict)
+        else:
+            return cls(**json_input)
+
 
 # @dataclass
 class BaseEntity(AbstractEntity):

@@ -3,6 +3,13 @@
 #
 from enum import auto, unique
 from framework.enums import AutoName
+import sys
+import traceback
+
+
+def stack_trace(exception: Exception):
+    exc_info = sys.exc_info()
+    return ''.join(traceback.format_exception(*exc_info))
 
 
 @unique
@@ -87,6 +94,13 @@ class HTTPStatus(AutoName):
 
         return None
 
+    @staticmethod
+    def get_success_statuses() -> list:
+        return list(HTTPStatus.OK, HTTPStatus.CREATED, HTTPStatus.ACCEPTED, HTTPStatus.NO_CONTENT)
+
+    @staticmethod
+    def is_success_status(http_status) -> bool:
+        return isinstance(http_status, HTTPStatus) and HTTPStatus.get_success_statuses().__contains__(http_status)
 
 # print()
 # get_method = HTTPMethod.GET
