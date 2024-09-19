@@ -25,13 +25,17 @@
 
 <div>
   <div class="container">
-    <form action="action_page.php">
+    <div class="form-container">
+      <fieldset class="fieldset">
+        <form action="{{ url_for('iws.webapp.contact') }}" method="post">
 
-      <label for="fname">First Name</label>
-      <input type="text" id="fname" name="firstname" placeholder="Your name..">
+<label class="label-bold" for="first_name">First Name<span class="label-required-star"
+              aria-hidden="true">*</span></label>
+      <input type="text" placeholder="First Name" name="first_name" required />
 
-      <label for="lname">Last Name</label>
-      <input type="text" id="lname" name="lastname" placeholder="Your last name..">
+      <label class="label-bold" for="last_name">Last Name<span class="label-required-star"
+              aria-hidden="true">*</span></label>
+      <input type="text" placeholder="Last Name" name="last_name" required />
 
       <label for="country">Country</label>
       <select id="country" name="country">
@@ -42,11 +46,15 @@
       </select>
 
       <label for="subject">Subject</label>
-      <textarea id="subject" name="subject" placeholder="Write something.." style="height:200px"></textarea>
+      <textarea id="subject" name="subject" placeholder="Write something.."></textarea>
 
-      <input type="submit" value="Submit">
+      <!-- submit-button -->
+          <button type="submit">Submit</button>
 
-    </form>
+</form>
+  </fieldset>
+    </div>
+
   </div>
 </div>
 

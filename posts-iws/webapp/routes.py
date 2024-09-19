@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-blueprint/
 #
-from flask import Blueprint, make_response, jsonify, render_template
+from flask import Blueprint, make_response, jsonify, render_template, request
 
 
 # bp = Blueprint("webapp", __name__, static_folder="static", static_url_path="assets", template_folder="templates")
@@ -71,8 +71,12 @@ def clients():
 @bp.get("/contact-us")
 def contact():
     """
-    About Us Page
+    Contact Us Page
     """
+
+    if request.method == 'POST' and request.is_json:
+        print(request.get_json())
+
     return render_template("contact.html")
 
 

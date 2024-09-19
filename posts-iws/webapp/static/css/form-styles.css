@@ -29,7 +29,7 @@ button {
   background-color: #04AA6D;
   color: white;
   padding: 16px;
-  margin: 8px 0;
+  margin: 16px 0px 16px 0px;
   border: none;
   cursor: pointer;
   width: 100%;
@@ -37,6 +37,21 @@ button {
 
 button:hover {
   opacity: 0.8;
+}
+
+textarea {
+  width: 100%;
+  height: 200px;
+  padding: 16px;
+  margin: 8px 0;
+  display: block;
+  box-sizing: border-box;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  /* background-color: #f8f8f8; */
+  font-size: 16px;
+  resize: none;
+
 }
 
 /* Extra styles for the cancel button */
