@@ -10,3 +10,4 @@ pydantic_core==2.20.1
 SQLAlchemy==2.0.31
 typing_extensions==4.12.2
 Werkzeug==3.0.3
+flask-log-request-id==0.10.1
