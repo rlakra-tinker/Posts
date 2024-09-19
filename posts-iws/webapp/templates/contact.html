@@ -27,32 +27,32 @@
   <div class="container">
     <div class="form-container">
       <fieldset class="fieldset">
-        <form action="{{ url_for('iws.webapp.contact') }}" method="post">
+        <form action="{{ url_for('iws.rest.v1.contact.register') }}" method="post">
 
-<label class="label-bold" for="first_name">First Name<span class="label-required-star"
+          <label class="label-bold" for="first_name">First Name<span class="label-required-star"
               aria-hidden="true">*</span></label>
-      <input type="text" placeholder="First Name" name="first_name" required />
+          <input type="text" placeholder="First Name" name="first_name" required />
 
-      <label class="label-bold" for="last_name">Last Name<span class="label-required-star"
+          <label class="label-bold" for="last_name">Last Name<span class="label-required-star"
               aria-hidden="true">*</span></label>
-      <input type="text" placeholder="Last Name" name="last_name" required />
+          <input type="text" placeholder="Last Name" name="last_name" required />
 
-      <label for="country">Country</label>
-      <select id="country" name="country">
-        <option value="australia">Australia</option>
-        <option value="canada">Canada</option>
-        <option value="india">India</option>
-        <option value="usa">USA</option>
-      </select>
+          <label for="country">Country</label>
+          <select id="country" name="country">
+            <option value="australia">Australia</option>
+            <option value="canada">Canada</option>
+            <option value="india">India</option>
+            <option value="usa">USA</option>
+          </select>
 
-      <label for="subject">Subject</label>
-      <textarea id="subject" name="subject" placeholder="Write something.."></textarea>
+          <label for="subject">Subject</label>
+          <textarea id="subject" name="subject" placeholder="Write something.."></textarea>
 
-      <!-- submit-button -->
+          <!-- submit-button -->
           <button type="submit">Submit</button>
 
-</form>
-  </fieldset>
+        </form>
+      </fieldset>
     </div>
 
   </div>
