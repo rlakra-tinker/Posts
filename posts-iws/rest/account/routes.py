@@ -5,7 +5,7 @@
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
 from flask import Blueprint, make_response, request, session, g, redirect, url_for
-from framework.utils import HTTPStatus
+from framework.http import HTTPStatus
 from framework.model.abstract import ErrorEntity
 from rest.account.service import AccountService
 from .models import User
@@ -111,10 +111,10 @@ def login():
     if request.is_json:
         user = request.get_json()
         print(f"user:{user}")
-        if not accounts:
-            for account in accounts:
-                if account['user_name'] == user.user_name:
-                    return make_response(HTTPStatus.OK, account)
+        # if not accounts:
+        #     for account in accounts:
+        #         if account['user_name'] == user.user_name:
+        #             return make_response(HTTPStatus.OK, account)
 
     response = ErrorEntity.get_error(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(response)

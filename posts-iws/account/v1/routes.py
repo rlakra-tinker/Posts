@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from framework.utils import HTTPMethod
+from framework.http import HTTPMethod
 from . import bp as v1_account
 
 

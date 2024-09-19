@@ -3,6 +3,7 @@
 # Reference - https://realpython.com/flask-blueprint/
 #
 from flask import Blueprint, make_response, jsonify, render_template, request
+from framework.http import HTTPMethod
 
 
 # bp = Blueprint("webapp", __name__, static_folder="static", static_url_path="assets", template_folder="templates")
@@ -68,6 +69,7 @@ def clients():
 
 
 # Contact Us Page
+#@bp.route("/contact-us", methods=[HTTPMethod.GET, HTTPMethod.POST])
 @bp.get("/contact-us")
 def contact():
     """

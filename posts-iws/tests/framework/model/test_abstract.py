@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from framework.model.abstract import AbstractModel, AbstractEntity, NamedEntity, ErrorEntity, ResponseEntity
-from framework.utils import HTTPStatus
+from framework.http import HTTPStatus
 from tests.framework.utils import AbstractTestCase
 
 

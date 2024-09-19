@@ -8,7 +8,7 @@ Blueprint of accounts rest api.
 """
 
 from flask import Blueprint, render_template, make_response, request, redirect, url_for
-from framework.utils import HTTPStatus, HTTPMethod
+from framework.http import HTTPStatus
 from framework.model.abstract import ErrorEntity, ResponseEntity
 from .models import User
 

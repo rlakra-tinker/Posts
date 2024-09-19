@@ -6,7 +6,8 @@
 import json
 from typing import Optional, Dict
 from pydantic import BaseModel, ConfigDict
-from framework.utils import HTTPStatus, stack_trace
+from framework.http import HTTPStatus
+from framework.utils import Utils
 
 
 # AbstractModel
@@ -70,7 +71,7 @@ class ErrorEntity(AbstractModel):
         # debug details
         debug_info = {}
         if is_critical and exception is not None:
-            debug_info['exception'] = stack_trace(exception)
+            debug_info['exception'] = Utils.stack_trace(exception)
             return ErrorEntity(status_code=http_status.status_code, message=message, debug_info=debug_info)
         else:
             return ErrorEntity(status_code=http_status.status_code, message=message)
