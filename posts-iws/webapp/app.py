@@ -2,6 +2,7 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-project/
 #
+import flask
 from flask import Flask, Blueprint
 from pathlib import Path
 
@@ -27,15 +28,14 @@ def create_app(testMode=False):
     # create flask application
     app = Flask(__name__)
     RequestID(app)
+    print(f"Running Flask Application [{app.name}] on version [{flask.__version__}] with testMode [{testMode}] ...")
 
     logFileName = 'posts-iws-service.log'
     logHandler = logging.FileHandler(logFileName)
     logging.Formatter("%(asctime)s:%(levelname)s:%(request_id)s - %(message)s") # make the format more compact
     logHandler.addFilter(RequestIDLogFilter()) # Adds request-ID filter
     # logging.getLogger().addHandler(logHandler)
-
-    if testMode:
-        print("Running Test Application ...")
+    print(f"logHandler=[{logHandler}]")
 
     # register logger here root logger
 

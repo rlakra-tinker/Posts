@@ -59,8 +59,8 @@ def create():
         response = errors
 
     print(f"response ==> {response}")
-    return make_response(response)
-
+    # return make_response(response)
+    return redirect(url_for("iws.webapp.contact"))
 
 @bp.post("/login")
 def login():

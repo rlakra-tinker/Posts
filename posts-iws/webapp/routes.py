@@ -4,6 +4,7 @@
 #
 from flask import Blueprint, make_response, jsonify, render_template, request
 from framework.http import HTTPMethod
+from rest.contact.routes import create
 
 
 # bp = Blueprint("webapp", __name__, static_folder="static", static_url_path="assets", template_folder="templates")
@@ -69,15 +70,15 @@ def clients():
 
 
 # Contact Us Page
-#@bp.route("/contact-us", methods=[HTTPMethod.GET, HTTPMethod.POST])
+# @bp.route("/contact-us", methods=[HTTPMethod.GET.name, HTTPMethod.POST.name])
 @bp.get("/contact-us")
 def contact():
     """
     Contact Us Page
     """
-
-    if request.method == 'POST' and request.is_json:
-        print(request.get_json())
+    # if HTTPMethod.is_post(request.method):
+    #     print(request.get_json())
+    #     response = create()
 
     return render_template("contact.html")
 

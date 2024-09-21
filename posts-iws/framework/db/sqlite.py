@@ -8,31 +8,41 @@ from flask import g, current_app
 class SQLite3Database(object):
 
     def __init__(self):
-        self.db = SQLite3Database.get_db()
+        self.app = None
+        self.pool = None
+        self.pool_name = 'sqlite3_pool'
+        self.db_name = None
+        self.db_user_name = None
+        self.db_password = None
+
+    def init(self, app):
+        self.app = app
+        self.db_name = current_app.config['posts']
+        # self.create_pool()
+        self.init_db()
+
+    def create_pool(self):
         pass
 
-    def getDatabase(self):
-        return self.db
+    def get_connection(self):
+        return self.connection
 
-    @staticmethod
-    def init_db():
-        db = SQLite3Database.get_db()
+    def init_db(self):
+        """Initializes the database"""
+        self.connection = SQLite3Database.open_connection()
         with current_app.open_resource('data/schema.sql') as schema_file:
-            db.executescript(schema_file.read().decode('utf8'))
+            self.get_connection().executescript(schema_file.read().decode('utf8'))
 
-    @staticmethod
-    def get_db():
-        if 'db' not in g:
-            g.db = sqlite3.connect(
-                current_app.config['DATABASE'],
-                detect_types=sqlite3.PARSE_DECLTYPES
-            )
-            g.db.row_factory = sqlite3.Row
+    def open_connection(self):
+        """Opens the database connection"""
+        if 'connection' not in g:
+            g.connection = sqlite3.connect(self.db_name, detect_types=sqlite3.PARSE_DECLTYPES)
+            g.connection.row_factory = sqlite3.Row
 
-        return g.db
+        return g.connection
 
-    @staticmethod
-    def close_db(e=None):
-        db = g.pop('db', None)
-        if db is not None:
-            db.close()
+    def close_connection(self, connection=None):
+        """Closes the database connection"""
+        connection = g.pop('connection', None)
+        if connection is not None:
+            connection.close()
