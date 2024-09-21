@@ -1,9 +1,11 @@
 #
 # Author: Rohtash Lakra
 #
-from typing import Dict
+from typing import Dict, Set, List
 from framework.service import AbstractService
-from .models import Contact
+from rest.contact.models import Contact
+from framework.model.abstract import ErrorEntity
+from framework.http import HTTPStatus
 
 
 class ContactService(AbstractService):
@@ -22,27 +24,27 @@ class ContactService(AbstractService):
         return last_id + 1
 
     def validate(self, contact):
-        print(f"contact={contact.to_json()}")
-        if not contact:
-            return 'contact is required.'
-        elif not contact.first_name:
-            return 'first_name is required.'
-        elif not contact.last_name:
-            return 'last_name is required.'
-        elif not contact.country:
-            return 'country is required.'
-        elif not contact.subject:
-            return 'subject is required.'
+        errors = []
+        if contact:
+            if not contact.first_name:
+                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'first_name is required!'))
+            if not contact.last_name:
+                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'last_name is required!'))
+            if not contact.country:
+                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'country is required!'))
+            if not contact.subject:
+                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'subject is required!'))
+        else:
+            errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'Contact is required!'))
 
-        return None
+        return errors
 
-    def add(self, contact: Contact):
+    def create(self, contact: Contact) -> Contact:
         print(f"contact: {contact}")
-        contact.id = self._find_next_id()
+        if not contact.id:
+            contact.id = self._find_next_id()
+
         print(f"contact.id: {contact.id}")
         self.contacts[contact.id] = contact
+        return self.contacts[contact.id]
 
-    def addContact(self, first_name, last_name, country, subject):
-        contact = Contact(first_name=first_name, last_name=last_name, country=country, subject=subject)
-        self.add(contact)
-        return contact.json()

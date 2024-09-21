@@ -13,6 +13,13 @@ class ContactRepository(AbstractRepository):
         # self.db = SQLite3Database()
 
     def register(self, username, password):
+        """
+        Registers the contact with username and password
+
+        Parameters:
+            username: unique identity of the user
+            password: password for security
+        """
         register_query = '''
         INSERT INTO users (username, password)
         VALUES (?, ?)

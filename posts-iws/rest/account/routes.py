@@ -116,7 +116,7 @@ def login():
         #         if account['user_name'] == user.user_name:
         #             return make_response(HTTPStatus.OK, account)
 
-    response = ErrorEntity.get_error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    response = ErrorEntity.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(response)
 
     return make_response(response)

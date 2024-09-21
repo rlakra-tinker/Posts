@@ -48,8 +48,8 @@ def create_app(testMode=False):
 
     # register more app's here.
     bp.register_blueprint(webapp_bp)
-    bp.register_blueprint(api_bp)
     bp.register_blueprint(rest_bp)
+    bp.register_blueprint(api_bp)
 
     # Connect the 'ews-posts' blueprint with your Flask project
     app.register_blueprint(bp)

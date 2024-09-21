@@ -1,54 +1,65 @@
 #
 # Author: Rohtash Lakra
 #
+import json
+
 from flask import Blueprint, make_response, request, session, g, redirect, url_for
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorEntity
+from framework.model.abstract import ErrorEntity, ResponseEntity
 from rest.contact.service import ContactService
-from .models import Contact
+from rest.contact.models import Contact
 
 #
-bp = Blueprint("contact", __name__, url_prefix="/contact")
+bp = Blueprint("contacts", __name__, url_prefix="/contacts")
 """
 Making a Flask Blueprint and registering it in an application, you extend the application with its contents.
 """
 
-
 # account's service
 contactService = ContactService()
 
-@bp.post("/register")
-def register():
-    print(request)
+
+@bp.post("/")
+def create():
+    print(f"request => {request}")
     if request.is_json:
-        contact = Contact.model_construct(request.get_json())
-        contactService.add(contact)
-        return contact, 201
-    else:
+        body = request.get_json()
+        print(f"body => {body}")
+        first_name = body.get('first_name', None)
+        last_name = body.get('last_name', None)
+        country = body.get('country', None)
+        subject = body.get('subject', None)
+        # contact = Contact.model_extra(request.get_json())
+        contact = Contact.create(first_name, last_name, country, subject)
+    elif request.form:
+        print(f"request.form => {request.form}")
         # first_name, last_name, country, subject
-        first_name = request.form['first_name']
-        last_name = request.form['last_name']
-        country = request.form['country']
-        subject = request.form['subject']
-        contact = Contact(first_name=first_name, last_name=last_name, country=country, subject=subject)
-        error = contactService.validate(contact)
+        first_name = request.form.get('first_name')
+        last_name = request.form.get('last_name')
+        country = request.form.get('country')
+        subject = request.form.get('subject')
+        contact = Contact.create(first_name, last_name, country, subject)
 
-        # db = get_db()
-        response = None
-        if error is None:
-            try:
-                response = contactService.addContact(first_name, last_name, country, subject)
-            except Exception as ex:
-                error = f"Contact '{contact}' is already registered! ex:{ex}"
-            else:
-                return redirect(url_for("iws.rest.v1.contact.register"))
+    errors = contactService.validate(contact)
+    print(f"errors => {json.dumps(errors)}")
 
-        # flash(error)
+    response = None
+    if not errors:
+        try:
+            contact = contactService.create(contact)
+            response = ResponseEntity.build_response(HTTPStatus.CREATED, entity=contact,
+                                                     message="Contact is successfully created.")
+        except Exception as ex:
+            message = f"Contact={contact.first_name} is already registered! ex:{ex}"
+            error = ErrorEntity.error(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
+            response = ResponseEntity.build_response(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
+        # else:
+        #     return redirect(url_for("iws.rest.v1.contacts.create"))
+    else:
+        response = errors
 
-        if response:
-            return response
-
-    return make_response(ErrorEntity(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
+    print(f"response ==> {response}")
+    return make_response(response)
 
 
 @bp.post("/login")
@@ -62,8 +73,8 @@ def login():
         #         if account['user_name'] == user.user_name:
         #             return make_response(HTTPStatus.OK, account)
 
-    response = ErrorEntity.get_error(HTTPStatus.NOT_FOUND, "Account is not registered!")
-    print(response)
+    response = ErrorEntity.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    print(json.dumps(response))
 
     return make_response(response)
 

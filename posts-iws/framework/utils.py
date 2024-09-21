@@ -14,3 +14,7 @@ class Utils(AutoName):
         """Returns the string representation of exception"""
         exc_info = sys.exc_info()
         return ''.join(traceback.format_exception(*exc_info))
+
+    @staticmethod
+    def exception(exception:Exception, message:str):
+        return exception(message)

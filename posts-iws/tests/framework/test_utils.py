@@ -14,3 +14,12 @@ class UtilsTest(AbstractTestCase):
         print(f"stack_trace={stack_trace}")
         self.assertIsNotNone(stack_trace)
         print()
+
+    def test_exception(self):
+        print('test_exception()')
+        try:
+            raise Utils.exception(ValueError, 'A validation error message!')
+        except ValueError as ex:
+            print(f"ex={ex}")
+            self.assertIsNotNone(ex)
+        print()

@@ -9,6 +9,8 @@ Abstract and reusable entities
 """
 import json
 from json import JSONEncoder
+from framework.utils import Utils
+from framework.http import HTTPStatus
 
 
 class GetClassAttr(type):
@@ -155,12 +157,12 @@ class ErrorResponse(AbstractEntity):
     def __new__(cls, *args, **kwargs):
         return super().__new__(cls)
 
-    def __init__(self, status, message: str = None, isCritical: bool = False, debug=None, exception: Exception = None):
+    def __init__(self, status, message: str = None, is_critical: bool = False, debug=None, exception: Exception = None):
         super().__init__()
         # current_app.logger.error('Headers:{}, Body:{}'.format(request.headers, request.get_data()))
         # current_app.logger.error('Message: {}'.format(message))
 
-        if isCritical:
+        if is_critical:
             if exception is not None:
                 if debug is None:
                     debug = {}
@@ -172,6 +174,7 @@ class ErrorResponse(AbstractEntity):
             #     exc_info=True,
             #     extra={'debug': debug} if debug is not None else {}
             # )
+
         self.error = ErrorEntity(status, message if message is not None else str(exception), exception)
 
     def __repr__(self) -> str:
