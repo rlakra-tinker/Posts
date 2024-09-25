@@ -9,8 +9,6 @@ Abstract and reusable entities
 """
 import json
 from json import JSONEncoder
-from framework.utils import Utils
-from framework.http import HTTPStatus
 
 
 class GetClassAttr(type):

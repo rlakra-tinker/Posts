@@ -4,14 +4,16 @@
 # - https://realpython.com/flask-blueprint/
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
-from flask import Blueprint, make_response, request, session, g, redirect, url_for
+from flask import Blueprint, make_response, request, session, redirect, url_for, abort, current_app
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorEntity
-from rest.account.service import AccountService
-from rest.account.models import Account
+from framework.model.abstract import ErrorEntity, ResponseEntity
+from framework.exceptions import DuplicateRecordException
+from rest.role.service import RoleService
+from rest.role.models import Role
+import json
 
 #
-bp = Blueprint("accounts", __name__, url_prefix="/accounts")
+bp = Blueprint("roles", __name__, url_prefix="/roles")
 """
 Making a Flask Blueprint:
 
@@ -54,86 +56,54 @@ When you register the Flask Blueprint in an application, you extend the applicat
 """
 
 # account's service
-accountService = AccountService()
+roleService = RoleService()
 
 
-@bp.before_app_request
-def load_logged_in_user():
-    user_id = session.get('user_id')
-    if user_id is None:
-        g.user = None
-    else:
-        # g.user = accountService.find_by_id(user_id)
-        g.user = None
-
-
-@bp.post("/register/")
-def register():
-    print(request)
+@bp.post("/")
+def create():
+    current_app.logger.debug(f"request: {request}")
     if request.is_json:
-        user = accountService.register()
-        user = Account.model_construct(request.get_json())
-        accountService.add(user)
-        return user, 201
+        body = request.get_json()
+        current_app.logger.debug(f"body: {body}")
+        name = body.get('name', None)
+        active = body.get('active', False)
+        role = Role.create(name=name, active=active)
+
+    errors = roleService.validate(role)
+    current_app.logger.debug(f"errors: {json.dumps(errors)}")
+    if not errors:
+        try:
+            role = roleService.create(role)
+            current_app.logger.debug(f"role: {role}")
+            response = ResponseEntity.build_response(HTTPStatus.CREATED, entity=role,
+                                                     message="Role is successfully created.")
+        except DuplicateRecordException as ex:
+            message = f"Role={role.name} is already created! ex:{ex}"
+            error = ErrorEntity.error(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
+            response = ResponseEntity.build_response(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
+        except Exception as ex:
+            error = ErrorEntity.error(HTTPStatus.INTERNAL_SERVER_ERROR, str(ex), exception=ex)
+            response = ResponseEntity.build_response(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
     else:
-        username = request.form['username']
-        password = request.form['password']
-        user = accountService.register(username, password)
+        response = errors
 
-        # db = get_db()
-        error = None
-
-        if not username:
-            error = 'Username is required.'
-        elif not password:
-            error = 'Password is required.'
-
-        response = None
-        if error is None:
-            try:
-                response = accountService.register()
-            except Exception as ex:
-                error = f"User '{username}' is already registered! ex:{ex}"
-            else:
-                return redirect(url_for("iws.api.login"))
-
-        # flash(error)
-
-        if response:
-            return response
-
-    return make_response(ErrorEntity(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
+    current_app.logger.debug(f"response: {response}")
+    # return make_response(response)
+    return redirect(url_for("iws.webapp.contact"))
 
 
-@bp.post("/login")
-def login():
-    print(request)
-    if request.is_json:
-        user = request.get_json()
-        print(f"user:{user}")
-        # if not accounts:
-        #     for account in accounts:
-        #         if account['user_name'] == user.user_name:
-        #             return make_response(HTTPStatus.OK, account)
+@bp.get("/")
+def get():
+    params = request.args
+    print(f"request:{request}, params: {params}")
+    if params:
+        role = roleService.find_by_id(params['id'])
+        print(f"role:{role}")
+        if role:
+            response = ResponseEntity.response(HTTPStatus.OK, entity=role)
+            return make_response(response)
+        else:
+            error = ErrorEntity.error(HTTPStatus.NOT_FOUND, message='No round found with ID!')
+            response = ResponseEntity.response(HTTPStatus.NOT_FOUND, error)
+            return abort(response)
 
-    response = ErrorEntity.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
-    print(response)
-
-    return make_response(response)
-
-
-# Logout Page
-@bp.post("/logout")
-def logout():
-    """
-    logout
-    """
-    session.clear()
-
-
-@bp.post("/forgot-password")
-def forgot_password():
-    """
-    forgot-password
-    """
-    pass

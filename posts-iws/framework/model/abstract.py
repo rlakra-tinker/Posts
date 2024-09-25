@@ -8,6 +8,7 @@ from typing import Optional, Dict, List
 from pydantic import BaseModel, ConfigDict
 from framework.http import HTTPStatus
 from framework.utils import Utils
+from datetime import datetime
 
 
 # AbstractModel
@@ -33,9 +34,17 @@ class AbstractEntity(AbstractModel):
     A base model for all other models inherit and provides basic configuration parameters.
     """
     id: int = None
+    created_at: datetime = datetime.now()
+    updated_at: datetime = datetime.now()
 
     def get_id(self):
         return self.id
+
+    def get_created_at(self):
+        return self.created_at
+
+    def get_updated_at(self):
+        return self.updated_at
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -141,7 +150,7 @@ class ResponseEntity(AbstractModel):
         print(f"+response({http_status}, {entity}, {message}, {exception}, {is_critical})")
         response = None
         if entity:
-            if isinstance(entity, ErrorEntity): # check if an error entity
+            if isinstance(entity, ErrorEntity):  # check if an error entity
                 # print(f"isinstance(entity, ErrorEntity) => {isinstance(entity, ErrorEntity)}")
                 error = ErrorEntity.error(http_status, message, exception, is_critical)
                 # update entity's message and exception if missing

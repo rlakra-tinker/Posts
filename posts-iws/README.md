@@ -137,11 +137,19 @@ pip install python-dotenv
 cp default.env .env
 ```
 
-Now, update the default local configurations as follows:
+Now, update the default local (.env) configurations as follows:
 
 ```text
 APP_HOST = 0.0.0.0
 APP_PORT = 8081
+DEBUG_ENABLED = True
+
+# Database Configs
+DB_HOSTNAME = 127.0.0.1
+DB_PORT =
+DB_NAME = posts
+DB_USERNAME =
+DB_PASSWORD =
 ```
 
 **By default**, Flask will run the application on **port 5000**.

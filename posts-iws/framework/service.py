@@ -1,6 +1,8 @@
 #
 # Author: Rohtash Lakra
 #
+from abc import abstractmethod
+
 
 class AbstractService:
     """
@@ -8,5 +10,6 @@ class AbstractService:
     """
 
     # Returns the next ID of the account
-    def _find_next_id(self):
-        return 0
+    @abstractmethod
+    def find_by_id(self, id:int):
+        pass

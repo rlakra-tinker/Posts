@@ -35,9 +35,11 @@
         },
         "payment_test": 1
     },
-    "env_configs": {
-        "ENCRYPTION_KEY": "12341234123412341234123412341234",
-        "ENCRYPTION_NONCE": "123412341234",
+    "SECURITY_CONFIGS": {
+        "ENCRYPTION_CONFIGS": {
+            "ENCRYPTION_KEY": "12341234123412341234123412341234",
+            "ENCRYPTION_NONCE": "123412341234"
+        },
         "CLIENT_ID_KEY": "CLIENT_ID_KEY",
         "CLIENT_ID_SECRET": "CLIENT_ID_SECRET"
     }

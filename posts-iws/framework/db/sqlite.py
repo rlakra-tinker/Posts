@@ -1,48 +1,43 @@
+
 #
 # Author: Rohtash Lakra
 #
 import sqlite3
-from flask import g, current_app
+from pathlib import Path
 
+__UTF_8 = 'UTF-8'
 
-class SQLite3Database(object):
+# open database connection
+connection = sqlite3.connect('posts.db')
 
-    def __init__(self):
-        self.app = None
-        self.pool = None
-        self.pool_name = 'sqlite3_pool'
-        self.db_name = None
-        self.db_user_name = None
-        self.db_password = None
+cur_dir = Path(__file__).parent
+print(f"cur_dir:{cur_dir}")
+data_path = cur_dir.joinpath("data")
+print(f"data_path:{data_path}")
+print()
 
-    def init(self, app):
-        self.app = app
-        self.db_name = current_app.config['posts']
-        # self.create_pool()
-        self.init_db()
+print("Opening database connection ...")
+# read schema file and execute all the queries
+with open(data_path.joinpath('schema.sql'), encoding=__UTF_8) as schema_file:
+    connection.executescript(schema_file.read())
 
-    def create_pool(self):
-        pass
+#cursor
+# cursor = connection.cursor()
 
-    def get_connection(self):
-        return self.connection
+print("Initializing database ...")
 
-    def init_db(self):
-        """Initializes the database"""
-        self.connection = SQLite3Database.open_connection()
-        with current_app.open_resource('data/schema.sql') as schema_file:
-            self.get_connection().executescript(schema_file.read().decode('utf8'))
+# read init-db file to populate db
+with open(data_path.joinpath('init-db.sql'), encoding=__UTF_8) as file:
+    connection.executescript(file.read())
+    # while line := file.readline():
+    #     line = line.rstrip()
+    #     print(line)
+    #     cursor.execute(line)
+    #     print()
 
-    def open_connection(self):
-        """Opens the database connection"""
-        if 'connection' not in g:
-            g.connection = sqlite3.connect(self.db_name, detect_types=sqlite3.PARSE_DECLTYPES)
-            g.connection.row_factory = sqlite3.Row
+print("Closing database connection ...")
+# commit connection
+connection.commit()
+connection.close()
 
-        return g.connection
-
-    def close_connection(self, connection=None):
-        """Closes the database connection"""
-        connection = g.pop('connection', None)
-        if connection is not None:
-            connection.close()
+print("Database connection is closed.")

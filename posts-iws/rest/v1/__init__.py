@@ -2,6 +2,7 @@
 # Author: Rohtash Lakra
 #
 from flask import Blueprint
+from rest.role.routes import bp as role_bp
 from rest.account.routes import bp as accounts_bp
 from rest.contact.routes import bp as contact_bp
 
@@ -15,5 +16,6 @@ The second argument is the blueprint’s '__name__' and used later when you impo
 
 
 # register end-points here
+bp.register_blueprint(role_bp)
 bp.register_blueprint(accounts_bp)
 bp.register_blueprint(contact_bp)
