@@ -4,6 +4,7 @@
 #
 import os
 from typing import Any
+import requests
 import flask
 from flask import Flask, Blueprint, make_response, jsonify, g
 from pathlib import Path
@@ -93,10 +94,13 @@ class WebApp:
         # register logger here root logger
         log_file_name = 'posts-iws-service.log'
         log_handler = logging.FileHandler(log_file_name)
+        log_format = "%(asctime)s:%(levelname)s:%(request_id)s - %(message)s"
         logging.Formatter("%(asctime)s:%(levelname)s:%(request_id)s - %(message)s")  # make the format more compact
         log_handler.addFilter(RequestIDLogFilter())  # Adds request-ID filter
-        # logging.getLogger().addHandler(log_handler)
         print(f"log_handler=[{log_handler}]")
+        # logging.getLogger().addHandler(log_handler)
+        logging.basicConfig(filename=log_file_name, level=logging.DEBUG, format="%(asctime)s:%(levelname)s - %(message)s")
+        requests.packages.urllib3.add_stderr_logger()
 
         # Initialize/Register Flask Extensions/Components, if any
         if not test_mode:
