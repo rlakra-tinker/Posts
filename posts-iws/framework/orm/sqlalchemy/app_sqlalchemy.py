@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-import datetime
+from datetime import datetime
 
 from sqlalchemy import create_engine
 from entity import AbstractEntity, Role, User, Address
@@ -182,7 +182,7 @@ class SqlAlchemyTableObject:
 class SqlAlchemyClassicalObject:
 
     def create_role(self, roleName):
-        now = datetime.datetime.now()
+        now = datetime.now()
         return Role(name=roleName, created_at=now, updated_at=now)
 
     def create_address(self, street1, city, state, country, zip):
@@ -276,6 +276,3 @@ if __name__ == '__main__':
     sqlAlchemyTableObject.update_records()
     sqlAlchemyTableObject.delete_record()
     print()
-
-    sqlAlchemyClassicalObject = SqlAlchemyClassicalObject()
-    sqlAlchemyClassicalObject.print_classical_objects()

@@ -5,7 +5,7 @@ import sqlite3
 from flask import g
 import click
 from pathlib import Path
-from webapp.config import Config
+from common.config import Config
 from flask_sqlalchemy import SQLAlchemy
 
 
@@ -110,7 +110,6 @@ class SQLite3Connector(DatabaseConnector):
             finally:
                 # close the connection
                 self.close_connection()
-
 
     def init_SQLAlchemy(self):
         """Initializes the database"""

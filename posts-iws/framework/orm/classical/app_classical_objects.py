@@ -2,7 +2,6 @@
 # Author: Rohtash Lakra
 #
 from datetime import datetime
-import json
 from entity import Role, User, Address
 
 

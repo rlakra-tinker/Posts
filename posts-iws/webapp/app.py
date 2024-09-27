@@ -6,9 +6,9 @@ import os
 from typing import Any
 import requests
 import flask
-from flask import Flask, Blueprint, make_response, jsonify, g
+from flask import Flask, Blueprint, make_response, jsonify
 from pathlib import Path
-from webapp.config import Config
+from common.config import Config
 from webapp.routes import bp as webapp_bp
 from api import bp as api_bp
 from rest import bp as rest_bp
@@ -17,7 +17,7 @@ import logging
 from flask_cors import CORS
 from framework.model.abstract import ErrorEntity
 from framework.http import HTTPStatus
-from webapp.globals import connector
+from common.globals import connector
 from dotenv import load_dotenv
 
 

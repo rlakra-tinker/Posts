@@ -46,6 +46,8 @@ class BaseEntity(AbstractEntity):
 
     # ID - Primary Key
     id: Mapped[int] = mapped_column(primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
 
     def __init__(self, **kwargs):
         """
@@ -86,8 +88,8 @@ class Role(NamedEntity):
 
     active: Mapped[bool] = True
     meta_data: Mapped[Optional[str]] = mapped_column(String(256))
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
 
     def __repr__(self) -> str:
         return f"Role <id={self.id!r}, name={self.name!r}, active={self.active!r}, meta_data={self.meta_data!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
@@ -105,8 +107,8 @@ class User(BaseEntity):
     first_name: Mapped[str] = mapped_column(String(64))
     last_name: Mapped[str] = mapped_column(String(64))
     admin: Mapped[bool] = False
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
 
     # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
@@ -126,8 +128,8 @@ class UserRole(BaseEntity):
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     active: Mapped[bool] = True
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
 
     def __repr__(self) -> str:
         return f"UserRole <id={self.id!r}, role_id={self.role_id!r}, user_id={self.user_id!r}, active={self.active!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
@@ -149,8 +151,8 @@ class Address(BaseEntity):
     state: Mapped[str] = mapped_column(String(64))
     country: Mapped[str] = mapped_column(String(64))
     zip: Mapped[str] = mapped_column(String(64))
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
 
     def __repr__(self) -> str:
         return f"Address <id={self.id!r}, user_id={self.user_id!r}, street1={self.street1!r}, street2={self.street2!r}, city={self.city!r}, state={self.state!r}, country={self.country!r}, zip={self.zip!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
