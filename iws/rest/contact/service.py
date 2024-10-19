@@ -2,10 +2,10 @@
 # Author: Rohtash Lakra
 #
 from typing import Dict, Set, List
-from iws.framework.service import AbstractService
-from iws.rest.contact.models import Contact
-from iws.framework.model.abstract import ErrorEntity
-from iws.framework.http import HTTPStatus
+from framework.service import AbstractService
+from rest.contact.models import Contact
+from framework.model.abstract import ErrorEntity
+from framework.http import HTTPStatus
 
 
 class ContactService(AbstractService):

@@ -2,9 +2,9 @@
 # Author: Rohtash Lakra
 #
 from tests.framework.utils import AbstractTestCase
-from iws.framework.http import HTTPStatus
-from iws.framework.model.abstract import AbstractModel, ResponseEntity, ErrorEntity
-from iws.rest.contact.models import Contact
+from framework.http import HTTPStatus
+from framework.model.abstract import AbstractModel, ResponseEntity, ErrorEntity
+from rest.contact.models import Contact
 
 
 class ModelsTest(AbstractTestCase):

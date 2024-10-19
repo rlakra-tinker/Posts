@@ -2,11 +2,11 @@
 # Author: Rohtash Lakra
 #
 from flask import current_app
-from iws.framework.service import AbstractService
-from iws.framework.model.abstract import ErrorEntity, ResponseEntity
-from iws.framework.http import HTTPStatus
-from iws.rest.role.repository import RoleRepository
-from iws.rest.role.models import Role
+from framework.service import AbstractService
+from framework.model.abstract import ErrorEntity, ResponseEntity
+from framework.http import HTTPStatus
+from rest.role.repository import RoleRepository
+from rest.role.models import Role
 
 
 class RoleService(AbstractService):

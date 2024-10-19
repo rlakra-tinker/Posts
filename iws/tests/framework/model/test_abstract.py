@@ -1,8 +1,8 @@
 #
 # Author: Rohtash Lakra
 #
-from iws.framework.model.abstract import AbstractModel, AbstractEntity, NamedEntity, ErrorEntity, ResponseEntity
-from iws.framework.http import HTTPStatus
+from framework.model.abstract import AbstractModel, AbstractEntity, NamedEntity, ErrorEntity, ResponseEntity
+from framework.http import HTTPStatus
 from tests.framework.utils import AbstractTestCase
 
 

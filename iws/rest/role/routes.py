@@ -5,11 +5,11 @@
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
 from flask import Blueprint, make_response, request, session, redirect, url_for, abort, current_app
-from iws.framework.http import HTTPStatus
-from iws.framework.model.abstract import ErrorEntity, ResponseEntity
-from iws.framework.exceptions import DuplicateRecordException
-from iws.rest.role.service import RoleService
-from iws.rest.role.models import Role
+from framework.http import HTTPStatus
+from framework.model.abstract import ErrorEntity, ResponseEntity
+from framework.exceptions import DuplicateRecordException
+from rest.role.service import RoleService
+from rest.role.models import Role
 import json
 
 #

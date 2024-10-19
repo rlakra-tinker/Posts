@@ -5,10 +5,10 @@
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
 from flask import Blueprint, make_response, request, session, g, redirect, url_for
-from iws.framework.http import HTTPStatus
-from iws.framework.model.abstract import ErrorEntity
-from iws.rest.account.service import AccountService
-from iws.rest.account.models import Account
+from framework.http import HTTPStatus
+from framework.model.abstract import ErrorEntity
+from rest.account.service import AccountService
+from rest.account.models import Account
 
 #
 bp = Blueprint("accounts", __name__, url_prefix="/accounts")

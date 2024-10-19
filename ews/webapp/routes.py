@@ -8,7 +8,7 @@ Create an instance of it named bp.
 The first argument, "views", is the name of your blueprint and identifies this blueprint in your Flask project.
 The second argument is the blueprint’s '__name__' and used later when you import api into' webapp.py'.
 """
-bp = Blueprint("views", __name__)
+bp = Blueprint("webapp", __name__)
 
 
 """
@@ -36,7 +36,7 @@ def index():
     """
     Index Page
     """
-    return render_template("views/index.html")
+    return render_template("index.html")
 
 
 # About Page
@@ -45,7 +45,7 @@ def about():
     """
     About Us Page
     """
-    return render_template("views/about.html")
+    return render_template("about.html")
 
 
 # Services Page
@@ -54,7 +54,7 @@ def services():
     """
     Services Page
     """
-    return render_template("views/services.html")
+    return render_template("services.html")
 
 
 # Clients Page
@@ -63,7 +63,7 @@ def clients():
     """
     Clients Page
     """
-    return render_template("views/clients.html")
+    return render_template("clients.html")
 
 
 # Contact Us Page
@@ -72,7 +72,7 @@ def contact():
     """
     About Us Page
     """
-    return render_template("views/contact.html")
+    return render_template("contact.html")
 
 
 # Logout Page
@@ -81,4 +81,4 @@ def logout():
     """
     About Us Page
     """
-    return render_template("views/logout.html")
+    return render_template("logout.html")

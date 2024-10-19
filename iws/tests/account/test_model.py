@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from iws.framework.entity.abstract import AbstractEntity
+from framework.entity.abstract import AbstractEntity
 from tests.framework.utils import AbstractTestCase
 from account.models import User
 

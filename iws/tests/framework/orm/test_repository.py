@@ -1,7 +1,7 @@
 import unittest
 
-from iws.framework.orm.repository import AbstractRepository
-from iws.framework.orm.sqlalchemy.repository import SqlAlchemyRepository
+from framework.orm.repository import AbstractRepository
+from framework.orm.sqlalchemy.repository import SqlAlchemyRepository
 
 
 class RepositoryTest(unittest.TestCase):

@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from iws.framework.utils import Utils
+from framework.utils import Utils
 from tests.framework.utils import AbstractTestCase
 
 

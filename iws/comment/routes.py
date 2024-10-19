@@ -3,8 +3,8 @@
 # Reference - https://realpython.com/flask-blueprint/
 #
 from flask import Blueprint, render_template, make_response, request, redirect, url_for
-from iws.framework.http import HTTPStatus
-from iws.framework.entity.abstract import ErrorEntity
+from framework.http import HTTPStatus
+from framework.entity.abstract import ErrorEntity
 
 #
 bp = Blueprint("admin", __name__, url_prefix="/admin")

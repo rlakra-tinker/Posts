@@ -1,9 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-import json
-
-from iws.framework.entity.abstract import BaseEntity
+from framework.entity.abstract import BaseEntity
 
 
 class User(BaseEntity):

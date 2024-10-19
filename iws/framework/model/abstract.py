@@ -6,8 +6,8 @@
 import json
 from typing import Optional, Dict, List
 from pydantic import BaseModel, ConfigDict
-from iws.framework.http import HTTPStatus
-from iws.framework.utils import Utils
+from framework.http import HTTPStatus
+from framework.utils import Utils
 from datetime import datetime
 
 

@@ -68,7 +68,7 @@ The parenthesized (venv) in front of the prompt indicates that you’ve successf
 
 ```
 pip install --upgrade pip
-python3 -m pip install -r ews/requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 - Install Flask
@@ -105,13 +105,17 @@ RDS_POOL_SIZE = 1
 
 
 ```shell
-python -m flask --app ews run --port 8080 --debug
+python wsgi.py
+
+OR
+
+python -m flask --app wsgi run --port 8080 --debug
 # http://127.0.0.1:8080/posts
 
 OR
 
-flask --app ews run
-python -m flask --app ews run
+flask --app wsgi run
+python -m flask --app wsgi run
 # http://127.0.0.1:5000/posts
 ```
 
@@ -135,6 +139,7 @@ pip freeze > requirements.txt
 
 ## Unit Tests
 ```shell
+python3 -m unittest
 python -m unittest discover -s ./tests -p "test_*.py"
 ```
 

@@ -1,9 +1,9 @@
 #
 # Author: Rohtash Lakra
 #
-from iws.rest.account.repository import AccountRepository
-from iws.framework.service import AbstractService
-from iws.rest.account.models import Account
+from rest.account.repository import AccountRepository
+from framework.service import AbstractService
+from rest.account.models import Account
 
 
 class AccountService(AbstractService):

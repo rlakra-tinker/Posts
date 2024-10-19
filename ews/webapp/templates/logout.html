@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'fragments/base.html' %}
 
 {% block header %}
 <h2>{% block title %}Logout{% endblock title %}</h2>
@@ -16,7 +16,7 @@
     What's it like to have a team work for you?
   </p>
   <p>
-    <a href="{{ url_for('ews.views.services') }}">Find out more</a>
+    <a href="{{ url_for('ews.webapp.services') }}">Find out more</a>
   </p>
 
 </div>

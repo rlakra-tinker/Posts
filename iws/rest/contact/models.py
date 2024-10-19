@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from iws.framework.model.abstract import AbstractEntity
+from framework.model.abstract import AbstractEntity
 
 
 class Contact(AbstractEntity):

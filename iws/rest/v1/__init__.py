@@ -2,9 +2,9 @@
 # Author: Rohtash Lakra
 #
 from flask import Blueprint
-from iws.rest.role.routes import bp as role_bp
-from iws.rest.account.routes import bp as accounts_bp
-from iws.rest.contact.routes import bp as contact_bp
+from rest.role.routes import bp as role_bp
+from rest.account.routes import bp as accounts_bp
+from rest.contact.routes import bp as contact_bp
 
 #
 bp = Blueprint("v1", __name__, url_prefix="/v1")

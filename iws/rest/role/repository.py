@@ -2,9 +2,9 @@
 # Author: Rohtash Lakra
 #
 from flask import current_app
-from iws.framework.repository import AbstractRepository
-from iws.rest.role.models import Role
-from iws.framework.utils import Utils
+from framework.repository import AbstractRepository
+from rest.role.models import Role
+from framework.utils import Utils
 
 
 class RoleRepository(AbstractRepository):

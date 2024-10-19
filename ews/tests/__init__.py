@@ -1,14 +1,9 @@
 #
 # Author: Rohtash Lakra
 #
-from webapp import WebApp
+from webapp import create_app
 
 # setup webapp for testing
-webApp = WebApp()
-# create an app
-app = webApp.create_app(test_mode=True)
+app = create_app()
 app.app_context = app.app_context()
 app.app_context.push()
-
-
-

@@ -1,6 +1,6 @@
 import unittest
 
-from iws.framework.enums import AutoName, AutoNameUpperCase
+from framework.enums import AutoName, AutoNameUpperCase
 
 
 class EnumsTest(unittest.TestCase):

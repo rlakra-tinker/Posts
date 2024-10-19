@@ -6,11 +6,10 @@
 """
 Blueprint of accounts rest api.
 """
-
 from flask import Blueprint, render_template, make_response, request, redirect, url_for
-from iws.framework.http import HTTPStatus
-from iws.framework.model.abstract import ErrorEntity, ResponseEntity
-from iws.account.models import User
+from framework.http import HTTPStatus
+from framework.model.abstract import ErrorEntity, ResponseEntity
+from account.models import User
 
 bp = Blueprint("accounts", __name__, url_prefix="/accounts")
 """

@@ -2,8 +2,8 @@
 # Author: Rohtash Lakra
 #
 # from werkzeug.security import generate_password_hash, gen_salt
-# from iws.framework.db.sqlite import SQLite3Database
-from iws.framework.repository import AbstractRepository
+# from framework.db.sqlite import SQLite3Database
+from framework.repository import AbstractRepository
 
 
 class ContactRepository(AbstractRepository):

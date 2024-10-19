@@ -4,10 +4,10 @@
 import json
 
 from flask import Blueprint, make_response, request, session, g, redirect, url_for
-from iws.framework.http import HTTPStatus
-from iws.framework.model.abstract import ErrorEntity, ResponseEntity
-from iws.rest.contact.service import ContactService
-from iws.rest.contact.models import Contact
+from framework.http import HTTPStatus
+from framework.model.abstract import ErrorEntity, ResponseEntity
+from rest.contact.service import ContactService
+from rest.contact.models import Contact
 
 #
 bp = Blueprint("contacts", __name__, url_prefix="/contacts")

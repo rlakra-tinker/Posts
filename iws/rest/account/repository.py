@@ -1,8 +1,8 @@
 #
 # Author: Rohtash Lakra
 #
-from iws.framework.repository import AbstractRepository
-from iws.rest.account.models import Account
+from framework.repository import AbstractRepository
+from rest.account.models import Account
 import json
 
 

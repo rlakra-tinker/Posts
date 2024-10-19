@@ -2,37 +2,39 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-project/
 #
-from flask import Flask, Blueprint
-from ews.templates import views
-from ews import api
+import os
+from webapp import create_app
+
+# init app by calling crate api function.
+app = create_app()
 
 """
-Create an application your application factory pattern.
+Run Web Application
 
-With an application factory, your project’s structure becomes more organized.
-It encourages you to separate different parts of your application, like routes, configurations, and initializations,
-into different files later on. This encourages a cleaner and more maintainable codebase.
+Configure the app here.
 """
 
 
-def create_app():
-    # create flask application
-    app = Flask(__name__)
+def run_web_app():
+    # localhost
+    host = os.getenv("APP_HOST", "0.0.0.0")
+    port = int(os.getenv("APP_PORT", 8080))
+    debug = bool(os.getenv("DEBUG_ENABLED", True))
 
-    # register logger here root logger
+    # run application with params
+    app.run(host=host, port=port, debug=debug)
 
-    """
-    Create an instance of it named bp.
-    The first argument, "webapp", is the name of your blueprint and identifies this blueprint in your Flask project.
-    The second argument is the blueprint’s '__name__' and used later when you import api into' webapp.py'.
-    """
-    bp = Blueprint("ews", __name__, url_prefix="/posts")
 
-    # register more app's here.
-    bp.register_blueprint(views.bp)
-    bp.register_blueprint(api.bp)
+"""
+Main Application
 
-    # Connect the 'ews' blueprint with other end-points of the project
-    app.register_blueprint(bp)
+How to run:
+- python3 webapp.py
+- python -m flask --app webapp run --port 8080 --debug
 
-    return app
+"""
+# App Main
+# If you do need to have executable code within your 'routes.py' file, enclose it in the "if __name__ == '__main__':"
+# block. This ensures the code only runs when the file is executed directly, not when imported.
+if __name__ == "__main__":
+    run_web_app()

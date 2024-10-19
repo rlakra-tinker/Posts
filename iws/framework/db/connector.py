@@ -5,7 +5,7 @@ import sqlite3
 from flask import g
 import click
 from pathlib import Path
-from iws.common.config import Config
+from common.config import Config
 from flask_sqlalchemy import SQLAlchemy
 
 

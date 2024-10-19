@@ -3,7 +3,7 @@
 #
 from typing import Any
 from flask import current_app
-from iws.common.globals import connector
+from globals import connector
 
 
 class RepositoryManager(object):

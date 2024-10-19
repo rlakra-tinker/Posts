@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from iws.framework.http import HTTPMethod, HTTPStatus, HTTPUtils
+from framework.http import HTTPMethod, HTTPStatus, HTTPUtils
 from tests.framework.utils import AbstractTestCase
 
 

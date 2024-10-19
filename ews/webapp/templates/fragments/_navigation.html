@@ -15,12 +15,12 @@
     </div>
     <div id="navbar" class="navbar-collapse collapse">
       <ul class="nav navbar-nav">
-        <!-- <li class="active"><a href="{{ url_for('ews.views.index') }}">Home</a></li> -->
-        <li><a href="{{ url_for('ews.views.index') }}">Home</a></li>
-        <li><a href="{{ url_for('ews.views.about') }}">About</a></li>
-        <li><a href="{{ url_for('ews.views.services') }}">Services</a></li>
-        <li><a href="{{ url_for('ews.views.clients') }}">Clients</a></li>
-        <li><a href="{{ url_for('ews.views.contact') }}">Contact</a></li>
+        <!-- <li class="active"><a href="{{ url_for('ews.webapp.index') }}">Home</a></li> -->
+        <li><a href="{{ url_for('ews.webapp.index') }}">Home</a></li>
+        <li><a href="{{ url_for('ews.webapp.about') }}">About</a></li>
+        <li><a href="{{ url_for('ews.webapp.services') }}">Services</a></li>
+        <li><a href="{{ url_for('ews.webapp.clients') }}">Clients</a></li>
+        <li><a href="{{ url_for('ews.webapp.contact') }}">Contact</a></li>
         <li class="dropdown">
           <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true"
             aria-expanded="false">Dropdown <span class="caret"></span></a>
@@ -40,7 +40,7 @@
         <!--        <li><a href="../navbar-static-top/">Static top</a></li>-->
         <!-- <li class="active"><a href="./">Fixed Top <span class="sr-only">(current)</span></a></li> -->
         <li><a href="./">Fixed Top <span class="sr-only">(current)</span></a></li>
-        <li><a href="{{ url_for('ews.views.logout') }}">Logout</a></li>
+        <li><a href="{{ url_for('ews.webapp.logout') }}">Logout</a></li>
       </ul>
     </div><!--/.nav-collapse -->
   </div>
@@ -49,8 +49,8 @@
 <!-- Sidebar -->
 <div id="sideNavBarDiv" class="sidenav">
   <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-  <a href="{{ url_for('ews.views.about') }}">About</a>
-  <a href="{{ url_for('ews.views.services') }}">Services</a>
-  <a href="{{ url_for('ews.views.clients') }}">Clients</a>
-  <a href="{{ url_for('ews.views.contact') }}">Contact</a>
+  <a href="{{ url_for('ews.webapp.about') }}">About</a>
+  <a href="{{ url_for('ews.webapp.services') }}">Services</a>
+  <a href="{{ url_for('ews.webapp.clients') }}">Clients</a>
+  <a href="{{ url_for('ews.webapp.contact') }}">Contact</a>
 </div>

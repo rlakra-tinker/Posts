@@ -3,7 +3,7 @@
 #
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
-from iws.framework.orm.repository import AbstractRepository
+from framework.orm.repository import AbstractRepository
 
 
 class SqlAlchemyRepository(AbstractRepository):

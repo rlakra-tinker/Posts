@@ -4,7 +4,7 @@
 from flask import g, request, current_app
 import uuid
 from enum import auto, unique, Enum
-from iws.framework.enums import AutoNameUpperCase
+from framework.enums import AutoNameUpperCase
 
 
 def log_decorator(func):

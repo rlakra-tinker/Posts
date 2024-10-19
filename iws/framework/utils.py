@@ -4,7 +4,7 @@
 import sys
 import traceback
 
-from iws.framework.enums import AutoName
+from framework.enums import AutoName
 
 
 class Utils(AutoName):

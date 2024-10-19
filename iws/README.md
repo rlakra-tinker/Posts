@@ -148,15 +148,17 @@ DB_PASSWORD =
 
 
 ```shell
-#python iws/webapp/app.py
-#OR
-#flask --app iws/webapp run
-python -m flask --app iws/webapp run
+python wsgi.py
+
+OR
+
+#flask --app wsgi run
+python -m flask --app wsgi run
 # http://127.0.0.1:5000/posts
 
 OR
 
-python -m flask --app iws/webapp run --port 8080 --debug
+python -m flask --app wsgi run --port 8080 --debug
 # http://127.0.0.1:8080/posts
 
 OR
@@ -195,6 +197,7 @@ pip freeze > requirements.txt
 
 ## Unit Tests
 ```shell
+python3 -m unittest
 python -m unittest discover -s ./tests -p "test_*.py"
 ```
 

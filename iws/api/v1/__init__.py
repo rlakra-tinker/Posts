@@ -2,10 +2,10 @@
 # Author: Rohtash Lakra
 #
 from flask import Blueprint
-from iws.account.routes import bp as accounts_bp
-from iws.admin.routes import bp as admin_bp
-from iws.post import bp as post_bp
-from iws.comment import bp as comment_bp
+from account.routes import bp as accounts_bp
+from admin.routes import bp as admin_bp
+from post import bp as post_bp
+from comment import bp as comment_bp
 
 bp = Blueprint("v1", __name__, url_prefix="/v1")
 """
