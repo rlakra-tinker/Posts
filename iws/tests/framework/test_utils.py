@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from framework.utils import Utils
-from tests.framework.utils import AbstractTestCase
+from tests.framework.base import AbstractTestCase
 
 
 class UtilsTest(AbstractTestCase):

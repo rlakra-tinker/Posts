@@ -5,6 +5,7 @@
 from flask import Blueprint
 from .v1 import bp as bp_v1
 
+bp = Blueprint("api", __name__, url_prefix="/api")
 """
 Making a Flask Blueprint:
 
@@ -45,7 +46,6 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-bp = Blueprint("api", __name__, url_prefix="/api")
 
 # register version paths here
 bp.register_blueprint(bp_v1)

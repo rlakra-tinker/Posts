@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from flask import Blueprint
-from account.routes import bp as accounts_bp
+from account import bp as accounts_bp
 from admin.routes import bp as admin_bp
 from post import bp as post_bp
 from comment import bp as comment_bp

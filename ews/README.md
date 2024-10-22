@@ -53,7 +53,7 @@ source venv/bin/activate
 ```
 
 **Note: -**
-```source``` is Linux/MAC OS command and doesn't work in Windows.
+```source``` is Linux/Mac-OS command and doesn't work in Windows.
 
 - Windows
 ```shell
@@ -97,7 +97,6 @@ DEFAULT_POOL_SIZE = 1
 RDS_POOL_SIZE = 1
 ```
 
-**By default**, Flask will run the application on **port 5000**.
 
 ### Run EWS Flask Application
 

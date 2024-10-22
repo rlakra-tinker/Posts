@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from tests.framework.utils import AbstractTestCase
+from tests.framework.base import AbstractTestCase
 from framework.entity.abstract import AbstractEntity, BaseEntity, NamedEntity, ErrorEntity, ErrorResponse
 
 

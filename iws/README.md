@@ -140,7 +140,6 @@ DB_USERNAME =
 DB_PASSWORD =
 ```
 
-**By default**, Flask will run the application on **port 5000**.
 
 ### Run IWS Flask Application
 
@@ -166,12 +165,12 @@ OR
 # Production Mode
 
 # equivalent to 'from app import app'
-gunicorn iws.webapp:app
-# gunicorn -w <n> 'webapp:app'
-gunicorn -w 2 'iws.webapp:app'
+gunicorn wsgi:app
+# gunicorn -w <n> 'wsgi:app'
+gunicorn -w 2 'wsgi:app'
 # http://127.0.0.1:8000/posts
 
-gunicorn -c iws/webapp/gunicorn.conf.py iws.webapp:app
+gunicorn -c gunicorn.conf.py wsgi:app
 # http://127.0.0.1:8080/posts
 
 ```
@@ -203,8 +202,12 @@ python -m unittest discover -s ./tests -p "test_*.py"
 
 # Reference
 
+- [Build a Scalable Flask Web Project From Scratch](https://realpython.com/flask-project/)
 - [Gunicorn - WSGI server](https://docs.gunicorn.org/en/latest/index.html)
 - [Python Packaging User Guide](https://packaging.python.org/en/latest/)
+- [The Twelve Factors App](https://12factor.net/)
+- [werkzeug examples](https://github.com/pallets/werkzeug/tree/main/examples)
+- 
 
 # Author
 - Rohtash Lakra

@@ -2,8 +2,8 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-project/
 #
-import os
 import importlib.metadata
+import os
 from typing import Any
 from flask import Flask, Blueprint, make_response, jsonify, current_app
 from pathlib import Path
@@ -23,6 +23,7 @@ from framework.http import HTTPStatus
 from framework.model.abstract import ErrorEntity
 from globals import connector
 
+
 class WebApp:
     """Create WebApp class"""
     __HOST = 'host'
@@ -37,17 +38,17 @@ class WebApp:
         self.app: Flask = None
 
     def _load_env(self):
-        # Load the environment variables
-        env_file_path = self.path.cwd().joinpath('.env')  # self.path.cwd() / '.env'
         with self.app.app_context():
+            current_app.logger.debug(f"FLASK_ENV={os.getenv('FLASK_ENV')}")
+            # Load the environment variables
+            env_file_path = self.path.cwd().joinpath('.env')  # self.path.cwd() / '.env'
             current_app.logger.debug(f"env_file_path={env_file_path}")
 
-        # loads .env file and updates the local env object
-        load_dotenv(dotenv_path=env_file_path)
-        self.set_env(self.__HOST, os.getenv(self.__HOST, "127.0.0.1"))
-        self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
-        self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
-        with self.app.app_context():
+            # loads .env file and updates the local env object
+            load_dotenv(dotenv_path=env_file_path)
+            self.set_env(self.__HOST, os.getenv(self.__HOST, "127.0.0.1"))
+            self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
+            self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
             current_app.logger.debug(f"env={self.env}")
 
     def set_env(self, key: str, value: Any):
@@ -85,7 +86,7 @@ class WebApp:
         self.app = app
         self._load_env()
 
-        with app.app_context():
+        with self.app.app_context():
             current_app.logger.debug(
                 f"Running Application [{app.name}] on version [{flask_version}] with testMode [{test_mode}] ...")
 
@@ -138,11 +139,11 @@ class WebApp:
         # Initialize/Register Blueprints, if any
 
         """
-        Create an instance of Blueprint prefixed with '/web-crawler' as named bp.
+        Create an instance of Blueprint prefixed with '/posts' as named bp.
         Parameters:
             name: "ws - web server", is the name of the blueprint and identifies it in the Flask project.
             __name__: The name of blueprint and used later when you import api into' app.py'.
-            url_prefix: the web url prefixed with '/web-crawler'
+            url_prefix: the web url prefixed with '/posts'
         """
         bp = Blueprint("iws", __name__, url_prefix="/posts")
 
@@ -151,7 +152,7 @@ class WebApp:
         bp.register_blueprint(rest_bp)
         bp.register_blueprint(api_bp)
 
-        # Connect the 'iws' blueprint with other end-points of the project
+        # Register root blueprint with app that connects an app with other end-points
         app.register_blueprint(bp)
 
         # Initialize/Register Request's behavior/db connection

@@ -8,6 +8,8 @@ webApp = WebApp()
 app = webApp.create_app()
 
 # App Main
+# If you do need to have executable code within your 'routes.py' file, enclose it in the "if __name__ == '__main__':"
+# block. This ensures the code only runs when the file is executed directly, not when imported.
 if __name__ == "__main__":
     """
     Main Application

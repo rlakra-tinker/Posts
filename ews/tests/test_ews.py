@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from .base import AbstractTestCase
+from tests.base import AbstractTestCase
 
 
 class EWSTest(AbstractTestCase):

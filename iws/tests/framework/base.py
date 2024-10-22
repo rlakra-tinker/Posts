@@ -3,7 +3,7 @@
 #
 import json
 import unittest
-from tests.blueprints import app
+from tests import app
 
 
 class AbstractTestCase(unittest.TestCase):
@@ -38,3 +38,20 @@ class AbstractTestCase(unittest.TestCase):
                 if cls.logKeys:
                     print(key)
 
+    def setUp(self):
+        # setup webapp for testing
+        # self.app = create_app()
+        # self.app_context = self.app.app_context()
+        # self.app_context.push()
+        print('setUp')
+
+    def tearDown(self):
+        # self.app_context.pop()
+        # self.app = None
+        # self.app_context = None
+        print('setUp')
+
+    def test_app(self):
+        # assert self.app is not None
+        # assert current_app == self.app
+        print('setUp')
