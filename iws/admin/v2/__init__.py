@@ -2,18 +2,17 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-blueprint/
 #
-from flask import Blueprint, render_template
+from flask import Blueprint
 
-bp = Blueprint("comments", __name__, url_prefix="/comments")
+bp = Blueprint("admin", __name__, url_prefix="/admin")
 """
 Making a Flask Blueprint:
 
-Create an instance of it named 'bp'.
-
-Note that in the below code, some arguments are specified when creating the Blueprint object.
-The first argument, 'api', is the Blueprint’s name, which is used by Flask’s routing mechanism (and identifies it in your Flask project). 
-The second argument, '__name__', is the Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
-The third argument, 'url_prefix="/api"', the path to prepend to all of the Blueprint’s URLs.
+Create an instance of Blueprint prefixed with '/bp' as named bp.
+Parameters:
+    name: "admin" is the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
+    __name__: The Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
+    url_prefix: the path to prepend to all of the Blueprint’s URLs.
 
 There are other optional arguments that you can provide to alter the Blueprint’s behavior:
 
@@ -45,31 +44,4 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-
-
-
-# display cart
-@bp.get("/")
-def index():
-    """
-    register a new account
-    """
-    return render_template("comment/index.html")
-
-
-# checkout cart
-@bp.get("/checkout")
-def checkout():
-    """
-    login to an account
-    """
-    return render_template("comment/checkout.html")
-
-
-# checkout cart
-@bp.get("/view")
-def view():
-    """
-    login to an account
-    """
-    return render_template("comment/view.html")
+from admin import routes

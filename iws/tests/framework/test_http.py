@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from framework.http import HTTPMethod, HTTPStatus, HTTPUtils
-from tests.framework.base import AbstractTestCase
+from tests.base import AbstractTestCase
 
 
 class HttpTest(AbstractTestCase):

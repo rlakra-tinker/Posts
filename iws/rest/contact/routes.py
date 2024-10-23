@@ -1,25 +1,19 @@
 #
 # Author: Rohtash Lakra
 #
+from rest.contact.v1 import bp as bp_contact_v1
 import json
-
 from flask import Blueprint, make_response, request, session, g, redirect, url_for
 from framework.http import HTTPStatus
 from framework.model.abstract import ErrorEntity, ResponseEntity
 from rest.contact.service import ContactService
 from rest.contact.models import Contact
 
-#
-bp = Blueprint("contacts", __name__, url_prefix="/contacts")
-"""
-Making a Flask Blueprint and registering it in an application, you extend the application with its contents.
-"""
-
 # account's service
 contactService = ContactService()
 
 
-@bp.post("/")
+@bp_contact_v1.post("/")
 def create():
     print(f"request => {request}")
     if request.is_json:
@@ -62,7 +56,8 @@ def create():
     # return make_response(response)
     return redirect(url_for("iws.webapp.contact"))
 
-@bp.post("/login")
+
+@bp_contact_v1.post("/login")
 def login():
     print(request)
     if request.is_json:
@@ -80,7 +75,7 @@ def login():
 
 
 # Logout Page
-@bp.post("/logout")
+@bp_contact_v1.post("/logout")
 def logout():
     """
     logout
@@ -88,7 +83,7 @@ def logout():
     session.clear()
 
 
-@bp.post("/forgot-password")
+@bp_contact_v1.post("/forgot-password")
 def forgot_password():
     """
     forgot-password

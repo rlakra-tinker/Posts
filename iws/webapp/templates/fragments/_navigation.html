@@ -24,10 +24,12 @@
             <li><a href="{{ url_for('iws.api.v1.posts.index') }}">Posts</a></li>
             <li role="separator" class="divider"></li>
             <li><a href="{{ url_for('iws.api.v1.comments.index') }}">Comments</a></li>
+            <li role="separator" class="divider"></li>
           </ul>
         </li>
         <li><a href="{{ url_for('iws.webapp.clients') }}">Clients</a></li>
         <li><a href="{{ url_for('iws.webapp.contact') }}">Contact</a></li>
+        <li><a href="{{ url_for('iws.api.v1.posts.index') }}">Blog</a></li>
       </ul>
       <ul class="nav navbar-nav navbar-right">
         <li><a href="{{ url_for('iws.api.v1.accounts.login') }}">Login</a></li>

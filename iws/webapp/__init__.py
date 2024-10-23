@@ -2,6 +2,7 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-project/
 #
+import sys
 import importlib.metadata
 import os
 from typing import Any
@@ -22,6 +23,8 @@ from rest import bp as rest_bp
 from framework.http import HTTPStatus
 from framework.model.abstract import ErrorEntity
 from globals import connector
+from framework.enums import EnvType
+from datetime import datetime
 
 
 class WebApp:
@@ -29,17 +32,25 @@ class WebApp:
     __HOST = 'host'
     __PORT = 'port'
     __DEBUG = 'debug'
+    __FLASK_ENV = 'FLASK_ENV'
+    __ENV_TYPE = 'env_type'
+    __LOG_FILE_NAME = 'LOG_FILE_NAME'
 
     def __init__(self):
         self.path = Path()
         self.basedir = str(self.path.cwd())
-        # print(f"basedir: {self.basedir}")
-        self.env: dict = {}
+        print(f"basedir={self.basedir}")
+        # sys.path.append(self.basedir)
+        print(f"sys.path={sys.path}")
+        self.environment: dict = {}
         self.app: Flask = None
 
-    def _load_env(self):
+    def _load_env(self, test_mode: bool = False):
         with self.app.app_context():
-            current_app.logger.debug(f"FLASK_ENV={os.getenv('FLASK_ENV')}")
+            flask_version = importlib.metadata.version("flask")
+            current_app.logger.debug(
+                f"Running Application [{self.app.name}] on version [{flask_version}] with testMode [{test_mode}] ...")
+            current_app.logger.debug(f"FLASK_ENV={os.getenv(self.__FLASK_ENV)}")
             # Load the environment variables
             env_file_path = self.path.cwd().joinpath('.env')  # self.path.cwd() / '.env'
             current_app.logger.debug(f"env_file_path={env_file_path}")
@@ -49,13 +60,15 @@ class WebApp:
             self.set_env(self.__HOST, os.getenv(self.__HOST, "127.0.0.1"))
             self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
             self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
-            current_app.logger.debug(f"env={self.env}")
+            self.set_env(self.__ENV_TYPE, os.getenv(self.__FLASK_ENV, 'Development'))
+            self.set_env(self.__LOG_FILE_NAME, os.getenv(self.__LOG_FILE_NAME, 'iws.log'))
+            current_app.logger.debug(f"environment={self.environment}")
 
     def set_env(self, key: str, value: Any):
-        self.env[key] = value
+        self.environment[key] = value
 
     def get_env(self, key: str) -> Any:
-        return self.env.get(key, None)
+        return self.environment.get(key, None)
 
     def run(self):
         """Loads Configurations and Runs Web Application"""
@@ -79,19 +92,11 @@ class WebApp:
         # create a new flask application object
         app = Flask(__name__)
         RequestID(app)
-        flask_version = importlib.metadata.version("flask")
         # app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
         app.wsgi_app = ProxyFix(app.wsgi_app)
         # wsgi_app = ProxyFix(app.wsgi_app)
         self.app = app
-        self._load_env()
-
-        with self.app.app_context():
-            current_app.logger.debug(
-                f"Running Application [{app.name}] on version [{flask_version}] with testMode [{test_mode}] ...")
-
-        # print(f"Running Application [{app.name}] on version [{flask.__version__}] with testMode [{test_mode}] ...")
-        # print(f"Running Application [{app.name}] on version [{flask_version}] with testMode [{test_mode}] ...")
+        self._load_env(test_mode=test_mode)
 
         # load app's configs
         app.config.from_object(config_class)
@@ -101,17 +106,19 @@ class WebApp:
             CORS(app)
 
         # register logger here root logger
-        log_file_name = 'iws.log'
-        log_handler = logging.FileHandler(log_file_name)
-        log_format = "%(asctime)s:%(levelname)s:%(request_id)s - %(message)s"
-        print(f"log_format={log_format}")
-        logging.Formatter("%(asctime)s:%(levelname)s:%(request_id)s - %(message)s")  # make the format more compact
-        log_handler.addFilter(RequestIDLogFilter())  # Adds request-ID filter
-        print(f"log_handler=[{log_handler}]")
-        # logging.getLogger().addHandler(log_handler)
-        logging.basicConfig(filename=log_file_name, level=logging.DEBUG,
-                            format="%(asctime)s:%(levelname)s - %(message)s")
-        requests.packages.urllib3.add_stderr_logger()
+        if EnvType.is_production(self.get_env(self.__ENV_TYPE)):
+            log_file_name = self.get_env(self.__LOG_FILE_NAME)
+            log_handler = logging.FileHandler(log_file_name)
+            log_format = "%(asctime)s:%(levelname)s:%(request_id)s - %(message)s"
+            logging.Formatter("%(asctime)s:%(levelname)s:%(request_id)s - %(message)s")  # make the format more compact
+            log_handler.addFilter(RequestIDLogFilter())  # Adds request-ID filter
+            with self.app.app_context():
+                current_app.logger.debug(f"log_format={log_format}")
+                current_app.logger.debug(f"log_handler=[{log_handler}]")
+            # logging.getLogger().addHandler(log_handler)
+            logging.basicConfig(filename=log_file_name, encoding='utf-8', level=logging.DEBUG,
+                                format="%(asctime)s:%(levelname)s - %(message)s")
+            requests.packages.urllib3.add_stderr_logger()
 
         # Initialize/Register Flask Extensions/Components, if any
         if not test_mode:
@@ -136,16 +143,28 @@ class WebApp:
             current_app.logger.debug(f'errorClass={type(error)}, error={error}')
             return make_response(jsonify(ErrorEntity.error(HTTPStatus.INTERNAL_SERVER_ERROR)), 500)
 
+        # Register Date & Time Formatter for Jinja Template
+        @app.template_filter('strftime')
+        def _jinja2_filter_datetime(date_str, format: str = None):
+            """Formats the date_str"""
+            date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
+            native = date.replace(tzinfo=None)
+            if format:
+                return native.strftime(format)
+            else:
+                return native.strftime("%b %d, %Y at %I:%M%p")
+
         # Initialize/Register Blueprints, if any
 
         """
-        Create an instance of Blueprint prefixed with '/posts' as named bp.
+        Create an instance of Blueprint prefixed with '/bp' as named bp.
         Parameters:
-            name: "ws - web server", is the name of the blueprint and identifies it in the Flask project.
-            __name__: The name of blueprint and used later when you import api into' app.py'.
-            url_prefix: the web url prefixed with '/posts'
+            name: "iws", is the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
+            __name__: The Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
+            url_prefix: the path to prepend to all of the Blueprint’s URLs.
         """
-        bp = Blueprint("iws", __name__, url_prefix="/posts")
+        # bp = Blueprint("iws", __name__, url_prefix="/posts")
+        bp = Blueprint("iws", __name__)
 
         # register more app's here.
         bp.register_blueprint(webapp_bp)

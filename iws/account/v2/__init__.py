@@ -1,22 +1,19 @@
 #
 # Author: Rohtash Lakra
-#
-#
-# Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-blueprint/
 #
 from flask import Blueprint
 
-bp = Blueprint('v2_account', __name__, url_prefix='/accounts')
+bp = Blueprint("accounts", __name__, url_prefix="/accounts")
+# bp = Blueprint("accounts", __name__, url_prefix="/accounts", template_folder='templates', static_folder='static')
 """
 Making a Flask Blueprint:
 
-Create an instance of it named 'bp'.
-
-Note that in the below code, some arguments are specified when creating the Blueprint object.
-The first argument, 'api', is the Blueprint’s name, which is used by Flask’s routing mechanism (and identifies it in your Flask project). 
-The second argument, '__name__', is the Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
-The third argument, 'url_prefix="/api"', the path to prepend to all of the Blueprint’s URLs.
+Create an instance of Blueprint prefixed with '/bp' as named bp.
+Parameters:
+    name: "accounts" is the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
+    __name__: The Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
+    url_prefix: the path to prepend to all of the Blueprint’s URLs.
 
 There are other optional arguments that you can provide to alter the Blueprint’s behavior:
 
@@ -48,4 +45,4 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-
+from account import routes

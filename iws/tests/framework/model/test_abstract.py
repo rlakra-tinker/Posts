@@ -3,7 +3,7 @@
 #
 from framework.model.abstract import AbstractModel, AbstractEntity, NamedEntity, ErrorEntity, ResponseEntity
 from framework.http import HTTPStatus
-from tests.framework.base import AbstractTestCase
+from tests.base import AbstractTestCase
 
 
 class TestAbstract(AbstractTestCase):

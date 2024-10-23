@@ -6,7 +6,7 @@ from flask import render_template, make_response, request, redirect, url_for
 from framework.http import HTTPStatus
 from framework.model.abstract import ErrorEntity, ResponseEntity
 from account.models import User
-from account import bp
+from account.v1 import bp as bp_v1_accounts
 
 # holds accounts in memory
 accounts = []
@@ -23,7 +23,7 @@ def _find_next_id():
 
 # register a new account
 # @bp.route("/register", methods=[HTTPMethod.GET, HTTPMethod.POST])
-@bp.get("/register")
+@bp_v1_accounts.get("/register")
 def register_view():
     """
     register a new account
@@ -31,7 +31,7 @@ def register_view():
     return render_template("account/register.html")
 
 
-@bp.post("/register")
+@bp_v1_accounts.post("/register")
 def register():
     print(request)
     user = None
@@ -52,7 +52,7 @@ def register():
 
 
 # login to an account
-@bp.get("/login")
+@bp_v1_accounts.get("/login")
 def login_view():
     """
     login to an account
@@ -60,7 +60,7 @@ def login_view():
     return render_template("account/login.html")
 
 
-@bp.post("/login")
+@bp_v1_accounts.post("/login")
 def login():
     print(request)
     if request.is_json:
@@ -78,7 +78,7 @@ def login():
 
 
 # view profile
-@bp.get("/profile")
+@bp_v1_accounts.get("/profile")
 def profile_view():
     """
     view profile
@@ -87,7 +87,7 @@ def profile_view():
 
 
 # forgot-password
-@bp.get("/forgot-password")
+@bp_v1_accounts.get("/forgot-password")
 def forgot_password():
     """
     forgot-password
@@ -96,7 +96,7 @@ def forgot_password():
 
 
 # Logout Page
-@bp.post("/logout")
+@bp_v1_accounts.post("/logout")
 def logout():
     """
     About Us Page
@@ -106,7 +106,7 @@ def logout():
 
 
 # accounts home page
-@bp.get("/notifications")
+@bp_v1_accounts.get("/notifications")
 def notifications():
     """
     Services Page

@@ -2,21 +2,23 @@
 # Author: Rohtash Lakra
 #
 from flask import Blueprint
-from account import bp as accounts_bp
-from admin.routes import bp as admin_bp
-from post import bp as post_bp
-from comment import bp as comment_bp
+from admin.v1 import bp as admin_v1_bp
+from account.v1 import bp as account_v1_bp
+from post.v1 import bp as post_v1_bp
+from comment.v1 import bp as comment_v1_bp
 
 bp = Blueprint("v1", __name__, url_prefix="/v1")
 """
-Create an instance of it named 'bp'. 
-The first argument, "api_v1", is the name of your blueprint and identifies this blueprint in your Flask project.
-The second argument is the blueprint’s '__name__' and used later when you import api into' webapp.py'.
+Create an instance of Blueprint prefixed with '/bp' as named bp.
+Parameters:
+    name: "v1" is the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
+    __name__: The Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
+    url_prefix: the path to prepend to all of the Blueprint’s URLs.
 """
 
 
 # register end-points here
-bp.register_blueprint(accounts_bp)
-bp.register_blueprint(admin_bp, url_prefix="/admin")
-bp.register_blueprint(post_bp)
-bp.register_blueprint(comment_bp)
+bp.register_blueprint(admin_v1_bp)
+bp.register_blueprint(account_v1_bp)
+bp.register_blueprint(post_v1_bp)
+bp.register_blueprint(comment_v1_bp)

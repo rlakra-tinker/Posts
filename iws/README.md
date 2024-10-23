@@ -207,7 +207,9 @@ python -m unittest discover -s ./tests -p "test_*.py"
 - [Python Packaging User Guide](https://packaging.python.org/en/latest/)
 - [The Twelve Factors App](https://12factor.net/)
 - [werkzeug examples](https://github.com/pallets/werkzeug/tree/main/examples)
-- 
+
+### Logger Guide
+- [Logging HOWTO](https://docs.python.org/3/howto/logging.html)
 
 # Author
 - Rohtash Lakra

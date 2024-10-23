@@ -3,18 +3,20 @@
 # Reference - https://realpython.com/flask-blueprint/
 #
 from flask import Blueprint
-from .v1 import bp as bp_v1
+from api.v1 import bp as api_v1_bp
+from api.v2 import bp as api_v2_bp
 
 bp = Blueprint("api", __name__, url_prefix="/api")
 """
 Making a Flask Blueprint:
 
-Create an instance of it named 'bp'.
-
 Note that in the below code, some arguments are specified when creating the Blueprint object.
-The first argument, 'api', is the Blueprint’s name, which is used by Flask’s routing mechanism (and identifies it in your Flask project). 
-The second argument, '__name__', is the Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
-The third argument, 'url_prefix="/api"', the path to prepend to all of the Blueprint’s URLs.
+
+Create an instance of Blueprint prefixed with '/bp' as named bp.
+Parameters:
+    name: "api", is the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
+    __name__: The Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
+    url_prefix: the path to prepend to all of the Blueprint’s URLs.
 
 There are other optional arguments that you can provide to alter the Blueprint’s behavior:
 
@@ -48,4 +50,13 @@ When you register the Flask Blueprint in an application, you extend the applicat
 """
 
 # register version paths here
-bp.register_blueprint(bp_v1)
+bp.register_blueprint(api_v1_bp)
+bp.register_blueprint(api_v2_bp)
+
+# Add middleware at API level (and can exclude any API like /admin APIs)
+# bp.before_request(parse_headers_user_agent)
+# bp.before_request(parse_headers_version_check)
+# bp.after_request(log_request)
+# bp.before_request(parse_headers_user_agent)
+# bp.before_request(parse_headers_version_check)
+# bp.after_request(log_response)

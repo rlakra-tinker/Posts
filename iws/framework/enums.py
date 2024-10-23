@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from typing import Any
-from enum import Enum, unique
+from enum import Enum, unique, auto
 
 
 # Also, subclassing an enumeration is allowed only if the enumeration does not define any members.
@@ -97,3 +97,14 @@ class AutoNameUpperCase(AutoName):
     def _generate_next_value_(name, start, count, last_values):
         # print(f"_generate_next_value_={type(name)}")
         return name.upper()
+
+
+@unique
+class EnvType(AutoName):
+    DEVELOPMENT = auto()
+    STAGING = auto()
+    PRODUCTION = auto()
+
+    @classmethod
+    def is_production(cls, text: str) -> bool:
+        return EnvType.equals(EnvType.PRODUCTION, text)

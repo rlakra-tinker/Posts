@@ -2,20 +2,22 @@
 # Author: Rohtash Lakra
 #
 from flask import Blueprint
-from rest.role.routes import bp as role_bp
-from rest.account.routes import bp as accounts_bp
-from rest.contact.routes import bp as contact_bp
+from rest.role.v1 import bp as role_v1_bp
+from rest.account.v1 import bp as account_v1_bp
+from rest.contact.v1 import bp as contact_v1_bp
 
-#
+
 bp = Blueprint("v1", __name__, url_prefix="/v1")
 """
-Create an instance of it named 'bp'. 
-The first argument, "api_v1", is the name of your blueprint and identifies this blueprint in your Flask project.
-The second argument is the blueprint’s '__name__' and used later when you import api into' webapp.py'.
+Create an instance of Blueprint prefixed with '/bp' as named bp.
+Parameters:
+    name: "v1", is the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
+    __name__: The Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
+    url_prefix: the path to prepend to all of the Blueprint’s URLs.
 """
 
 
-# register end-points here
-bp.register_blueprint(role_bp)
-bp.register_blueprint(accounts_bp)
-bp.register_blueprint(contact_bp)
+# Register REST APIs (end-points) here
+bp.register_blueprint(role_v1_bp)
+bp.register_blueprint(account_v1_bp)
+bp.register_blueprint(contact_v1_bp)

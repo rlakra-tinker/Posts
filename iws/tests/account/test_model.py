@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from framework.entity.abstract import AbstractEntity
-from tests.framework.base import AbstractTestCase
+from tests.base import AbstractTestCase
 from account.models import User
 
 

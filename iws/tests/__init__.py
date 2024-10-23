@@ -10,3 +10,7 @@ app = webApp.create_app(test_mode=True)
 app_context = app.app_context()
 # app.app_context.push()
 app_context.push()
+
+#
+# app.app_context = app.app_context()
+# app.app_context.push()

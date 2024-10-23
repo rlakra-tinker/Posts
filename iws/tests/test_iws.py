@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from tests.framework.base import AbstractTestCase
+from tests.base import AbstractTestCase
 
 
 class IWSTest(AbstractTestCase):
@@ -16,3 +16,4 @@ class IWSTest(AbstractTestCase):
         self.assertFalse(issubclass(object, IWSTest))
         print("-test_iws()")
         print()
+
