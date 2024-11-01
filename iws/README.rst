@@ -1,6 +1,5 @@
-# IWS (Internal Web Service)
-
----
+IWS (Internal Web Service)
+==========================
 
 The ```iws``` represents an internal web service for the posts project.
 
@@ -126,30 +125,18 @@ cp ./iws/default.env .env
 OR
 touch .env
 
-#
-# App Configs
-#
-FLASK_ENV = development
-DEBUG = False
+# Local Variables
 HOST = 127.0.0.1
 PORT = 8080
-#
-# Pool Configs
-#
+DEBUG = True
 DEFAULT_POOL_SIZE = 1
 RDS_POOL_SIZE = 1
-#
-# Logger Configs
-#
-LOG_FILE_NAME = 'iws.log'
-#
 # Database Configs
-#
 DB_HOSTNAME = 127.0.0.1
 DB_PORT =
 DB_NAME = posts
-DB_USERNAME = posts
-DB_PASSWORD = Password
+DB_USERNAME =
+DB_PASSWORD =
 ```
 
 

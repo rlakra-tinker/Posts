@@ -1,13 +1,13 @@
 @import url("https://www.w3schools.com/lib/w3schools31.css");
 
+* {
+  box-sizing: border-box;
+}
+
 body {
   font-family: Arial;
   font-size: 16px;
   padding: 8px;
-}
-
-* {
-  box-sizing: border-box;
 }
 
 .row {

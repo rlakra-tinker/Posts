@@ -1,13 +1,14 @@
 #
 # Author: Rohtash Lakra
 #
+import os
 from typing import Any
 from enum import Enum, unique, auto
 
 
 # Also, subclassing an enumeration is allowed only if the enumeration does not define any members.
 # Auto name for the enum members
-class AutoName(Enum):
+class BaseEnum(Enum):
     """Base Enum for all other Enums. For readability, add constants in Alphabetical order."""
 
     @staticmethod
@@ -83,7 +84,8 @@ class AutoName(Enum):
 
 
 @unique
-class AutoNameLowerCase(AutoName):
+class AutoNameLowerCase(BaseEnum):
+    """AutoNameLowerCase class converts names to lower-case letters"""
 
     @staticmethod
     def _generate_next_value_(name, start, count, last_values):
@@ -91,7 +93,8 @@ class AutoNameLowerCase(AutoName):
 
 
 @unique
-class AutoNameUpperCase(AutoName):
+class AutoNameUpperCase(BaseEnum):
+    """AutoNameUpperCase class converts names to upper-case letters"""
 
     @staticmethod
     def _generate_next_value_(name, start, count, last_values):
@@ -100,11 +103,36 @@ class AutoNameUpperCase(AutoName):
 
 
 @unique
-class EnvType(AutoName):
-    DEVELOPMENT = auto()
-    STAGING = auto()
-    PRODUCTION = auto()
+class EnvType(BaseEnum):
+    """EnvType class represents various supported env types"""
 
-    @classmethod
-    def is_production(cls, text: str) -> bool:
-        return EnvType.equals(EnvType.PRODUCTION, text)
+    DEVELOPMENT = auto()
+    PRODUCTION = auto()
+    STAGING = auto()
+    TESTING = auto()
+
+    @staticmethod
+    def is_development(env_type: str) -> bool:
+        """Returns true if DEVELOPMENT == env_type other false"""
+        return EnvType.equals(EnvType.DEVELOPMENT, env_type)
+
+    @staticmethod
+    def is_production(env_type: str) -> bool:
+        """Returns true if PRODUCTION == env_type other false"""
+        return EnvType.equals(EnvType.PRODUCTION, env_type)
+
+    @staticmethod
+    def is_staging(env_type: str) -> bool:
+        """Returns true if STAGING == env_type other false"""
+        return EnvType.equals(EnvType.STAGING, env_type)
+
+    @staticmethod
+    def is_testing(env_type: str) -> bool:
+        """Returns true if TESTING == env_type other false"""
+        return EnvType.equals(EnvType.TESTING, env_type)
+
+    @staticmethod
+    def flask_env() -> str:
+        """Returns the value of FLASK_ENV env variable value if set otherwise None."""
+        return os.getenv("FLASK_ENV")
+

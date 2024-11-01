@@ -25,6 +25,7 @@ from framework.model.abstract import ErrorEntity
 from globals import connector
 from framework.enums import EnvType
 from datetime import datetime
+import connexion
 
 
 class WebApp:
@@ -91,6 +92,8 @@ class WebApp:
         """
         # create a new flask application object
         app = Flask(__name__)
+        # app = connexion.App(__name__, specification_dir="./")
+        # app.add_api("swagger.yml")
         RequestID(app)
         # app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
         app.wsgi_app = ProxyFix(app.wsgi_app)
