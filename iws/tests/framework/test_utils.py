@@ -44,3 +44,12 @@ class UtilsTest(AbstractTestCase):
 
         for a, b, c in examples:
             check(a, b, c)
+
+    def test_measure_ttfb(self):
+        print('test_measure_ttfb()')
+        url = "https://www.google.com/"
+        ttfb = Utils.measure_ttfb(url)
+        print(f"TTFB for {url}: {ttfb:.2f} ms, {ttfb / 1000:.2f} seconds")
+        self.assertIsNotNone(ttfb)
+        self.assertGreaterEqual(ttfb, 1)
+        print()

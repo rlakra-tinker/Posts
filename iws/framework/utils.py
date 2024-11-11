@@ -1,10 +1,15 @@
 #
 # Author: Rohtash Lakra
 #
-import sys
-import traceback
 import logging
+import os
 import re
+import sys
+import time
+import traceback
+
+import requests
+
 from framework.enums import BaseEnum
 
 # logger
@@ -45,3 +50,57 @@ class Utils(BaseEnum):
         else:
             return chunks[0].lower() + ''.join(converted[1:])
 
+    @staticmethod
+    def abs_path(file_name) -> str:
+        """Returns the absolute path of the given file."""
+        return os.path.abspath(os.path.dirname(file_name))
+
+    @staticmethod
+    def exists(path) -> bool:
+        """Returns true if the path exists otherwise false."""
+        return os.path.exists(path)
+
+    @staticmethod
+    def measure_ttfb(url):
+        logger.debug(f"+measure_ttfb({url})")
+        _watcher = StopWatch()
+        _watcher.start()
+        response = requests.get(url)
+        _watcher.stop()
+        elapsed = _watcher.elapsed()
+        logger.debug(f"elapsed={elapsed}")
+        ttfb = elapsed * 1000  # Convert to milliseconds
+
+        logger.debug(f"-measure_ttfb(), url={url}, ttfb={ttfb}")
+        return ttfb
+
+
+class StopWatch(object):
+    """Test support functionality for other tests."""
+
+    def __init__(self):
+        self.start_time = None
+        self.duration = None
+
+    def start(self):
+        self.start_time = self.now()
+        self.duration = None
+
+    def stop(self):
+        self.duration = self.now() - self.start_time
+
+    @staticmethod
+    def now():
+        return time.time()
+
+    # @property
+    def elapsed(self):
+        assert self.start_time is not None
+        return self.now() - self.start_time
+
+    def __enter__(self):
+        self.start()
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.stop()
