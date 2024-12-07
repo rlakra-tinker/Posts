@@ -104,7 +104,7 @@ The parenthesized (venv) in front of the prompt indicates that you’ve successf
 
 ```
 pip install --upgrade pip
-python3 -m pip install -r iws/requirements.txt
+python3 -m pip install -r requirements.txt
 ```
 
 

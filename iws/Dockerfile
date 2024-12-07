@@ -2,7 +2,7 @@
 FROM python:3.12 as build
 WORKDIR /app
 RUN python -m venv --upgrade-deps venv
-COPY requirements requirements
+COPY requirements.txt requirements.txt
 RUN venv/bin/pip install -r requirements.txt
 
 # Layer - 2

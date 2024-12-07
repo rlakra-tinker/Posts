@@ -29,29 +29,22 @@ REMOVE_FILES := __pycache__
 .DEFAULT_GOAL: help
 
 
-all: setup clean test run doc
+all: help
+
+
 
 # The @ makes sure that the command itself isn't echoed in the terminal
 # Put it first so that "make" without argument is like "make help".
-# Catch-all target: route all unknown targets
-define find.functions
-	@# @fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
-    @printf "%-25s %s\n" "Target" "Description"
-    @printf "%-25s %s\n" "----------------" "----------------"
-    @make -pqR : 2>/dev/null \
-        | awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' \
-        | sort \
-        | egrep -v -e '^[^[:alnum:]]' -e '^$@$$' \
-        | xargs -I _ sh -c 'printf "%-25s " _; make _ -nB | (grep -i "^# Help:" || echo "") | tail -1 | sed "s/^# Help: //g"'
-endef
+#help:
+#	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-# A hidden target
-.hidden:
+define find.functions
+	@fgrep -h "##" $(MAKEFILE_LIST) | fgrep -v fgrep | sed -e 's/\\$$//' | sed -e 's/##//'
+endef
 
 help:
 	@echo
 	@echo 'The following commands can be used:'
-	@echo
 	$(call find.functions)
 	@echo
 
@@ -71,7 +64,6 @@ help:
 
 setup: ## Sets up environment and installs requirements
 setup:
-	@# Help: Sets up environment and installs requirements
 	@echo "Setting up the Python environment ..."
 	python3 -m pip install virtualenv
 	python3 -m $(VENV) $(VENV)
@@ -83,7 +75,6 @@ setup:
 # In this context, the *.project pattern means "anything that has the .project extension"
 clean: ## Remove build and cache files
 clean:
-	@# Help: Remove build and cache files
 	@echo "Cleaning up ..."
 	#$(VENV)/bin/deactivate
 	#deactivate
@@ -92,14 +83,13 @@ clean:
 	find . -name '*.py[co]' -delete
 	find . -type f -name '*.py[co]' -delete
 
+venv: ## Activates the virtual environment
 venv:
-	@# Help: Sets up environment and installs requirements
 	@echo "Activating Virtual Environment ..."
 	source $(VENU)/bin/activate
 
 run: ## Runs the python application
 run: venv
-	@# Help: Runs the python application
 	@echo "Running Python Application ..."
 	@$(PYTHON) -m flask --app wsgi run --port 8080 --debug
 
@@ -107,17 +97,16 @@ run: venv
 # This function uses pytest to test our source files
 test: ## Tests the python application
 test:
-	@# Help: Tests the python application
 	@echo "Testing Python Application ..."
 	@$(PYTHON) -m unittest
-	@$(PYTHON) -m pytest
+	@#$(PYTHON) -m pytest
 	-#find coverage/ -mindepth 1 -delete
 #	pytest $${TESTS}
 #	@$(PYTHON) setup.py sdist
 
+
 doc: ## Generates the documentation
 doc:
-	@# Help: Generates the documentation
 	${PYTHON} setup.py build_sphinx
 	@echo
 	@echo Generated documentation: "file://"$$(readlink -f doc/build/html/index.html)
@@ -125,14 +114,14 @@ doc:
 
 dist: ## Distributes the application
 dist: test
-	@# Help: Distributes the application
 	python setup.py sdist
+
 
 lint: ## Runs the application, exit if critical rules are broken
 lint:
-	@# Help: Runs the application, exit if critical rules are broken
 	# stop the build if there are Python syntax errors or undefined names
 	flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
 	# exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 	flake8 src --count --exit-zero --statistics
+
 

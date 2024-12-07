@@ -2,30 +2,31 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-project/
 #
-import sys
 import importlib.metadata
+import logging
 import os
-from typing import Any
-from flask import Flask, Blueprint, make_response, jsonify, current_app
+import sys
+from datetime import datetime
 from pathlib import Path
-from flask_log_request_id import RequestID, RequestIDLogFilter
-from flask_cors import CORS
+from typing import Any
+
+import requests
 from dotenv import load_dotenv
+from flask import Flask, Blueprint, make_response, jsonify, current_app
+from flask_cors import CORS
+from flask_log_request_id import RequestID, RequestIDLogFilter
 from werkzeug.exceptions import NotFound
 # https://flask.palletsprojects.com/en/3.0.x/deploying/proxy_fix/
 from werkzeug.middleware.proxy_fix import ProxyFix
-import logging
-import requests
-from common.config import Config
-from webapp.routes import bp as webapp_bp
+
 from api import bp as api_bp
-from rest import bp as rest_bp
+from common.config import Config
+from framework.enums import EnvType
 from framework.http import HTTPStatus
 from framework.model.abstract import ErrorEntity
 from globals import connector
-from framework.enums import EnvType
-from datetime import datetime
-import connexion
+from rest import bp as rest_bp
+from webapp.routes import bp as webapp_bp
 
 
 class WebApp:

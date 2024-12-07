@@ -2,9 +2,9 @@
 # Author: Rohtash Lakra
 # References:
 #  - https://blog.mcpolemic.com/2016/01/18/adding-request-ids-to-flask.html
-import logutils
-import log
 import logging
+import log
+
 from flask import Flask
 
 # set up a small Flask app to show it in action.
@@ -19,7 +19,14 @@ app.app_context()
 @app.route("/")
 def hello():
     logger.info("Sending our hello")
+    test_other()
     return "Hello World!"
+
+
+def test_other():
+    print("Starting test_other()")
+    logger.info("Testing other method logging")
+    print("Ending test_other()")
 
 
 if __name__ == "__main__":
