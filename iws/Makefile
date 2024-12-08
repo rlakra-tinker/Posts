@@ -213,10 +213,10 @@ dist: test
 # Docker Commands
 #
 
-#Builds Docker Image
-docker-build-image: ## Builds Docker Image
-	@# Help: Builds the docker image of an app
-	@echo "Building Docker Image ..."
+#Builds Docker Container Image
+docker-build-container: ## Builds Docker Container Image
+	@# Help: Builds the docker container image of an app
+	@echo "Building Docker Container Image ..."
 	#docker build --progress=plain -t ${DOCKER_REPOSITORY}:${DOCKER_APP_TAG} --target ${PROJECT_NAME} .
 	docker build -t ${DOCKER_CONTAINER_NAME}:${DOCKER_APP_TAG} .
 
