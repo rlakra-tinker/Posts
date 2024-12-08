@@ -1,35 +1,89 @@
+# Author: Rohtash Lakra
 # Signifies our desired python version
 # Makefile macros (or variables) are defined a little bit differently than traditional bash, keep in mind that in the Makefile there's top-level Makefile-only syntax, and everything else is bash script syntax.
 # PYTHON = python3
 # https://gist.github.com/MarkWarneke/2e26d7caef237042e9374ebf564517ad
 #
-VENV := venv
-PYTHON = $(VENV)/bin/python
-PIP = $(VENV)/bin/pip
-REMOVE_FILES := __pycache__
+# --------------------------------------------------------------
+# Generic Variables
+# --------------------------------------------------------------
+ROOT_DIR:=${PWD}
+# Python Settings
+VENV:=venv
+PYTHON=$(VENV)/bin/python
+PIP=$(VENV)/bin/pip
+REMOVE_FILES:=__pycache__
+# Date Settings
+TIMESTAMP:=$(date +%s)
+DATE_TIMESTAMP:=$(date '+%Y-%m-%d')
+# --------------------------------------------------------------
+# MODIFY FROM HERE
+# --------------------------------------------------------------
+# App Static Variables
+PROJECT_OWNER=Rohtash
+PROJECT_NAME=iws_posts
+DOCKER_CONTAINER_NAME=iws_posts
+DOCKER_REPOSITORY:=${PROJECT_OWNER}/${PROJECT__NAME}
+# --------------------------------------------------------------
+# MySQL Settings
+# --------------------------------------------------------------
+NETWORK_NAME=mysql-network
+MYSQL_CONTAINER_NAME=mysql-docker
+MYSQL_ROOT_PASSWORD=root
+MYSQL_DATABASE=posts
+# --------------------------------------------------------------
+# Database Settings
+# --------------------------------------------------------------
+DATABASE_USERNAME=root
+DATABASE_PASSWORD=
+DATABASE_NAME=posts
 
-# Makefile configs for Sphinx documentation
-# You can set these variables from the command line, and also from the environment for the first two.
+# App Dynamic Variables
+ifndef APP_NAME
+APP_NAME=iws_posts
+endif
+
+ifndef HOST_PORT
+HOST_PORT=8080
+endif
+
+ifndef APP_PORT
+APP_PORT=8080
+endif
+
+ifndef DOCKER_APP_TAG
+DOCKER_APP_TAG=latest
+#DOCKER_APP_TAG=$(date +%Y%m%d%H%M%S)
+endif
+
+# Variables that depend on git
+ifndef GIT_BRANCH
+GIT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+endif
+#GIT_BRANCH_SLUG=$(subst /,-,$(GIT_BRANCH))
+
+ifndef GIT_BUILD_NUMBER
+GIT_BUILD_NUMBER=99999
+endif
+
+ifndef GIT_COMMIT
+GIT_COMMIT=$(git rev-parse HEAD)
+endif
+GIT_SHORT_COMMIT=${GIT_COMMIT:0:8}
 #
-# SPHINXOPTS    ?=
-# SPHINXBUILD   ?= sphinx-build
-# SOURCEDIR     = .
-# BUILDDIR      = build
-
+# Makefile configs
+#
 # .PHONY defines parts of the makefile that are not dependant on any specific file
 # This is most often used to store functions
 .PHONY: help
 # .PHONY: help Makefile
 
-# Defining an array variable
-# FILES = input output
-
 # Defines the default target that `make` will to try to make, or in the case of a phony target, execute the specified
 # commands. This target is executed whenever we just type `make`
 .DEFAULT_GOAL: help
 
-
-all: setup clean test run doc
+all: help
+#all: setup clean test run doc
 
 # The @ makes sure that the command itself isn't echoed in the terminal
 # Put it first so that "make" without argument is like "make help".
@@ -80,11 +134,17 @@ setup:
 	$(PIP) install --upgrade pip
 	$(PYTHON) -m pip install -r requirements.txt
 
+
+#
+# Clean Commands
+#
+
 # In this context, the *.project pattern means "anything that has the .project extension"
 clean: ## Remove build and cache files
 clean:
 	@# Help: Remove build and cache files
 	@echo "Cleaning up ..."
+	docker-stop-container
 	#$(VENV)/bin/deactivate
 	#deactivate
 	rm -rf $(VENU)
@@ -92,16 +152,28 @@ clean:
 	find . -name '*.py[co]' -delete
 	find . -type f -name '*.py[co]' -delete
 
+#
+# Virtual Env Commands
+#
+
 venv:
 	@# Help: Sets up environment and installs requirements
 	@echo "Activating Virtual Environment ..."
 	source $(VENU)/bin/activate
+
+#
+# Run Commands
+#
 
 run: ## Runs the python application
 run: venv
 	@# Help: Runs the python application
 	@echo "Running Python Application ..."
 	@$(PYTHON) -m flask --app wsgi run --port 8080 --debug
+
+#
+# Test Commands
+#
 
 # The ${} notation is specific to the make syntax and is very similar to bash's $()
 # This function uses pytest to test our source files
@@ -115,6 +187,10 @@ test:
 #	pytest $${TESTS}
 #	@$(PYTHON) setup.py sdist
 
+#
+# Doc Commands
+#
+
 doc: ## Generates the documentation
 doc:
 	@# Help: Generates the documentation
@@ -123,10 +199,67 @@ doc:
 	@echo Generated documentation: "file://"$$(readlink -f doc/build/html/index.html)
 	@echo
 
+
+#
+# Distribute Commands
+#
+
 dist: ## Distributes the application
 dist: test
 	@# Help: Distributes the application
 	python setup.py sdist
+
+#
+# Docker Commands
+#
+
+#Builds Docker Image
+docker-build-image: ## Builds Docker Image
+	@# Help: Builds the docker image of an app
+	@echo "Building Docker Image ..."
+	#docker build --progress=plain -t ${DOCKER_REPOSITORY}:${DOCKER_APP_TAG} --target ${PROJECT_NAME} .
+	docker build -t ${DOCKER_CONTAINER_NAME}:${DOCKER_APP_TAG} .
+
+# Runs the Docker Container
+docker-run-container: ## Runs Docker Container
+	@# Help: Runs the docker container of an app as background service
+	@echo "Running Docker Container ..."
+	@#docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${APP_PORT} -d -e APP_NAME=${APP_NAME} ${DOCKER_APP_TAG}
+	docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${APP_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
+	@#docker container run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${APP_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
+
+
+# Builds Docker Image and Run it.
+#docker-build-all: ## Builds Docker Image and Runs it
+#	@# Help: Builds the docker image of an app and runs it
+#	@echo "Building Docker Image and Running it ..."
+#	docker-build-image
+#	docker-run-container
+
+# Shows Docker Container Logs
+docker-log-container: ## Shows Docker Container Logs
+	@# Help: Shows the docker container's log of an app
+	@echo "Showing Docker Container Logs [${DOCKER_CONTAINER_NAME}] ..."
+	docker logs -f ${DOCKER_CONTAINER_NAME}
+	#docker container logs -f ${DOCKER_CONTAINER_NAME}
+
+# Executes the bash shell in the specified container, giving you a basic shell prompt.
+# To exit back out of the container, type exit then press ENTER:
+docker-bash-container: ## Executes the 'bash' shell in the container
+	@# Help: Executes the 'bash' shell in the container, giving you a basic shell prompt.
+	@echo "Executing Docker Container [${DOCKER_CONTAINER_NAME}] ..."
+	docker exec -it ${DOCKER_CONTAINER_NAME} bash
+
+# Stops Docker Container
+docker-stop-container: ## Stops Docker Container
+	@# Help: Stops the docker container of an app
+	@echo "Stopping Docker Container [${DOCKER_CONTAINER_NAME}] ..."
+	docker stop ${DOCKER_CONTAINER_NAME}
+	docker rm ${DOCKER_CONTAINER_NAME}
+
+#
+# Lint Commands
+#
 
 lint: ## Runs the application, exit if critical rules are broken
 lint:
@@ -135,4 +268,51 @@ lint:
 	flake8 src --count --select=E9,F63,F7,F82 --show-source --statistics
 	# exit-zero treats all errors as warnings. The GitHub editor is 127 chars wide
 	flake8 src --count --exit-zero --statistics
+
+#
+# MySQL Docker Commands
+#
+mysql-create-network: ## Creates MySQL Network
+	@# Help: Creates MySQL Network
+	@echo "Creating MySQL Network"
+	docker network create $(NETWORK_NAME)
+
+mysql-run-container: ## Pulls and Runs MySQL Docker Image
+	@# Help: Pulls and Runs MySQL Docker Image
+	@echo "Pulling and Running MySQL Docker Image"
+	docker container run --network $(NETWORK_NAME) --name $(MYSQL_CONTAINER_NAME) -e MYSQL_ROOT_PASSWORD=$(MYSQL_ROOT_PASSWORD) -e MYSQL_DATABASE=$(MYSQL_DATABASE) -d mysql:latest
+
+# Shows the MySQL Docker container logs
+mysql-log-container: ## Shows the MySQL Docker container logs
+	@# Help: Shows the MySQL Docker container logs
+	@echo "Showing MySQL Docker Container Logs [${DOCKER_CONTAINER_NAME}] ..."
+	docker logs -f ${MYSQL_CONTAINER_NAME}
+	#docker container logs -f ${MYSQL_CONTAINER_NAME}
+
+# Executes the bash shell in the specified container, giving you a basic shell prompt.
+# To exit back out of the container, type exit then press ENTER:
+mysql-bash-container: ## Executes the 'bash' shell in the MySQL container
+	@# Help: Executes the 'bash' shell in the MySQL container, giving you a basic shell prompt.
+	@echo "Executing 'bash' shell in MySQL Container [${MYSQL_CONTAINER_NAME}] ..."
+	docker exec -it ${MYSQL_CONTAINER_NAME} bash
+	#docker exec -it ${MYSQL_CONTAINER_NAME} mysql -uroot -proot
+	#use EmployeeService;
+	#show databases;
+	#show tables;
+	#exit;
+
+# Connects the MySQL Container as 'bash' shell prompt.
+mysql-connect-database: ## Connects the MySQL Container as 'bash' shell prompt.
+	@# Help: Connects the MySQL Container as 'bash' shell prompt.
+	@echo "Connecting MySQL [${MYSQL_CONTAINER_NAME}] container as 'bash' shell prompt ..."
+	docker exec -it ${MYSQL_CONTAINER_NAME} mysql -uroot -proot
+	use posts;
+	#exit;
+
+# Stops MySQL Docker Container
+mysql-stop-container: ## Stops MySQL Docker Container
+	@# Help: Stops the MySQL Docker Container
+	@echo "Stopping MySQL Docker Container [${MYSQL_CONTAINER_NAME}] ..."
+	docker stop ${MYSQL_CONTAINER_NAME}
+	docker rm ${MYSQL_CONTAINER_NAME}
 
