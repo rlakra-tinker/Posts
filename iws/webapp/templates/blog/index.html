@@ -16,7 +16,7 @@
 
   <!-- blog-header -->
   <div class="header">
-    <h2>Blog Posts</h2>
+    <h2>Blog Name</h2>
   </div>
 
   <!-- row -->
@@ -24,27 +24,6 @@
 
     <!-- left-column -->
     <div class="left-column">
-
-      <!-- Upload File -->
-      <div class="card">
-        <h1>Uploading Files in Flask</h1>
-
-        {% if upload_metadata %}
-        <h2>{{ upload_metadata["message"] }}</h2>
-        {% endif %}
-
-        <div class="form-container">
-            <fieldset class="fieldset">
-              <form method="POST" action="{{ url_for('iws.api.v1.posts.upload') }}" enctype="multipart/form-data">
-                <input style="padding: 32px;" type="file" name="file" required />
-                <!-- submit-button -->
-                <button type="submit">Submit</button>
-              </form>
-            </fieldset>
-        </div>
-      </div>
-
-      <hr />
 
       {% for post in posts %}
         <!-- card -->
@@ -99,7 +78,7 @@
 
       <div class="card">
         <h3>Follow Me</h3>
-        <p>Some text..</p>
+        <p>Some text ...</p>
       </div>
 
     </div>

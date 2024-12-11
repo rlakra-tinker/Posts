@@ -2,11 +2,16 @@
 # Author: Rohtash Lakra
 #
 import sqlite3
-from flask import g, current_app
-import click
 from pathlib import Path
-from common.config import Config
+
+import click
+from flask import g, current_app
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import create_engine, MetaData
+from sqlalchemy.orm import Session
+
+from common.config import Config
+from framework.orm.sqlalchemy.entity import AbstractEntity
 
 
 # 'click.command()' defines a command line command called init-db that calls the 'init_db' function and shows a success
@@ -90,7 +95,7 @@ class SQLite3Connector(DatabaseConnector):
 
                 self.db_uri = ''.join(['sqlite:///', self.db_name])
                 self.db_password = Config.DB_PASSWORD
-                current_app.logger.debug(f"db_name:{self.db_name}, db_password:{self.db_password}, db_uri: {self.db_uri}")
+            current_app.logger.debug(f"db_name:{self.db_name}, db_password:{self.db_password}, db_uri: {self.db_uri}")
 
     def init_db(self):
         """Initializes the database"""
@@ -112,7 +117,7 @@ class SQLite3Connector(DatabaseConnector):
                 self.close_connection()
 
     def init_SQLAlchemy(self):
-        """Initializes the database"""
+        """Initializes the SQLAlchemy database"""
         with self.app.app_context():
             current_app.logger.debug(f"Initializing SQLAlchemy ...")
             self.init_configs()
@@ -121,6 +126,16 @@ class SQLite3Connector(DatabaseConnector):
             # Initialize Database Plugin
             self.sqlAlchemy = SQLAlchemy(self.app)
             current_app.logger.debug(f"sqlAlchemy: {self.sqlAlchemy}")
+            # SQLAlchemy DB Creation
+            # The echo=True parameter indicates that SQL emitted by connections will be logged to standard out.
+            self.engine = create_engine(self.db_uri, echo=True)
+            # self.session = sessionmaker(bind=self.engine)
+            self.session = Session()
+            # Using our table metadata and our engine, we can generate our schema at once in our target SQLite database,
+            # using a method called 'MetaData.create_all()':
+            self.metadata = MetaData()
+            self.metadata.create_all(self.engine)
+            AbstractEntity.metadata.create_all(self.engine)
 
     def open_connection(self):
         """Opens the database connection"""
@@ -158,3 +173,15 @@ class SQLite3Connector(DatabaseConnector):
                     current_app.logger.debug(f'Error while closing the connection! Error:{ex}')
             else:
                 current_app.logger.debug('No active connection!')
+
+    def save_entity(self, entity):
+        current_app.logger.info(f"save_entity => entity={entity}")
+        with Session(self.engine) as session:
+            # add entity
+            session.add_all([entity])
+            session.commit()
+            current_app.logger.info(f"Entity saved successfully!")
+
+    def select_entity(self, entity: AbstractEntity):
+        current_app.logger.info(f"select_entity => entity={entity}")
+        return self.session.query(entity).first()

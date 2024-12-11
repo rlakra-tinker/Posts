@@ -3,17 +3,13 @@
 # Reference - https://realpython.com/flask-blueprint/
 #
 import json
+
+from flask import current_app, render_template, make_response, request, redirect
+from blog.v1 import bp as bp_v1_blogs
 import time
-from io import BytesIO
-
-from flask import current_app, render_template, request, redirect, send_file
-
-from framework.orm.sqlalchemy.entity import Document
-from globals import connector
-from post.v1 import bp as bp_v1_posts
 
 
-@bp_v1_posts.get("/")
+@bp_v1_blogs.get("/")
 def index():
     """Load Index Page"""
     posts = [
@@ -36,10 +32,10 @@ def index():
     }
 
     current_app.logger.debug(f"posts={json.dumps(posts)}")
-    return render_template("post/index.html", posts=posts, **context)
+    return render_template("blog/index.html", posts=posts, **context)
 
 
-@bp_v1_posts.route('/create', methods=['GET', 'POST'])
+@bp_v1_blogs.route('/create', methods=['GET', 'POST'])
 def create():
     """Load Create/Add Post Page"""
     if request.method == 'POST':
@@ -48,26 +44,4 @@ def create():
         return redirect('/')
 
     """Render Add Post Page"""
-    return render_template("post/create.html")
-
-
-@bp_v1_posts.route('/upload', methods=['GET', 'POST'])
-def upload():
-    print(f"request.method={request.method}")
-    if request.method == 'POST':
-        file = request.files['file']
-        document = Document(filename=file.filename, data=file.read())
-        connector.save_entity(document)
-        upload_metadata = {
-            "message": f'Uploaded: {file.filename}'
-        }
-        # return f'Uploaded: {file.filename}'
-        return render_template('post/index.html', upload_metadata=upload_metadata)
-
-    return render_template('post/upload_file.html')
-
-
-@bp_v1_posts.route('/download/<upload_id>')
-def download(upload_id):
-    document = Document.query.filter_by(id=upload_id).first()
-    return send_file(BytesIO(document.data), download_name=document.filename, as_attachment=True)
+    return render_template("blog/create.html")

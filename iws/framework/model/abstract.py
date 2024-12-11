@@ -3,12 +3,13 @@
 # Reference(s):
 #  - https://docs.pydantic.dev/latest/
 #
-import json
+from datetime import datetime
 from typing import Optional, Dict, List
+
 from pydantic import BaseModel, ConfigDict
+
 from framework.http import HTTPStatus
 from framework.utils import Utils
-from datetime import datetime
 
 
 # AbstractModel
@@ -25,7 +26,7 @@ class AbstractModel(BaseModel):
 
     def __str__(self):
         """Returns the string representation of this object"""
-        return self.__repr__()
+        return str(self)
 
 
 # Abstract Entity
@@ -46,9 +47,13 @@ class AbstractEntity(AbstractModel):
     def get_updated_at(self):
         return self.updated_at
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         """Returns the string representation of this object"""
         return f"{type(self).__name__} <id={self.get_id()}>"
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
 
 
 # Named Entity
@@ -59,9 +64,13 @@ class NamedEntity(AbstractEntity):
     def get_name(self):
         return self.name
 
-    def __repr__(self) -> str:
+    def __str__(self):
         """Returns the string representation of this object"""
         return f"{type(self).__name__} <id={self.get_id()}, name={self.get_name()}>"
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
 
 
 # Error Entity
@@ -104,9 +113,13 @@ class ErrorEntity(AbstractModel):
                        is_critical: bool = False):
         return ErrorEntity.error(http_status, message, exception, is_critical).to_json()
 
-    def __repr__(self) -> str:
+    def __str__(self):
         """Returns the string representation of this object"""
         return f"{type(self).__name__} <status={self.status}, message={self.message}, debug_info={self.debug_info}>"
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
 
 
 class ResponseEntity(AbstractModel):
