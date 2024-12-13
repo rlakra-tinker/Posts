@@ -46,7 +46,7 @@ class AbstractRepository(object):
         current_app.logger.info(f"execute({statement}, {params}, {many}), connector => {connector}")
         # print(f"execute({params}, {many}), connector => {connector}")
         connection = connector.get_connection()
-        if (many):
+        if many:
             return connection.executemany(statement, params)
         else:
             return connection.execute(statement, params)

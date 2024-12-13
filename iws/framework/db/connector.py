@@ -3,6 +3,7 @@
 #
 import sqlite3
 from pathlib import Path
+from typing import Iterable
 
 import click
 from flask import Flask, g, current_app
@@ -10,8 +11,9 @@ from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import Session
 
 from common.config import Config
-from framework.orm.sqlalchemy.entity import AbstractEntity
 from framework.enums import KeyEnum
+from framework.orm.sqlalchemy.entity import AbstractEntity
+from framework.orm.sqlalchemy.schema import BaseSchema
 
 
 # 'click.command()' defines a command line command called init-db that calls the 'init_db' function and shows a success
@@ -125,8 +127,10 @@ class SQLite3Connector(DatabaseConnector):
                 # Using our table metadata and our engine, we can generate our schema at once in our target SQLite
                 # database, using a method called 'MetaData.create_all()':
                 self.metadata = MetaData()
+                # MetaData.create_all(BaseSchema, bind=self.engine)
                 # self.metadata.create_all(self.engine)
                 AbstractEntity.metadata.create_all(self.engine)
+                # BaseSchema.metadata.create_all(bind=self.engine)
             else:
                 """Initializes the SQLite Database"""
                 #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
@@ -180,14 +184,23 @@ class SQLite3Connector(DatabaseConnector):
             else:
                 current_app.logger.debug('No active connection!')
 
-    def save_entity(self, entity):
-        current_app.logger.info(f"save_entity => entity={entity}")
+    def save(self, instance):
+        current_app.logger.info(f"save_entity => instance={instance}")
         with Session(self.engine) as session:
             # add entity
-            session.add_all([entity])
+            session.add(instance)
             session.commit()
-            current_app.logger.info(f"Entity saved successfully!")
+            current_app.logger.info(f"Persisted a instance successfully!")
 
-    def select_entity(self, entity: AbstractEntity):
+    def save_all(self, instances: Iterable[object]):
+        current_app.logger.info(f"save_all => instances={instances}")
+        with Session(self.engine) as session:
+            # add entity
+            session.add_all(instances)
+            session.commit()
+            current_app.logger.info(f"Persisted [{len(instances)}] instances successfully!")
+
+    def select(self, entity: AbstractEntity):
         current_app.logger.info(f"select_entity => entity={entity}")
-        return self.session.query(entity).first()
+        with Session(self.engine) as session:
+            return session.query(entity).first()

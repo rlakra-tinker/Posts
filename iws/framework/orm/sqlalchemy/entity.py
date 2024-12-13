@@ -34,7 +34,6 @@ class AbstractEntity(DeclarativeBase):
     the '__abstract__' indicator:
     """
     __abstract__ = True
-    pass
 
 
 class BaseEntity(AbstractEntity):

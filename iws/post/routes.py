@@ -57,7 +57,7 @@ def upload():
     if request.method == 'POST':
         file = request.files['file']
         document = Document(filename=file.filename, data=file.read())
-        connector.save_entity(document)
+        connector.save(document)
         upload_metadata = {
             "message": f'Uploaded: {file.filename}'
         }
