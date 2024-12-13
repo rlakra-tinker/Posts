@@ -5,13 +5,14 @@ import sqlite3
 from pathlib import Path
 
 import click
-from flask import g, current_app
-from flask_sqlalchemy import SQLAlchemy
+from flask import Flask, g, current_app
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.orm import Session
 
 from common.config import Config
 from framework.orm.sqlalchemy.entity import AbstractEntity
+from framework.enums import KeyEnum
+
 
 
 # 'click.command()' defines a command line command called init-db that calls the 'init_db' function and shows a success
@@ -32,26 +33,33 @@ def init_db_command():
 #     # app.cli.add_command() adds a new command that can be called with the flask command.
 #     app.cli.add_command(init_db_command)
 
+# Define Constants
+KEY_CONNECTION = 'connection'
+KEY_POOL_NAME = 'sqlite3_pool'
+SQLITE_PREFIX = 'sqlite:///'
+
 
 class DatabaseConnector(object):
+    """Database Connector"""
 
     def __init__(self):
         current_app.logger.debug("Initializing Connector ...")
         self.UTF_8 = 'UTF-8'
 
-    def init(self, app=None):
+    def init(self, app: Flask = None):
         current_app.logger.debug("Initializing Connector with application ...")
 
-    def init_db(self):
+    def init_db(self, configs: dict = None):
         current_app.logger.debug("Initializing database ...")
 
 
 class SQLite3Connector(DatabaseConnector):
-    # Define Constants
-    __CONNECTION_KEY = 'connection'
-    __POOL_NAME = 'sqlite3_pool'
+    """SQLite is a C-language library that implements a small, fast, self-contained, high-reliability, full-featured,
+    SQL database engine. SQLite is the most used database engine in the world.
+    """
 
     def __init__(self):
+        """Initialize"""
         # current_app.logger.debug("Initializing SQLite3 Connector ...")
         self.app = None
         self.pool = None
@@ -59,7 +67,9 @@ class SQLite3Connector(DatabaseConnector):
         self.db_user_name = None
         self.db_password = None
         self.db_uri = None
-        self.sqlAlchemy = None
+        self.engine = None
+        self.metadata = None
+        self.session = None
 
         # paths
         self.cur_dir = Path(__file__).parent
@@ -68,13 +78,16 @@ class SQLite3Connector(DatabaseConnector):
         # current_app.logger.debug(f"data_path:{self.data_path}")
 
     def get_connection(self):
+        """Get Connection"""
         current_app.logger.debug(f"get_connection(), db_name: {self.db_name}, db_password: {self.db_password}")
         return sqlite3.connect(self.db_name, detect_types=sqlite3.PARSE_DECLTYPES)
 
     def init(self, app):
+        """Initialize App Context"""
         self.app = app
         with self.app.app_context():
-            current_app.logger.debug(f"Initializing SQLite3 Connector for {app} ...")
+            current_app.logger.debug(f"Initializing App Context for {app} ...")
+        self._init_configs()
         # 'app.teardown_appcontext()' tells Flask to call that function when cleaning up after returning the response.
         # self.app.teardown_appcontext(self.close_connection())
 
@@ -82,10 +95,10 @@ class SQLite3Connector(DatabaseConnector):
         # app.cli.add_command() adds a new command that can be called with the flask command.
         # self.app.cli.add_command(self.init_db)
 
-    def init_configs(self):
-        """Initializes the database"""
+    def _init_configs(self):
+        """Initializes Configs"""
         with self.app.app_context():
-            current_app.logger.debug(f"Initializing database configurations ...")
+            current_app.logger.debug(f"Initializing Configs ...")
             #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
             # read db-name from app's config
             if not self.db_name:
@@ -93,49 +106,43 @@ class SQLite3Connector(DatabaseConnector):
                 if not self.db_name.endswith(".db"):
                     self.db_name = self.db_name + '.db'
 
-                self.db_uri = ''.join(['sqlite:///', self.db_name])
+                self.db_uri = ''.join([SQLITE_PREFIX, self.db_name])
                 self.db_password = Config.DB_PASSWORD
             current_app.logger.debug(f"db_name:{self.db_name}, db_password:{self.db_password}, db_uri: {self.db_uri}")
 
-    def init_db(self):
+    def init_db(self, configs: dict = None):
         """Initializes the database"""
         with self.app.app_context():
-            self.init_configs()
-            current_app.logger.debug(f"Initializing database ...")
-            #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
-            # read db-name from app's config
-            try:
-                connection = self.open_connection()
-                # read the db-schema file and prepare db
-                with open(self.data_path.joinpath('schema.sql'), encoding='UTF_8') as schema_file:
-                    connection.executescript(schema_file.read())
+            current_app.logger.debug(f"Initializing Database. configs={configs}")
+            dbType = configs.get(KeyEnum.DB_TYPE)
+            if dbType and dbType == KeyEnum.SQLALCHEMY:
+                """Initializes the SQLAlchemy database"""
+                # Set up the SQLAlchemy Database to be a local file 'posts.db'
+                self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
+                # SQLAlchemy DB Creation
+                # The echo=True parameter indicates that SQL emitted by connections will be logged to standard out.
+                self.engine = create_engine(self.db_uri, echo=True)
+                self.session = Session()
+                # Using our table metadata and our engine, we can generate our schema at once in our target SQLite
+                # database, using a method called 'MetaData.create_all()':
+                self.metadata = MetaData()
+                # self.metadata.create_all(self.engine)
+                AbstractEntity.metadata.create_all(self.engine)
+            else:
+                """Initializes the SQLite Database"""
+                #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
+                # read db-name from app's config
+                try:
+                    connection = self.open_connection()
+                    # read the db-schema file and prepare db
+                    with open(self.data_path.joinpath('schema.sql'), encoding='UTF_8') as schema_file:
+                        connection.executescript(schema_file.read())
 
-            except Exception as ex:
-                current_app.logger.debug(f'Error initializing database! Error:{ex}')
-            finally:
-                # close the connection
-                self.close_connection()
-
-    def init_SQLAlchemy(self):
-        """Initializes the SQLAlchemy database"""
-        with self.app.app_context():
-            current_app.logger.debug(f"Initializing SQLAlchemy ...")
-            self.init_configs()
-            # Set up the SQLAlchemy Database to be a local file 'desserts.db'
-            self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
-            # Initialize Database Plugin
-            self.sqlAlchemy = SQLAlchemy(self.app)
-            current_app.logger.debug(f"sqlAlchemy: {self.sqlAlchemy}")
-            # SQLAlchemy DB Creation
-            # The echo=True parameter indicates that SQL emitted by connections will be logged to standard out.
-            self.engine = create_engine(self.db_uri, echo=True)
-            # self.session = sessionmaker(bind=self.engine)
-            self.session = Session()
-            # Using our table metadata and our engine, we can generate our schema at once in our target SQLite database,
-            # using a method called 'MetaData.create_all()':
-            self.metadata = MetaData()
-            self.metadata.create_all(self.engine)
-            AbstractEntity.metadata.create_all(self.engine)
+                except Exception as ex:
+                    current_app.logger.debug(f'Error initializing database! Error:{ex}')
+                finally:
+                    # close the connection
+                    self.close_connection()
 
     def open_connection(self):
         """Opens the database connection"""

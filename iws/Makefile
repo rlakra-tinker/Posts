@@ -144,10 +144,9 @@ clean: ## Remove build and cache files
 clean:
 	@# Help: Remove build and cache files
 	@echo "Cleaning up ..."
-	docker-stop-container
 	#$(VENV)/bin/deactivate
 	#deactivate
-	rm -rf $(VENU)
+	rm -rf $(VENV)
 	rm -rf $(REMOVE_FILES) *.project
 	find . -name '*.py[co]' -delete
 	find . -type f -name '*.py[co]' -delete
@@ -159,7 +158,7 @@ clean:
 venv:
 	@# Help: Sets up environment and installs requirements
 	@echo "Activating Virtual Environment ..."
-	source $(VENU)/bin/activate
+	source $(VENV)/bin/activate
 
 #
 # Run Commands

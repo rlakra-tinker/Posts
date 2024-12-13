@@ -1,6 +1,6 @@
 import unittest
 
-from framework.enums import BaseEnum, AutoNameUpperCase, AutoNameLowerCase, EnvType
+from framework.enums import BaseEnum, AutoUpperCase, AutoLowerCase, EnvType
 
 
 class EnumsTest(unittest.TestCase):
@@ -13,7 +13,7 @@ class EnumsTest(unittest.TestCase):
 
     def test_auto_name_upper_case_enum(self):
         print("test_auto_name_upper_case_enum")
-        self.assertEqual("<enum 'AutoNameUpperCase'>", str(AutoNameUpperCase))
+        self.assertEqual("<enum 'AutoUpperCase'>", str(AutoUpperCase))
         # self.assertEqual(('CONSUMER', 'EXPERT'), RoleEnum.names())
         # self.assertEqual(('consumer', 'service_provider'), RoleEnum.values())
         # text = 'expert'
@@ -30,7 +30,7 @@ class EnumsTest(unittest.TestCase):
 
     def test_auto_name_lower_case_enum(self):
         print("test_auto_name_lower_case_enum")
-        self.assertEqual("<enum 'AutoNameLowerCase'>", str(AutoNameLowerCase))
+        self.assertEqual("<enum 'AutoNameLowerCase'>", str(AutoLowerCase))
         print()
 
     def test_env_type_enum(self):

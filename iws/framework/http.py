@@ -4,7 +4,7 @@
 from flask import g, request, current_app
 import uuid
 from enum import auto, unique, Enum
-from framework.enums import AutoNameUpperCase
+from framework.enums import AutoUpperCase
 
 
 def log_decorator(func):
@@ -49,7 +49,7 @@ def log_decorator(func):
 
 
 @unique
-class HTTPMethod(AutoNameUpperCase):
+class HTTPMethod(AutoUpperCase):
     """
     HTTP Methods
 
@@ -68,7 +68,7 @@ class HTTPMethod(AutoNameUpperCase):
 
 
 @unique
-class HTTPStatus(AutoNameUpperCase):
+class HTTPStatus(AutoUpperCase):
     """
     Status Code
 

@@ -27,6 +27,7 @@ from framework.model.abstract import ErrorEntity
 from globals import connector
 from rest import bp as rest_bp
 from webapp.routes import bp as webapp_bp
+from framework.enums import KeyEnum
 
 
 class WebApp:
@@ -129,9 +130,11 @@ class WebApp:
             connector.init(app)
 
         # Initialize/Register Default Error Handlers, if any
+
         @app.errorhandler(404)
         def not_found(error):
-            current_app.logger.debug(f'errorClass={type(error)}, error={error}')
+            """404 - NotFound Error Handler"""
+            current_app.logger.error(f'errorClass={type(error)}, error={error}')
             if isinstance(error, NotFound):
                 return make_response(jsonify('Not Found!'), 404)
             else:
@@ -139,22 +142,24 @@ class WebApp:
 
         @app.errorhandler(400)
         def bad_request(error):
-            current_app.logger.debug(f'errorClass={type(error)}, error={error}')
+            """400 - BadRequest Error Handler"""
+            current_app.logger.error(f'errorClass={type(error)}, error={error}')
             return make_response(jsonify(ErrorEntity.error(HTTPStatus.BAD_REQUEST)), 400)
 
         @app.errorhandler(500)
         def app_error(error):
-            current_app.logger.debug(f'errorClass={type(error)}, error={error}')
+            """500 - InternalServer Error Handler"""
+            current_app.logger.error(f'errorClass={type(error)}, error={error}')
             return make_response(jsonify(ErrorEntity.error(HTTPStatus.INTERNAL_SERVER_ERROR)), 500)
 
         # Register Date & Time Formatter for Jinja Template
         @app.template_filter('strftime')
-        def _jinja2_filter_datetime(date_str, format: str = None):
+        def _jinja2_filter_datetime(date_str, datetime_format: str = None):
             """Formats the date_str"""
             date = datetime.strptime(date_str, "%Y-%m-%dT%H:%M:%S.%f")
             native = date.replace(tzinfo=None)
-            if format:
-                return native.strftime(format)
+            if datetime_format:
+                return native.strftime(datetime_format)
             else:
                 return native.strftime("%b %d, %Y at %I:%M%p")
 
@@ -180,8 +185,7 @@ class WebApp:
 
         # Initialize/Register Request's behavior/db connection
         if not test_mode:
-            connector.init_db()
-            connector.init_SQLAlchemy()
+            connector.init_db({KeyEnum.DB_TYPE: KeyEnum.SQLALCHEMY})
             # app.before_request(connector.open_connection())
             # app.teardown_request(connector.close_connection())
 

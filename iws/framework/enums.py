@@ -2,8 +2,8 @@
 # Author: Rohtash Lakra
 #
 import os
-from typing import Any
 from enum import Enum, unique, auto
+from typing import Any
 
 
 # Also, subclassing an enumeration is allowed only if the enumeration does not define any members.
@@ -84,7 +84,7 @@ class BaseEnum(Enum):
 
 
 @unique
-class AutoNameLowerCase(BaseEnum):
+class AutoLowerCase(BaseEnum):
     """AutoNameLowerCase class converts names to lower-case letters"""
 
     @staticmethod
@@ -93,13 +93,20 @@ class AutoNameLowerCase(BaseEnum):
 
 
 @unique
-class AutoNameUpperCase(BaseEnum):
-    """AutoNameUpperCase class converts names to upper-case letters"""
+class AutoUpperCase(BaseEnum):
+    """AutoUpperCase class converts names to upper-case letters"""
 
     @staticmethod
     def _generate_next_value_(name, start, count, last_values):
         # print(f"_generate_next_value_={type(name)}")
         return name.upper()
+
+
+@unique
+class KeyEnum(AutoUpperCase):
+    SQLALCHEMY = auto()
+    APP_ENV = auto()
+    DB_TYPE = auto()
 
 
 @unique
@@ -135,4 +142,3 @@ class EnvType(BaseEnum):
     def flask_env() -> str:
         """Returns the value of FLASK_ENV env variable value if set otherwise None."""
         return os.getenv("FLASK_ENV")
-

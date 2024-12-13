@@ -46,6 +46,26 @@
 
       <hr />
 
+      <!-- Download Files -->
+      <div class="card">
+        <h1>Download Files in Flask</h1>
+        {% if upload_metadata %}
+        <h2>{{ upload_metadata["message"] }}</h2>
+        {% endif %}
+
+        <div class="form-container">
+          <ul>
+          {% for file in files %}
+            <li>
+              <a href="{{ url_for('download', filename=file) }}">{{ file }}</a>
+            </li>
+          {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <hr />
+
       {% for post in posts %}
         <!-- card -->
         <div class="card">
