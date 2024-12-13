@@ -14,7 +14,6 @@ from framework.orm.sqlalchemy.entity import AbstractEntity
 from framework.enums import KeyEnum
 
 
-
 # 'click.command()' defines a command line command called init-db that calls the 'init_db' function and shows a success
 # message to the user. You can read Command Line Interface to learn more about writing commands.
 @click.command('init-db')
