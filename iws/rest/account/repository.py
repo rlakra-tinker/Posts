@@ -4,6 +4,7 @@
 from framework.repository import AbstractRepository
 from rest.account.models import Account
 import json
+from rest.account.entities import Role, User, UserRole
 
 
 class AccountRepository(AbstractRepository):

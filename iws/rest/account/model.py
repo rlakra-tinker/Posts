@@ -1,8 +1,8 @@
 #
 # Author: Rohtash Lakra
 #
-from framework.orm.sqlalchemy.abstract import AbstractEntity
+from framework.orm.sqlalchemy.schema import BaseSchema
 
 
-class Account(AbstractEntity):
+class Account(BaseSchema):
     pass

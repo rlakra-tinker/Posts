@@ -91,6 +91,14 @@ class AbstractEntity(AbstractJSONHandler):
         else:
             return cls(**json_input)
 
+    def __str__(self):
+        """Returns the string representation of this object."""
+        return f"{type(self).__name__}"
+
+    def __repr__(self):
+        """Returns the string representation of this object."""
+        return str(self)
+
 
 # @dataclass
 class BaseEntity(AbstractEntity):
@@ -108,8 +116,13 @@ class BaseEntity(AbstractEntity):
         """Get ID"""
         return self.id
 
-    def __repr__(self) -> str:
+    def __str__(self):
+        """Returns the string representation of this object."""
         return f"{type(self).__name__} <id={self.get_id()}>"
+
+    def __repr__(self):
+        """Returns the string representation of this object."""
+        return str(self)
 
 
 # @dataclass
@@ -124,8 +137,13 @@ class NamedEntity(BaseEntity):
         super().__init__(id)
         self.name = name
 
-    def __repr__(self) -> str:
+    def __str__(self):
+        """Returns the string representation of this object."""
         return f"{type(self).__name__} <id={self.get_id()}, name={self.name}>"
+
+    def __repr__(self):
+        """Returns the string representation of this object."""
+        return str(self)
 
 
 # Error Entity
@@ -143,9 +161,14 @@ class ErrorEntity(AbstractEntity):
         self.message = message
         self.exception = exception
 
-    def __repr__(self) -> str:
+    def __str__(self):
+        """Returns the string representation of this object."""
         return f"{type(self).__name__} <status={self.status}, message={self.message}, exception={self.exception}>"
         # return f"{type(self)} <status={self.status}, message={self.message}>"
+
+    def __repr__(self):
+        """Returns the string representation of this object."""
+        return str(self)
 
 
 class ErrorResponse(AbstractEntity):
@@ -175,5 +198,10 @@ class ErrorResponse(AbstractEntity):
 
         self.error = ErrorEntity(status, message if message is not None else str(exception), exception)
 
-    def __repr__(self) -> str:
+    def __str__(self):
+        """Returns the string representation of this object."""
         return f"{type(self).__name__} <error={self.error}>"
+
+    def __repr__(self):
+        """Returns the string representation of this object."""
+        return str(self)

@@ -24,7 +24,7 @@ class RepositoryTest(unittest.TestCase):
         expected = 'SqlAlchemyRepository <engine=Engine(sqlite://)>'
         self.assertEqual(expected, str(repository))
         self.assertIsNotNone(repository.get_engine())
-        result = repository.save_entities(None)
+        result = repository.save_all(None)
         self.assertIsNone(result)
         print()
 

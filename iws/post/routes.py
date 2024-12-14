@@ -8,7 +8,7 @@ from io import BytesIO
 
 from flask import current_app, render_template, request, redirect, send_file
 
-from framework.orm.sqlalchemy.entity import Document
+from post.model.entity import Document
 from globals import connector
 from post.v1 import bp as bp_v1_posts
 

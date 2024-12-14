@@ -30,7 +30,7 @@ class BaseEnum(Enum):
 
     def __repr__(self):
         """Returns the string representation of this object."""
-        return self.__str__()
+        return str(self)
 
     @classmethod
     def names(cls):
@@ -67,9 +67,16 @@ class BaseEnum(Enum):
         "Returns the Service Request Type object based on request_type param"
         if value is not None:
             for member in cls:
+                # print(f"member={member}, type={type(member)}")
                 if member.value == value:
                     return member
-
+                elif isinstance(member.value, tuple):
+                    # print(f"member={member}, type={type(member.value)}, value={value}, value-type={type(value)}")
+                    if value in tuple(member.value):
+                        return member
+                    elif isinstance(value, str):
+                        if value.lower() in tuple(member.value):
+                            return member
         return None
 
     @classmethod
@@ -79,13 +86,13 @@ class BaseEnum(Enum):
             raise ValueError('enum_type should provide!')
         if text is None:
             raise ValueError('text should provide!')
-
+        # print(f"equals => enum_type={enum_type}")
         return enum_type == cls.of_name(text) or enum_type == cls.of_value(text)
 
 
 @unique
 class AutoLowerCase(BaseEnum):
-    """AutoNameLowerCase class converts names to lower-case letters"""
+    """AutoLowerCase class converts names to lower-case letters"""
 
     @staticmethod
     def _generate_next_value_(name, start, count, last_values):
@@ -112,33 +119,70 @@ class KeyEnum(AutoUpperCase):
 @unique
 class EnvType(BaseEnum):
     """EnvType class represents various supported env types"""
+    # The environment where developers write and test code
+    DEV = ("development", "develop", "dev")
+    LOCAL = ("local", "localhost")
+    PROD = ("production", "live", "prod")
+    # A testing environment
+    QA = ("qa")
+    # A testing environment
+    STAGE = ("staging", "stage")
+    # A testing environment
+    TEST = ("testing", "test")
+    #  UAT or “User Acceptance Testing” Environment - testing environment
+    UAT = ("uat")
 
-    DEVELOPMENT = auto()
-    PRODUCTION = auto()
-    STAGING = auto()
-    TESTING = auto()
+    @classmethod
+    def get_env_type(cls):
+        __ENV_TYPE = 'env_type'
+        env_type = os.getenv(__ENV_TYPE)
+        if env_type is None:
+            env_type = os.getenv(__ENV_TYPE.upper())
+
+        return env_type
 
     @staticmethod
     def is_development(env_type: str) -> bool:
-        """Returns true if DEVELOPMENT == env_type other false"""
-        return EnvType.equals(EnvType.DEVELOPMENT, env_type)
+        """Returns true if DEV == env_type other false"""
+        return EnvType.equals(EnvType.DEV, env_type)
+
+    @staticmethod
+    def is_local(env_type: str) -> bool:
+        """Returns true if LOCAL == env_type other false"""
+        return EnvType.equals(EnvType.LOCAL, env_type)
 
     @staticmethod
     def is_production(env_type: str) -> bool:
-        """Returns true if PRODUCTION == env_type other false"""
-        return EnvType.equals(EnvType.PRODUCTION, env_type)
+        """Returns true if PROD == env_type other false"""
+        return EnvType.equals(EnvType.PROD, env_type)
+
+    @staticmethod
+    def is_qa(env_type: str) -> bool:
+        """Returns true if QA == env_type other false"""
+        print(f"is_qa => env_type={env_type}")
+        return EnvType.equals(EnvType.QA, env_type)
 
     @staticmethod
     def is_staging(env_type: str) -> bool:
-        """Returns true if STAGING == env_type other false"""
-        return EnvType.equals(EnvType.STAGING, env_type)
+        """Returns true if STAGE == env_type other false"""
+        return EnvType.equals(EnvType.STAGE, env_type)
 
     @staticmethod
     def is_testing(env_type: str) -> bool:
-        """Returns true if TESTING == env_type other false"""
-        return EnvType.equals(EnvType.TESTING, env_type)
+        """Returns true if TEST == env_type other false"""
+        return EnvType.equals(EnvType.TEST, env_type)
+
+    @staticmethod
+    def is_uat(env_type: str) -> bool:
+        """Returns true if UAT == env_type other false"""
+        return EnvType.equals(EnvType.UAT, env_type)
 
     @staticmethod
     def flask_env() -> str:
         """Returns the value of FLASK_ENV env variable value if set otherwise None."""
-        return os.getenv("FLASK_ENV")
+        __FLASK_ENV = 'flask_env'
+        flask_env = os.getenv(__FLASK_ENV)
+        if flask_env is None:
+            flask_env = os.getenv(__FLASK_ENV.upper())
+
+        return flask_env

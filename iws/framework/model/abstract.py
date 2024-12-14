@@ -25,7 +25,11 @@ class AbstractModel(BaseModel):
         return self.model_dump_json()
 
     def __str__(self):
-        """Returns the string representation of this object"""
+        """Returns the string representation of this object."""
+        return f"{type(self).__name__}"
+
+    def __repr__(self):
+        """Returns the string representation of this object."""
         return str(self)
 
 
