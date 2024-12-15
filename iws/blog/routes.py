@@ -7,11 +7,15 @@ import json
 from flask import current_app, render_template, make_response, request, redirect
 from blog.v1 import bp as bp_v1_blogs
 import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @bp_v1_blogs.get("/")
 def index():
     """Load Index Page"""
+    logger.info(f"index={request}")
     posts = [
         {
             "title": "Are blogs important for businesses?",
@@ -38,6 +42,7 @@ def index():
 @bp_v1_blogs.route('/create', methods=['GET', 'POST'])
 def create():
     """Load Create/Add Post Page"""
+    logger.info(f"index={request}")
     if request.method == 'POST':
         body = request.get_json()
         print(f"body={body}")

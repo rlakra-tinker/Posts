@@ -1,10 +1,10 @@
 #
 # Author: Rohtash Lakra
 #
-from tests.base import AbstractTestCase
 from framework.http import HTTPStatus
-from framework.model.abstract import AbstractModel, ResponseEntity, ErrorEntity
+from framework.model.abstract import AbstractPydanticModel, ResponseModel, ErrorModel
 from rest.contact.models import Contact
+from tests.base import AbstractTestCase
 
 
 class ModelsTest(AbstractTestCase):
@@ -18,7 +18,7 @@ class ModelsTest(AbstractTestCase):
         contact = self.new_contact(id=16, first_name="Roh", last_name="Lakra", country="country", subject="subject")
         print(f"contact: {contact}")
         # valid object and expected results
-        self.assertTrue(isinstance(contact, AbstractModel))
+        self.assertTrue(isinstance(contact, AbstractPydanticModel))
         self.assertFalse(isinstance(contact, AbstractTestCase))
         self.assertTrue(issubclass(Contact, object))
         self.assertFalse(issubclass(object, Contact))
@@ -35,7 +35,7 @@ class ModelsTest(AbstractTestCase):
         contact = self.new_contact(id=16, first_name="Roh", last_name="Lakra", country="country", subject="subject")
         print(f"contact: {contact}")
         # valid object and expected results
-        self.assertTrue(isinstance(contact, AbstractModel))
+        self.assertTrue(isinstance(contact, AbstractPydanticModel))
         self.assertFalse(isinstance(contact, AbstractTestCase))
         self.assertTrue(issubclass(Contact, object))
         self.assertFalse(issubclass(object, Contact))
@@ -50,16 +50,16 @@ class ModelsTest(AbstractTestCase):
         """Tests an ResponseEntity object"""
         print("\n+test_contact_success()")
         contact = self.new_contact(id=16, first_name="Roh", last_name="Lakra", country="USA", subject="Test Success")
-        response = ResponseEntity.response(HTTPStatus.CREATED, contact)
+        response = ResponseModel.buildResponse(HTTPStatus.CREATED, contact)
         print(f"response: {response}")
         self.assertIsNotNone(response)
         self.assertEqual(HTTPStatus.CREATED.status_code, response.status)
         self.assertIsNotNone(response.data)
         self.assertIsNone(response.errors)
-        self.assertFalse(response.has_error())
+        self.assertFalse(response.hasError())
 
         # build json response
-        response_json = ResponseEntity.build_response(HTTPStatus.CREATED, contact)
+        response_json = ResponseModel.jsonResponse(HTTPStatus.CREATED, contact)
         self.assertIsNotNone(response_json)
         print(f"response_json: {response_json}")
         print("-test_contact_success()")
@@ -69,35 +69,37 @@ class ModelsTest(AbstractTestCase):
         """Tests an ResponseEntity object"""
         print("\n+test_contact_error()")
         contact = self.new_contact(id=16, first_name="Roh", last_name="Lakra", country="USA", subject="Failure")
-        response = ResponseEntity.response(HTTPStatus.BAD_REQUEST, contact, message="Test Failure")
+        response = ResponseModel.buildResponse(HTTPStatus.BAD_REQUEST, contact, message="Test Failure")
         print(f"response: {response}")
         self.assertIsNotNone(response)
         self.assertEqual(HTTPStatus.BAD_REQUEST.status_code, response.status)
-        self.assertIsNotNone(response.data)
-        self.assertTrue(response.has_error())
+        self.assertIsNone(response.data)
+        self.assertTrue(response.hasError())
         self.assertIsNotNone(response.errors)
+        self.assertTrue(len(response.errors) > 0)
 
         # build json response
-        response_json = ResponseEntity.build_response(HTTPStatus.BAD_REQUEST, contact)
+        response_json = ResponseModel.jsonResponse(HTTPStatus.BAD_REQUEST, contact)
         self.assertIsNotNone(response_json)
         print(f"response_json: {response_json}")
         print("-test_contact_error()")
         print()
 
-
     def test_response(self):
         """Tests an ResponseEntity object"""
         print("\n+test_response()")
-        ResponseEntity
         contact = self.new_contact(id=16, first_name="Roh", last_name="Lakra", country="USA", subject="Failure")
-        errors = [ErrorEntity.error(HTTPStatus.INVALID_DATA, message='First name should provide!'),
-                  ErrorEntity.error(HTTPStatus.INVALID_DATA, message='Last name should provide!')]
-        response = ResponseEntity(status=HTTPStatus.BAD_REQUEST.status_code, data=contact, errors=errors)
+        errors = [ErrorModel.error(HTTPStatus.INVALID_DATA, message='First name should provide!'),
+                  ErrorModel.error(HTTPStatus.INVALID_DATA, message='Last name should provide!')]
+        # response = ResponseModel(status=HTTPStatus.BAD_REQUEST.status_code, data=contact, errors=errors)
+        response = ResponseModel(status=HTTPStatus.BAD_REQUEST.status_code)
+        response.add(contact)
+        response.addError(errors)
         print(f"response: {response}")
         self.assertIsNotNone(response)
         self.assertEqual(HTTPStatus.BAD_REQUEST.status_code, response.status)
         self.assertIsNotNone(response.data)
-        self.assertTrue(response.has_error())
+        self.assertTrue(response.hasError())
         self.assertIsNotNone(response.errors)
 
         # build json response

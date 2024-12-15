@@ -2,13 +2,15 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-blueprint/
 #
-from flask import render_template, make_response, request, redirect, url_for
-from framework.http import HTTPStatus
-from framework.model.abstract import ErrorEntity, ResponseEntity
+from flask import render_template, make_response, request, redirect, url_for, current_app
+
 from account.models import User
 from account.v1 import bp as bp_v1_accounts
+from framework.http import HTTPStatus
+from framework.model.abstract import ErrorModel, ResponseModel
 
 # holds accounts in memory
+
 accounts = []
 
 
@@ -28,12 +30,13 @@ def register_view():
     """
     register a new account
     """
+    current_app.logger.debug(f"register_view => {request}")
     return render_template("account/register.html")
 
 
 @bp_v1_accounts.post("/register")
 def register():
-    print(request)
+    current_app.logger.debug(f"register => {request}")
     user = None
     response_json = None
     if request.is_json:
@@ -45,8 +48,8 @@ def register():
         # response_json = ResponseEntity.build_response_json(HTTPStatus.CREATED, user)
         response_json = user.json()
     else:
-        response_json = ResponseEntity.build_response(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, entity=user,
-                                                      message="Invalid JSON object!")
+        response_json = ResponseModel.jsonResponse(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, entity=user,
+                                                   message="Invalid JSON object!")
 
     return make_response(response_json)
 
@@ -57,23 +60,35 @@ def login_view():
     """
     login to an account
     """
+    current_app.logger.debug(f"login_view => {request}")
     return render_template("account/login.html")
 
 
 @bp_v1_accounts.post("/login")
+# @bp_v1_accounts.route('/login', methods=['POST'])
 def login():
+    current_app.logger.debug(f"login => {request}")
     print(request)
     if request.is_json:
         user = request.get_json()
-        print(f"user:{user}")
+        current_app.logger.debug(f"user{user}")
         if not accounts:
             for account in accounts:
                 if account['user_name'] == user.user_name:
                     return make_response(HTTPStatus.OK, account)
+    else:
+        user = None
+        # user = get_user(request.form['username'])
+        if user and user.check_password(request.form['password']):
+            # login_user(user)
+            current_app.logger.info('%s logged in successfully', user.username)
+            return redirect(url_for('index'))
+        else:
+            current_app.logger.info('%s failed to log in', user.username)
+            # abort(401)
 
-    response = ErrorEntity.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
-    print(response)
-
+    response = ErrorModel.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    current_app.logger.debug(f"response{response}")
     return make_response(response)
 
 

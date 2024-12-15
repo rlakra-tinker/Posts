@@ -5,7 +5,7 @@ from rest.contact.v1 import bp as bp_contact_v1
 import json
 from flask import Blueprint, make_response, request, session, g, redirect, url_for
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorEntity, ResponseEntity
+from framework.model.abstract import ErrorModel, ResponseModel
 from rest.contact.service import ContactService
 from rest.contact.models import Contact
 
@@ -41,12 +41,12 @@ def create():
     if not errors:
         try:
             contact = contactService.create(contact)
-            response = ResponseEntity.build_response(HTTPStatus.CREATED, entity=contact,
-                                                     message="Contact is successfully created.")
+            response = ResponseModel.jsonResponse(HTTPStatus.CREATED, entity=contact,
+                                                  message="Contact is successfully created.")
         except Exception as ex:
             message = f"Contact={contact.first_name} is already registered! ex:{ex}"
-            error = ErrorEntity.error(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
-            response = ResponseEntity.build_response(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
+            error = ErrorModel.error(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
+            response = ResponseModel.jsonResponse(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
         # else:
         #     return redirect(url_for("iws.rest.v1.contacts.create"))
     else:
@@ -68,7 +68,7 @@ def login():
         #         if account['user_name'] == user.user_name:
         #             return make_response(HTTPStatus.OK, account)
 
-    response = ErrorEntity.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    response = ErrorModel.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(json.dumps(response))
 
     return make_response(response)

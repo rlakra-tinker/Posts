@@ -2,10 +2,10 @@
 # Author: Rohtash Lakra
 #
 
-from framework.model.abstract import AbstractEntity
+from framework.model.abstract import AbstractModel
 
 
-class Account(AbstractEntity):
+class Account(AbstractModel):
     role_id: int = None
     user_name: str = None
     email: str = None

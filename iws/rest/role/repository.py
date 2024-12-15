@@ -1,10 +1,13 @@
 #
 # Author: Rohtash Lakra
 #
+from typing import List, Optional
+
 from flask import current_app
+
 from framework.repository import AbstractRepository
-from rest.role.models import Role
 from framework.utils import Utils
+from rest.role.models import Role
 
 
 class RoleRepository(AbstractRepository):
@@ -12,7 +15,7 @@ class RoleRepository(AbstractRepository):
     def __init__(self):
         super(AbstractRepository, self).__init__()
 
-    def create(self, role:Role) -> Role:
+    def create(self, role: Role) -> Role:
         """Inserts a new role"""
         current_app.logger.info(f"+create({role})")
         query = """
@@ -28,12 +31,20 @@ class RoleRepository(AbstractRepository):
                 current_app.logger.error(f"saved: {saved}")
                 result = saved
         except Exception as ex:
-            current_app.logger.error(ex)
-            current_app.logger.error(Utils.stack_trace(ex))
+            current_app.logger.error(f"Error={ex}, stack_trace={Utils.stack_trace(ex)}")
             print(f"Role [{role.name}] already exists!")
 
         current_app.logger.info(f"-create(), result: {result}")
         return result
+
+    def find_all(self) -> List[Optional[Role]]:
+        return self.execute('SELECT * FROM roles').fetchall()
+
+    def filter(self, filters, connector='AND', operators={}) -> List[Optional[Role]]:
+        current_app.logger.info(f"filter({filters}, {connector}, {operators})")
+        where_clause, enumerated_filters = super().build_filters(filters, connector, operators, return_tuple=True)
+        select_query = f'SELECT * FROM roles {where_clause} ORDER BY id'
+        return self.execute(select_query).fetchall()
 
     def find_by_id(self, id) -> Role:
         return self.execute('SELECT * FROM roles WHERE id = ?', (id,)).fetchone()

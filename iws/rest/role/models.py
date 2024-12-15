@@ -2,10 +2,10 @@
 # Author: Rohtash Lakra
 #
 
-from framework.model.abstract import AbstractEntity
+from framework.model.abstract import AbstractModel
 
 
-class Role(AbstractEntity):
+class Role(AbstractModel):
     name: str = None
     active: bool = None
 

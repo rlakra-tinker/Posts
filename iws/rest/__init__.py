@@ -3,10 +3,11 @@
 # Reference - https://realpython.com/flask-blueprint/
 #
 from flask import Blueprint
+
 from rest.v1 import bp as rest_v1_bp
 from rest.v2 import bp as rest_v2_bp
 
-bp = Blueprint("rest", __name__)
+bp = Blueprint("rest", __name__, url_prefix="/rest")
 """
 Making a Flask Blueprint:
 

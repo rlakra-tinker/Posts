@@ -7,7 +7,7 @@
 from rest.account.v1 import bp as bp_account_v1
 from flask import make_response, request, session, g, redirect, url_for
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorEntity
+from framework.model.abstract import ErrorModel
 from rest.account.service import AccountService
 from rest.account.models import Account
 
@@ -61,7 +61,7 @@ def register():
         if response:
             return response
 
-    return make_response(ErrorEntity(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
+    return make_response(ErrorModel(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
 
 
 @bp_account_v1.post("/login")
@@ -75,7 +75,7 @@ def login():
         #         if account['user_name'] == user.user_name:
         #             return make_response(HTTPStatus.OK, account)
 
-    response = ErrorEntity.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    response = ErrorModel.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(response)
 
     return make_response(response)

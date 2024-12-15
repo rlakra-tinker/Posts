@@ -3,18 +3,20 @@
 # Reference - https://realpython.com/flask-project/
 #
 import importlib.metadata
+import json
 import logging
 import os
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+from framework.logger import DefaultLogger
 
 import requests
 from dotenv import load_dotenv
-from flask import Flask, Blueprint, make_response, jsonify, current_app
+from flask import Flask, Blueprint, make_response, jsonify, current_app, request
 from flask_cors import CORS
-from flask_log_request_id import RequestID, RequestIDLogFilter
+from flask_log_request_id import RequestIDLogFilter
 from werkzeug.exceptions import NotFound
 # https://flask.palletsprojects.com/en/3.0.x/deploying/proxy_fix/
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -22,12 +24,12 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 from api import bp as api_bp
 from common.config import Config
 from framework.enums import EnvType
+from framework.enums import KeyEnum
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorEntity
+from framework.model.abstract import ErrorModel
 from globals import connector
 from rest import bp as rest_bp
 from webapp.routes import bp as webapp_bp
-from framework.enums import KeyEnum
 
 
 class WebApp:
@@ -96,13 +98,15 @@ class WebApp:
         app = Flask(__name__)
         # app = connexion.App(__name__, specification_dir="./")
         # app.add_api("swagger.yml")
-        RequestID(app)
+
+        # use custom logger adapter
+        app.logger = DefaultLogger(app, {})
+
         # app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
         app.wsgi_app = ProxyFix(app.wsgi_app)
         # wsgi_app = ProxyFix(app.wsgi_app)
         self.app = app
         self._load_env(test_mode=test_mode)
-
         # load app's configs
         app.config.from_object(config_class)
 
@@ -134,23 +138,28 @@ class WebApp:
         @app.errorhandler(404)
         def not_found(error):
             """404 - NotFound Error Handler"""
-            current_app.logger.error(f'errorClass={type(error)}, error={error}')
+            current_app.logger.error(f'request={request}, errorClass={type(error)}, error={error}')
             if isinstance(error, NotFound):
+                current_app.logger.error(f'NotFound => request={request}, errorClass={type(error)}, error={error}')
                 return make_response(jsonify('Not Found!'), 404)
             else:
-                return make_response(jsonify(ErrorEntity.error(HTTPStatus.NOT_FOUND)), 404)
+                # return make_response(jsonify(ErrorEntity.error(HTTPStatus.NOT_FOUND).to_json()), 404)
+                # return make_response(ErrorEntity.error(HTTPStatus.NOT_FOUND).to_json(), 404)
+                return make_response(json.dumps(ErrorModel.error(HTTPStatus.NOT_FOUND)), 404)
 
         @app.errorhandler(400)
         def bad_request(error):
             """400 - BadRequest Error Handler"""
-            current_app.logger.error(f'errorClass={type(error)}, error={error}')
-            return make_response(jsonify(ErrorEntity.error(HTTPStatus.BAD_REQUEST)), 400)
+            current_app.logger.error(f'request={request}, errorClass={type(error)}, error={error}')
+            # return make_response(jsonify(ErrorEntity.error(HTTPStatus.BAD_REQUEST).to_json()), 400)
+            return make_response(ErrorModel.error(HTTPStatus.BAD_REQUEST).to_json(), 400)
 
         @app.errorhandler(500)
         def app_error(error):
             """500 - InternalServer Error Handler"""
-            current_app.logger.error(f'errorClass={type(error)}, error={error}')
-            return make_response(jsonify(ErrorEntity.error(HTTPStatus.INTERNAL_SERVER_ERROR)), 500)
+            current_app.logger.error(f'request={request}, errorClass={type(error)}, error={error}')
+            return make_response(jsonify(ErrorModel.error(HTTPStatus.INTERNAL_SERVER_ERROR)), 500)
+            return make_response(ErrorModel.error(HTTPStatus.INTERNAL_SERVER_ERROR).to_json(), 500)
 
         # Register Date & Time Formatter for Jinja Template
         @app.template_filter('strftime')
@@ -176,9 +185,9 @@ class WebApp:
         bp = Blueprint("iws", __name__)
 
         # register more app's here.
-        bp.register_blueprint(webapp_bp)
         bp.register_blueprint(rest_bp)
         bp.register_blueprint(api_bp)
+        bp.register_blueprint(webapp_bp)
 
         # Register root blueprint with app that connects an app with other end-points
         app.register_blueprint(bp)

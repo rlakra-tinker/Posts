@@ -1,32 +1,41 @@
 #
 # Author: Rohtash Lakra
 #
+from typing import List, Optional
+
 from flask import current_app
-from framework.service import AbstractService
-from framework.model.abstract import ErrorEntity, ResponseEntity
+
 from framework.http import HTTPStatus
-from rest.role.repository import RoleRepository
+from framework.model.abstract import ErrorModel
+from framework.service import AbstractService
 from rest.role.models import Role
+from rest.role.repository import RoleRepository
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class RoleService(AbstractService):
 
     def __init__(self):
+        logger.debug("RoleService()")
         self.repository = RoleRepository()
 
     def validate(self, role: Role):
+        logger.debug(f"validate({role})")
         current_app.logger.debug(f"validate({role})")
         errors = []
         if role:
             if not role.name:
-                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'Role name is required!'))
+                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'Role name is required!'))
         else:
-            errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'Role is required!'))
+            errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'Role is required!'))
 
         return errors
 
     def create(self, role: Role) -> Role:
         """Crates a new role"""
+        logger.debug(f"+create({role})")
         current_app.logger.debug(f"+create({role})")
         old_role = self.repository.find_by_name(role.name)
         current_app.logger.debug(f"old_role: {old_role}")
@@ -37,7 +46,11 @@ class RoleService(AbstractService):
         current_app.logger.debug(f"-create(), role: {role}")
         return role
 
-    def find_by_id(self, id:int) -> Role:
+    def find_all(self, filters) -> List[Optional[Role]]:
+        logger.debug(f"find_all({filters})")
+        return self.repository.filter(filters)
+
+    def find_by_id(self, id: int) -> Role:
         return self.repository.find_by_id(id)
 
     def exists(self, id: int) -> bool:

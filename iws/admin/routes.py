@@ -4,7 +4,7 @@
 #
 from flask import render_template, make_response, request, redirect, url_for
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorEntity, ResponseEntity
+from framework.model.abstract import ErrorModel, ResponseModel
 from admin.v1 import bp as bp_v1_admin
 
 # holds accounts in memory
@@ -47,7 +47,7 @@ def post_register():
         accounts.append(user)
         return user, 201
 
-    return make_response(ErrorEntity(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
+    return make_response(ErrorModel(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
 
 
 # login to an account
@@ -70,7 +70,7 @@ def post_login():
                 if account['user_name'] == user.user_name:
                     return make_response(HTTPStatus.OK, account)
 
-    response = ErrorEntity.get_error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    response = ErrorModel.get_error(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(response)
 
     return make_response(response)

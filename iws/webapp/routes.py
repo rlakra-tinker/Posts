@@ -2,7 +2,11 @@
 # Author: Rohtash Lakra
 # Reference - https://realpython.com/flask-blueprint/
 #
-from flask import Blueprint, make_response, jsonify, render_template
+import logging
+
+from flask import Blueprint, make_response, jsonify, render_template, request
+
+logger = logging.getLogger(__name__)
 
 bp = Blueprint("webapp", __name__)
 # bp = Blueprint("webapp", __name__, static_folder="static", static_url_path="assets", template_folder="templates")
@@ -26,6 +30,7 @@ def health_check():
     TODO: Add a check that server is up.
     :return:
     """
+    logger.debug(f"health_check={request}")
 
     return make_response(jsonify({'message': 'ok'}), 200)
 
@@ -33,24 +38,28 @@ def health_check():
 @bp.get("/")
 def index():
     """Index/Home Page"""
+    logger.debug(f"index={request}")
     return render_template("index.html")
 
 
 @bp.get("/about-us")
 def about():
     """About Us Page"""
+    logger.debug(f"about={request}")
     return render_template("about.html")
 
 
 @bp.get("/services")
 def services():
     """Services Page"""
+    logger.debug(f"services={request}")
     return render_template("services.html")
 
 
 @bp.get("/clients")
 def clients():
     """Clients Page"""
+    logger.debug(f"clients={request}")
     return render_template("clients.html")
 
 
@@ -61,6 +70,7 @@ def contact():
     # if HTTPMethod.is_post(request.method):
     #     print(request.get_json())
     #     response = create()
+    logger.debug(f"contact={request}")
 
     return render_template("contact.html")
 
@@ -68,4 +78,5 @@ def contact():
 @bp.get("/logout")
 def logout():
     """Logout Page"""
+    logger.debug(f"logout={request}")
     return render_template("logout.html")

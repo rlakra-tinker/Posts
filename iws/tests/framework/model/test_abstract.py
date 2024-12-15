@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from framework.model.abstract import AbstractModel, AbstractEntity, NamedEntity, ErrorEntity, ResponseEntity
+from framework.model.abstract import AbstractPydanticModel, AbstractModel, NamedModel, ErrorModel, ResponseModel
 from framework.http import HTTPStatus
 from tests.base import AbstractTestCase
 
@@ -11,54 +11,54 @@ class TestAbstract(AbstractTestCase):
     def test_abstract_model(self):
         """Tests an AbstractEntity object"""
         print("+test_abstract_model()")
-        abstract_model = AbstractModel(id=1)
+        abstract_model = AbstractPydanticModel(id=1)
         print(f"abstract_model: {abstract_model}")
 
         # valid object and expected results
-        self.assertTrue(isinstance(abstract_model, AbstractModel))
+        self.assertTrue(isinstance(abstract_model, AbstractPydanticModel))
         self.assertFalse(isinstance(abstract_model, TestAbstract))
-        self.assertTrue(issubclass(AbstractModel, object))
-        self.assertFalse(issubclass(object, AbstractModel))
+        self.assertTrue(issubclass(AbstractPydanticModel, object))
+        self.assertFalse(issubclass(object, AbstractPydanticModel))
         print("-test_abstract_model()")
         print()
 
     def test_abstract_entity(self):
         """Tests an AbstractEntity object"""
         print("+test_abstract_entity()")
-        abstract_entity = AbstractEntity(id=1)
+        abstract_entity = AbstractModel(id=1)
         print(f"abstract_entity: {abstract_entity}")
 
         # valid object and expected results
-        self.assertTrue(isinstance(abstract_entity, AbstractEntity))
+        self.assertTrue(isinstance(abstract_entity, AbstractModel))
         self.assertFalse(isinstance(abstract_entity, TestAbstract))
-        self.assertTrue(issubclass(AbstractEntity, object))
-        self.assertFalse(issubclass(object, AbstractEntity))
+        self.assertTrue(issubclass(AbstractModel, object))
+        self.assertFalse(issubclass(object, AbstractModel))
         print("-test_abstract_entity()")
         print()
 
     def test_named_entity(self):
         """Tests an NamedEntity object"""
         print("+test_named_entity()")
-        named_entity = NamedEntity(id=10, name="Roh")
+        named_entity = NamedModel(id=10, name="Roh")
         print(f"named_entity: {named_entity}")
 
         # valid object and expected results
         self.assertEqual(10, named_entity.get_id())
         self.assertNotEqual(2, named_entity.get_id())
 
-        self.assertTrue(isinstance(named_entity, AbstractEntity))
-        self.assertTrue(isinstance(named_entity, NamedEntity))
+        self.assertTrue(isinstance(named_entity, AbstractModel))
+        self.assertTrue(isinstance(named_entity, NamedModel))
         self.assertFalse(isinstance(named_entity, TestAbstract))
-        self.assertTrue(issubclass(NamedEntity, AbstractEntity))
-        self.assertFalse(issubclass(AbstractEntity, NamedEntity))
+        self.assertTrue(issubclass(NamedModel, AbstractModel))
+        self.assertFalse(issubclass(AbstractModel, NamedModel))
         print("-test_named_entity()")
         print()
 
     def test_error_entity(self):
         """Tests an ErrorEntity object"""
         print("+test_error_entity()")
-        error_entity = ErrorEntity.error(http_status=HTTPStatus.INTERNAL_SERVER_ERROR,
-                                         message="Internal Server Error!")
+        error_entity = ErrorModel.error(http_status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                                        message="Internal Server Error!")
         print(f"error_entity: {error_entity}")
 
         # valid object and expected results
@@ -68,19 +68,19 @@ class TestAbstract(AbstractTestCase):
         self.assertNotEqual(HTTPStatus.INTERNAL_SERVER_ERROR.message, error_entity.message)
         self.assertNotEqual(HTTPStatus.BAD_REQUEST, error_entity.status)
 
-        self.assertTrue(isinstance(error_entity, AbstractModel))
-        self.assertTrue(isinstance(error_entity, ErrorEntity))
-        self.assertFalse(isinstance(error_entity, AbstractEntity))
-        self.assertTrue(issubclass(ErrorEntity, object))
-        self.assertTrue(issubclass(ErrorEntity, AbstractModel))
-        self.assertFalse(issubclass(AbstractModel, ErrorEntity))
+        self.assertTrue(isinstance(error_entity, AbstractPydanticModel))
+        self.assertTrue(isinstance(error_entity, ErrorModel))
+        self.assertFalse(isinstance(error_entity, AbstractModel))
+        self.assertTrue(issubclass(ErrorModel, object))
+        self.assertTrue(issubclass(ErrorModel, AbstractPydanticModel))
+        self.assertFalse(issubclass(AbstractPydanticModel, ErrorModel))
         print("-test_error_entity()")
         print()
 
     def test_entity(self):
         """Tests all entities object"""
         print("+test_entity()")
-        entity_object = AbstractEntity(id=100)
+        entity_object = AbstractModel(id=100)
         print(f"entity_object: {entity_object}")
         self.assertEqual(100, entity_object.get_id())
         self.assertNotEqual("Lakra", entity_object.get_id())
@@ -88,7 +88,7 @@ class TestAbstract(AbstractTestCase):
         print(f"entity_object_json: \n{entity_object_json}")
         self.assertEqual(entity_object_json, entity_object.to_json())
 
-        entity_object = NamedEntity(id=1600, name="R. Lakra")
+        entity_object = NamedModel(id=1600, name="R. Lakra")
         print(f"entity_object: {entity_object}")
         self.assertEqual(1600, entity_object.get_id())
         self.assertEqual("R. Lakra", entity_object.name)
@@ -98,12 +98,12 @@ class TestAbstract(AbstractTestCase):
         self.assertEqual(entity_object_json, entity_object.to_json())
 
         # valid object and expected results
-        self.assertTrue(isinstance(entity_object, NamedEntity))
-        self.assertTrue(isinstance(entity_object, AbstractEntity))
-        self.assertFalse(isinstance(entity_object, ErrorEntity))
-        self.assertFalse(issubclass(object, AbstractEntity))
+        self.assertTrue(isinstance(entity_object, NamedModel))
+        self.assertTrue(isinstance(entity_object, AbstractModel))
+        self.assertFalse(isinstance(entity_object, ErrorModel))
+        self.assertFalse(issubclass(object, AbstractModel))
 
-        errorEntity = ErrorEntity.error(http_status=HTTPStatus.BAD_REQUEST, message="Error")
+        errorEntity = ErrorModel.error(http_status=HTTPStatus.BAD_REQUEST, message="Error")
         print(f"errorEntity: {errorEntity}")
 
         # valid object and expected results
@@ -121,17 +121,17 @@ class TestAbstract(AbstractTestCase):
     def test_response_entity_success(self):
         """Tests an ResponseEntity object"""
         print("\n+test_response_entity_success()")
-        named_entity = NamedEntity(id=1600, name="R. Lakra")
-        response_entity = ResponseEntity.response(HTTPStatus.CREATED, named_entity)
+        named_entity = NamedModel(id=1600, name="R. Lakra")
+        response_entity = ResponseModel.buildResponse(HTTPStatus.CREATED, named_entity)
         print(f"response_entity: {response_entity}")
         self.assertIsNotNone(response_entity)
         self.assertEqual(HTTPStatus.CREATED.status_code, response_entity.status)
         self.assertIsNotNone(response_entity.data)
         self.assertIsNone(response_entity.errors)
-        self.assertFalse(response_entity.has_error())
+        self.assertFalse(response_entity.hasError())
 
         # build json response
-        response_entity_json = ResponseEntity.build_response(HTTPStatus.CREATED, named_entity)
+        response_entity_json = ResponseModel.jsonResponse(HTTPStatus.CREATED, named_entity)
         self.assertIsNotNone(response_entity_json)
         print(f"response_entity_json: {response_entity_json}")
         print("-test_response_entity_success()")
@@ -140,17 +140,17 @@ class TestAbstract(AbstractTestCase):
     def test_response_entity_error(self):
         """Tests an ResponseEntity object"""
         print("\n+test_response_entity_error()")
-        error_entity = ErrorEntity.error(http_status=HTTPStatus.BAD_REQUEST, message="Error")
-        response = ResponseEntity.response(HTTPStatus.BAD_REQUEST, error_entity)
+        error_entity = ErrorModel.error(http_status=HTTPStatus.BAD_REQUEST, message="Error")
+        response = ResponseModel.buildResponse(HTTPStatus.BAD_REQUEST, error_entity)
         print(f"response: {response}")
         self.assertIsNotNone(response)
         self.assertEqual(HTTPStatus.BAD_REQUEST.status_code, response.status)
         self.assertIsNone(response.data)
-        self.assertTrue(response.has_error())
+        self.assertTrue(response.hasError())
         self.assertIsNotNone(response.errors)
 
         # build json response
-        response_entity_json = ResponseEntity.build_response(HTTPStatus.BAD_REQUEST, error_entity)
+        response_entity_json = ResponseModel.jsonResponse(HTTPStatus.BAD_REQUEST, error_entity)
         self.assertIsNotNone(response_entity_json)
         print(f"response_entity_json: {response_entity_json}")
         print("-test_response_entity_error()")
@@ -161,17 +161,18 @@ class TestAbstract(AbstractTestCase):
         print("+test_build_response_with_critical()")
 
         try:
-            named_entity = NamedEntity(id=1600, name="R. Lakra")
+            named_entity = NamedModel(id=1600, name="R. Lakra")
             raise ValueError("The name should be unique!")
         except ValueError as ex:
-            response = ResponseEntity.response(HTTPStatus.INTERNAL_SERVER_ERROR, named_entity, exception=ex, is_critical=True)
+            response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, named_entity, exception=ex, is_critical=True)
 
         print(f"response: {response}")
         self.assertIsNotNone(response)
         self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR.status_code, response.status)
-        self.assertIsNotNone(response.data)
-        self.assertTrue(response.has_error())
+        self.assertIsNone(response.data)
+        self.assertTrue(response.hasError())
         self.assertIsNotNone(response.errors)
+        self.assertTrue(len(response.errors) > 0)
         print(f"response.errors => {response.errors}")
         self.assertEqual("The name should be unique!", response.errors[0].message)
 

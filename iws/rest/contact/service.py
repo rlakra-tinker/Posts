@@ -4,7 +4,7 @@
 from typing import Dict, Set, List
 from framework.service import AbstractService
 from rest.contact.models import Contact
-from framework.model.abstract import ErrorEntity
+from framework.model.abstract import ErrorModel
 from framework.http import HTTPStatus
 
 
@@ -27,15 +27,15 @@ class ContactService(AbstractService):
         errors = []
         if contact:
             if not contact.first_name:
-                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'first_name is required!'))
+                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'first_name is required!'))
             if not contact.last_name:
-                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'last_name is required!'))
+                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'last_name is required!'))
             if not contact.country:
-                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'country is required!'))
+                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'country is required!'))
             if not contact.subject:
-                errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'subject is required!'))
+                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'subject is required!'))
         else:
-            errors.append(ErrorEntity.error(HTTPStatus.INVALID_DATA, 'Contact is required!'))
+            errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'Contact is required!'))
 
         return errors
 

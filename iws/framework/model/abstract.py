@@ -3,6 +3,7 @@
 # Reference(s):
 #  - https://docs.pydantic.dev/latest/
 #
+import logging
 from datetime import datetime
 from typing import Optional, Dict, List
 
@@ -11,17 +12,18 @@ from pydantic import BaseModel, ConfigDict
 from framework.http import HTTPStatus
 from framework.utils import Utils
 
+logger = logging.getLogger(__name__)
+
 
 # AbstractModel
-class AbstractModel(BaseModel):
-    """
-    A base model for all other models inherit and provides basic configuration parameters.
+class AbstractPydanticModel(BaseModel):
+    """AbstractPydanticModel is a base model for all other models inherit and provides basic configuration parameters.
     """
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
     def to_json(self):
         """Returns the JSON representation of this object."""
-        # print(f"to_json() -> type: {type(self)}")
+        logger.debug(f"to_json() => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     def __str__(self):
@@ -33,10 +35,8 @@ class AbstractModel(BaseModel):
         return str(self)
 
 
-# Abstract Entity
-class AbstractEntity(AbstractModel):
-    """
-    A base model for all other models inherit and provides basic configuration parameters.
+class AbstractModel(AbstractPydanticModel):
+    """AbstractModel is a base model for all other models inherit and provides basic configuration parameters.
     """
     id: int = None
     created_at: datetime = datetime.now()
@@ -60,9 +60,8 @@ class AbstractEntity(AbstractModel):
         return str(self)
 
 
-# Named Entity
-class NamedEntity(AbstractEntity):
-    """NamedEntity used an entity with name in it"""
+class NamedModel(AbstractModel):
+    """NamedModel used an entity with a property called 'name' in it"""
     name: str
 
     def get_name(self):
@@ -77,9 +76,8 @@ class NamedEntity(AbstractEntity):
         return str(self)
 
 
-# Error Entity
-class ErrorEntity(AbstractModel):
-    """ErrorEntity represents the error object"""
+class ErrorModel(AbstractPydanticModel):
+    """ErrorModel represents the error object"""
     status: int = None
     message: str = None
     debug_info: Optional[Dict[str, object]] = None
@@ -105,17 +103,17 @@ class ErrorEntity(AbstractModel):
         debug_info = {}
         if is_critical and exception is not None:
             debug_info['exception'] = Utils.stack_trace(exception)
-            return ErrorEntity(status=http_status.status_code, message=message, debug_info=debug_info)
+            return ErrorModel(status=http_status.status_code, message=message, debug_info=debug_info)
         elif exception is not None:
             debug_info['exception'] = Utils.stack_trace(exception)
-            return ErrorEntity(status=http_status.status_code, message=message, debug_info=debug_info)
+            return ErrorModel(status=http_status.status_code, message=message, debug_info=debug_info)
         else:
-            return ErrorEntity(status=http_status.status_code, message=message)
+            return ErrorModel(status=http_status.status_code, message=message)
 
-    @staticmethod
-    def error_response(http_status: HTTPStatus, message: str = None, exception: Exception = None,
+    @classmethod
+    def error_response(cls, http_status: HTTPStatus, message: str = None, exception: Exception = None,
                        is_critical: bool = False):
-        return ErrorEntity.error(http_status, message, exception, is_critical).to_json()
+        return ErrorModel.error(http_status, message, exception, is_critical).to_json()
 
     def __str__(self):
         """Returns the string representation of this object"""
@@ -126,89 +124,114 @@ class ErrorEntity(AbstractModel):
         return str(self)
 
 
-class ResponseEntity(AbstractModel):
-    """ResponseEntity represents the response object"""
+class ResponseModel(AbstractPydanticModel):
+    """ResponseModel represents the response object"""
     status: int
-    data: AbstractEntity = None
-    errors: List[ErrorEntity] = None
+    data: List[Optional[AbstractModel]] = None
+    errors: List[ErrorModel] = None
 
-    def __repr__(self) -> str:
+    def __str__(self) -> str:
         """Returns the string representation of this object"""
         return f"{type(self).__name__} <status={self.status}, data={self.data}, errors={self.errors}>"
 
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
+
     def to_json(self):
         """Returns the JSON representation of this object."""
-        print(f"to_json() -> type: {type(self)}")
+        logger.debug(f"to_json() => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
-    def has_error(self) -> bool:
+    def add(self, entity: AbstractPydanticModel = None):
+        """Adds an object into the list of data or errors"""
+        logger.debug(f"add(), entity={entity}")
+        if isinstance(entity, ErrorModel):
+            if self.errors is None and entity:
+                self.errors = []
+            self.errors.append(entity)
+        elif isinstance(entity, AbstractModel):
+            if self.data is None and entity:
+                self.data = []
+            self.data.append(entity)
+        else:
+            logger.debug(f"Invalid entity:{entity}!")
+
+    def addData(self, entities: List[AbstractModel] = None):
+        """Adds an object into the list of data or errors"""
+        logger.debug(f"addData(), entities={entities}")
+        if entities:
+            if self.data is None:
+                self.data = []
+            else:
+                self.data.extend(entities)
+        elif entities is not None and not entities:  # Emtpy list
+            if self.data is None:
+                self.data = []
+
+    def addError(self, entities: List[ErrorModel] = None):
+        """Adds an object into the list of data or errors"""
+        logger.debug(f"addError(), entities={entities}")
+        if entities:
+            if self.errors is None:
+                self.errors = []
+            else:
+                self.data.extend(entities)
+        elif entities is not None and not entities:  # Emtpy list
+            if self.errors is None:
+                self.errors = []
+
+    def hasError(self) -> bool:
         """Returns true if any errors otherwise false"""
         return self.errors is not None
 
-    def __add_error(self, error: ErrorEntity = None):
-        """Adds an error object into the list"""
-        if self.errors is None and error:
-            self.errors = []
-
-        self.errors.append(error)
-
-    @staticmethod
-    def response(http_status: HTTPStatus, entity: AbstractModel = None, message: str = None,
-                 exception: Exception = None, is_critical: bool = False):
-        """
-        Builds the response for the provided entity.
-        Parameters:
-            http_status: status of the request
-            entity: an entity object
-            message: information message
-            exception: exceptions, if any
-            is_critical: if the exception is considered a critical error
-        """
-        print(f"+response({http_status}, {entity}, {message}, {exception}, {is_critical})")
+    @classmethod
+    def buildResponse(cls, http_status: HTTPStatus, entity: AbstractPydanticModel = None, message: str = None,
+                      exception: Exception = None, is_critical: bool = False):
+        logger.debug(f"+buildResponse({http_status}, {entity}, {message}, {exception}, {is_critical})")
         response = None
-        if entity:
-            if isinstance(entity, ErrorEntity):  # check if an error entity
-                # print(f"isinstance(entity, ErrorEntity) => {isinstance(entity, ErrorEntity)}")
-                error = ErrorEntity.error(http_status, message, exception, is_critical)
-                # update entity's message and exception if missing
-                if not error.message:
-                    error.message = entity.message if entity.message else error.message
+        if isinstance(entity, ErrorModel):  # check if an error entity
+            logger.debug(f"isinstance(entity, ErrorModel) => {isinstance(entity, ErrorModel)}")
+            error = ErrorModel.error(http_status, message, exception, is_critical)
+            # update entity's message and exception if missing
+            if not error.message:
+                error.message = entity.message if entity.message else error.message
 
-                # build response and add error in the list
-                response = ResponseEntity(status=http_status.status_code)
-                response.__add_error(error)
-            elif isinstance(entity, AbstractEntity):
-                # print(f"isinstance(entity, AbstractEntity) => {isinstance(entity, AbstractEntity)}")
-                response = ResponseEntity(status=http_status.status_code, data=entity)
-                # build error response, if exception is provided
-                if not HTTPStatus.is_success_status(http_status):
-                    # if not exception or not message:
-                    error = ErrorEntity.error(http_status, message, exception, is_critical)
-                    response.__add_error(error)
-
-        elif not exception:
-            # print(f"not exception")
-            response = ResponseEntity(status=http_status.status_code)
+            # build response and add error in the list
+            response = ResponseModel(status=http_status.status_code)
+            response.add(error)
+        elif isinstance(entity, AbstractModel):
+            logger.debug(f"isinstance(entity, AbstractModel) => {isinstance(entity, AbstractModel)}")
+            response = ResponseModel(status=http_status.status_code)
             # build error response, if exception is provided
-            response.__add_error(ErrorEntity.error(http_status, message, exception, is_critical))
+            if HTTPStatus.is_success_status(http_status):
+                # if not exception or not message:
+                response.add(entity)
+            else:
+                response.add(ErrorModel.error(http_status, message, exception, is_critical))
+        elif exception:
+            logger.debug(f"elif exception => exception={exception}")
+            response = ResponseModel(status=http_status.status_code)
+            # build error response, if exception is provided
+            response.add(ErrorModel.error(http_status, message, exception, is_critical))
         else:
-            # print(f"else")
-            response = ResponseEntity(status=http_status.status_code)
+            logger.debug(f"else => ")
+            response = ResponseModel(status=http_status.status_code)
 
-        print(f"-response(), response: {response}")
+        logger.debug(f"-buildResponse(), response={response}")
         return response
 
-    @staticmethod
-    def build_response(http_status: HTTPStatus, entity: AbstractModel = None, message: str = None,
-                       exception: Exception = None, is_critical: bool = False):
-        return ResponseEntity.response(http_status, entity, message, exception, is_critical).to_json()
+    @classmethod
+    def jsonResponse(cls, http_status: HTTPStatus, entity: AbstractPydanticModel = None, message: str = None,
+                     exception: Exception = None, is_critical: bool = False):
+        return ResponseModel.buildResponse(http_status, [entity], message, exception, is_critical).to_json()
         # return ResponseEntity.response(http_status, entity, message, exception, is_critical).model_dump_json()
 
-    @staticmethod
-    def error_response(entities):
+    @classmethod
+    def jsonResponses(cls, entities: List[Optional[AbstractPydanticModel]] = []):
         responses = []
         for entity in entities:
-            print(entity.to_json())
+            logger.debug(f"jsonResponses() => type={type(entity)}, object={str(entity)}, json={entity.to_json()}")
             responses.append(entity.to_json())
 
         return responses
