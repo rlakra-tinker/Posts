@@ -5,7 +5,7 @@ from rest.contact.v1 import bp as bp_contact_v1
 import json
 from flask import Blueprint, make_response, request, session, g, redirect, url_for
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorModel, ResponseModel
+from framework.model import ErrorModel, ResponseModel
 from rest.contact.service import ContactService
 from rest.contact.models import Contact
 

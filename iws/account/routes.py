@@ -7,7 +7,9 @@ from flask import render_template, make_response, request, redirect, url_for, cu
 from account.models import User
 from account.v1 import bp as bp_v1_accounts
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorModel, ResponseModel
+from framework.model import ErrorModel, ResponseModel
+from rest.role.entity import Role
+from rest.account.entities import User, UserRole, Address
 
 # holds accounts in memory
 

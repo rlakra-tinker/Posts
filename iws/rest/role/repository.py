@@ -7,7 +7,7 @@ from flask import current_app
 
 from framework.repository import AbstractRepository
 from framework.utils import Utils
-from rest.role.models import Role
+from rest.role.model import Role
 
 
 class RoleRepository(AbstractRepository):

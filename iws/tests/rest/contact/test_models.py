@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from framework.http import HTTPStatus
-from framework.model.abstract import AbstractPydanticModel, ResponseModel, ErrorModel
+from framework.model import AbstractPydanticModel, ResponseModel, ErrorModel
 from rest.contact.models import Contact
 from tests.base import AbstractTestCase
 

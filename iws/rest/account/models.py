@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 
-from framework.model.abstract import AbstractModel
+from framework.model import AbstractModel
 
 
 class Account(AbstractModel):

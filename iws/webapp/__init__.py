@@ -26,7 +26,7 @@ from common.config import Config
 from framework.enums import EnvType
 from framework.enums import KeyEnum
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorModel
+from framework.model import ErrorModel
 from globals import connector
 from rest import bp as rest_bp
 from webapp.routes import bp as webapp_bp

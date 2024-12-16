@@ -10,9 +10,9 @@ from flask import make_response, request, abort, current_app, jsonify
 
 from framework.exceptions import DuplicateRecordException
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorModel, ResponseModel
+from framework.model import ErrorModel, ResponseModel
 from framework.utils import Utils
-from rest.role.models import Role
+from rest.role.model import Role
 from rest.role.service import RoleService
 from rest.role.v1 import bp as bp_role_v1
 

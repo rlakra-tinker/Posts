@@ -6,9 +6,9 @@ from typing import List, Optional
 from flask import current_app
 
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorModel
+from framework.model import ErrorModel
 from framework.service import AbstractService
-from rest.role.models import Role
+from rest.role.model import Role
 from rest.role.repository import RoleRepository
 import logging
 

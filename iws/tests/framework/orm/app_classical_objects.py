@@ -2,7 +2,9 @@
 # Author: Rohtash Lakra
 #
 from datetime import datetime
-from entity import Role, User, Address
+
+from rest.account.entities import User, Address
+from rest.role.entity import Role
 
 
 class SqlAlchemyClassicalModel:

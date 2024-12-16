@@ -1,10 +1,10 @@
 #
 # Author: Rohtash Lakra
 #
+import json
+
 from framework.repository import AbstractRepository
 from rest.account.models import Account
-import json
-from rest.account.entities import Role, User, UserRole
 
 
 class AccountRepository(AbstractRepository):
@@ -12,17 +12,20 @@ class AccountRepository(AbstractRepository):
     def __init__(self):
         pass
 
-    def find_by_id(self, id:int):
+    def find_by_id(self, id: int):
         return self.execute('SELECT * FROM accounts WHERE id = ?', (id,)).fetchone()
 
-    def create(self, account:Account):
+    def create(self, account: Account):
         create_query = '''
         INSERT INTO accounts (role_id, user_name, email, first_name, last_name, password, is_admin)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         '''
 
         try:
-            values = (account.role_id, account.user_name, account.email, account.first_name, account.last_name, account.password, account.is_admin)
+            values = (
+                account.role_id, account.user_name, account.email, account.first_name, account.last_name,
+                account.password,
+                account.is_admin)
             self.execute(create_query, values)
         except Exception as ex:
             print(ex)
@@ -41,4 +44,3 @@ class AccountRepository(AbstractRepository):
         update_query = ''
 
         return super().execute(update_query, {'id': id, **account_json})
-

@@ -4,7 +4,7 @@
 from typing import Dict, Set, List
 from framework.service import AbstractService
 from rest.contact.models import Contact
-from framework.model.abstract import ErrorModel
+from framework.model import ErrorModel
 from framework.http import HTTPStatus
 
 

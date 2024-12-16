@@ -4,8 +4,11 @@
 from datetime import datetime
 
 from sqlalchemy import create_engine
-from entity import AbstractEntity, Role, User, Address
 from sqlalchemy.orm import Session
+
+from framework.orm.sqlalchemy.entity import AbstractEntity
+from rest.account.entities import User, Address
+from rest.role.entity import Role
 
 
 class SqlAlchemyTableObject:

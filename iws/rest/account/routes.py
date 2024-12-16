@@ -7,7 +7,7 @@
 from rest.account.v1 import bp as bp_account_v1
 from flask import make_response, request, session, g, redirect, url_for
 from framework.http import HTTPStatus
-from framework.model.abstract import ErrorModel
+from framework.model import ErrorModel
 from rest.account.service import AccountService
 from rest.account.models import Account
 

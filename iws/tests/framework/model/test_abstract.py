@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from framework.model.abstract import AbstractPydanticModel, AbstractModel, NamedModel, ErrorModel, ResponseModel
+from framework.model import AbstractPydanticModel, AbstractModel, NamedModel, ErrorModel, ResponseModel
 from framework.http import HTTPStatus
 from tests.base import AbstractTestCase
 
