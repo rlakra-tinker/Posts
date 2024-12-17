@@ -47,8 +47,8 @@ ifndef HOST_PORT
 HOST_PORT=8080
 endif
 
-ifndef APP_PORT
-APP_PORT=8080
+ifndef CONTAINER_PORT
+CONTAINER_PORT=8080
 endif
 
 ifndef DOCKER_APP_TAG
@@ -223,9 +223,9 @@ docker-build-container: ## Builds Docker Container Image
 docker-run-container: ## Runs Docker Container
 	@# Help: Runs the docker container of an app as background service
 	@echo "Running Docker Container ..."
-	@#docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${APP_PORT} -d -e APP_NAME=${APP_NAME} ${DOCKER_APP_TAG}
-	docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${APP_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
-	@#docker container run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${APP_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
+	@#docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d -e APP_NAME=${APP_NAME} ${DOCKER_APP_TAG}
+	docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
+	@#docker container run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
 
 
 # Builds Docker Image and Run it.
@@ -254,7 +254,7 @@ docker-stop-container: ## Stops Docker Container
 	@# Help: Stops the docker container of an app
 	@echo "Stopping Docker Container [${DOCKER_CONTAINER_NAME}] ..."
 	docker stop ${DOCKER_CONTAINER_NAME}
-	docker rm ${DOCKER_CONTAINER_NAME}
+	docker container rm ${DOCKER_CONTAINER_NAME}
 
 #
 # Lint Commands
