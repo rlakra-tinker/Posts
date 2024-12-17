@@ -21,8 +21,8 @@ DATE_TIMESTAMP:=$(date '+%Y-%m-%d')
 # --------------------------------------------------------------
 # App Static Variables
 PROJECT_OWNER=Rohtash
-PROJECT_NAME=iws_posts
-DOCKER_CONTAINER_NAME=iws_posts
+PROJECT_NAME=posts-iws
+DOCKER_CONTAINER_NAME=posts-iws
 DOCKER_REPOSITORY:=${PROJECT_OWNER}/${PROJECT__NAME}
 # --------------------------------------------------------------
 # MySQL Settings
@@ -40,7 +40,7 @@ DATABASE_NAME=posts
 
 # App Dynamic Variables
 ifndef APP_NAME
-APP_NAME=iws_posts
+APP_NAME=posts-iws
 endif
 
 ifndef HOST_PORT
