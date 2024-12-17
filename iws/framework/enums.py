@@ -132,15 +132,6 @@ class EnvType(BaseEnum):
     #  UAT or “User Acceptance Testing” Environment - testing environment
     UAT = ("uat")
 
-    @classmethod
-    def get_env_type(cls):
-        __ENV_TYPE = 'env_type'
-        env_type = os.getenv(__ENV_TYPE)
-        if env_type is None:
-            env_type = os.getenv(__ENV_TYPE.upper())
-
-        return env_type
-
     @staticmethod
     def is_development(env_type: str) -> bool:
         """Returns true if DEV == env_type other false"""
@@ -176,6 +167,19 @@ class EnvType(BaseEnum):
     def is_uat(env_type: str) -> bool:
         """Returns true if UAT == env_type other false"""
         return EnvType.equals(EnvType.UAT, env_type)
+
+    @classmethod
+    def get_env_type(cls):
+        __ENV_TYPE = 'env_type'
+        env_type = os.getenv(__ENV_TYPE)
+        if env_type is None:
+            env_type = os.getenv(__ENV_TYPE.upper())
+            if env_type is None:
+                env_type = EnvType.flask_env()
+                if env_type is None:
+                    env_type = EnvType.DEV.name
+
+        return env_type
 
     @staticmethod
     def flask_env() -> str:

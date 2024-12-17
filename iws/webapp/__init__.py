@@ -37,7 +37,6 @@ class WebApp:
     __HOST = 'host'
     __PORT = 'port'
     __DEBUG = 'debug'
-    __FLASK_ENV = 'FLASK_ENV'
     __ENV_TYPE = 'env_type'
     __LOG_FILE_NAME = 'LOG_FILE_NAME'
 
@@ -55,7 +54,7 @@ class WebApp:
             flask_version = importlib.metadata.version("flask")
             current_app.logger.debug(
                 f"Running Application [{self.app.name}] on version [{flask_version}] with testMode [{test_mode}] ...")
-            current_app.logger.debug(f"FLASK_ENV={os.getenv(self.__FLASK_ENV)}")
+            current_app.logger.info(f"ENV_TYPE={EnvType.get_env_type()}")
             # Load the environment variables
             env_file_path = self.path.cwd().joinpath('.env')  # self.path.cwd() / '.env'
             current_app.logger.debug(f"env_file_path={env_file_path}")
@@ -65,7 +64,7 @@ class WebApp:
             self.set_env(self.__HOST, os.getenv(self.__HOST, "127.0.0.1"))
             self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
             self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
-            self.set_env(self.__ENV_TYPE, os.getenv(self.__FLASK_ENV, 'Development'))
+            self.set_env(self.__ENV_TYPE, EnvType.get_env_type())
             self.set_env(self.__LOG_FILE_NAME, os.getenv(self.__LOG_FILE_NAME, 'iws.log'))
             current_app.logger.debug(f"environment={self.environment}")
 
@@ -194,7 +193,7 @@ class WebApp:
 
         # Initialize/Register Request's behavior/db connection
         if not test_mode:
-            connector.init_db({KeyEnum.DB_TYPE: KeyEnum.SQLALCHEMY})
+            connector.init_db({KeyEnum.DB_TYPE.name: KeyEnum.SQLALCHEMY.name})
             # app.before_request(connector.open_connection())
             # app.teardown_request(connector.close_connection())
 

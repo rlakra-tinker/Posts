@@ -116,7 +116,7 @@ class SQLite3Connector(DatabaseConnector):
         with self.app.app_context():
             current_app.logger.debug(f"Initializing Database. configs={configs}")
             dbType = configs.get(KeyEnum.DB_TYPE)
-            if dbType and dbType == KeyEnum.SQLALCHEMY:
+            if dbType and KeyEnum.equals(KeyEnum.SQLALCHEMY, dbType):
                 """Initializes the SQLAlchemy database"""
                 # Set up the SQLAlchemy Database to be a local file 'posts.db'
                 self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
