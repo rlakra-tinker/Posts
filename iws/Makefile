@@ -51,9 +51,9 @@ ifndef CONTAINER_PORT
 CONTAINER_PORT=8080
 endif
 
-ifndef DOCKER_APP_TAG
-DOCKER_APP_TAG=latest
-#DOCKER_APP_TAG=$(date +%Y%m%d%H%M%S)
+ifndef DOCKER_IMAGE_TAG
+DOCKER_IMAGE_TAG=latest
+#DOCKER_IMAGE_TAG=$(date +%Y%m%d%H%M%S)
 endif
 
 # Variables that depend on git
@@ -216,16 +216,16 @@ dist: test
 docker-build-container: ## Builds Docker Container Image
 	@# Help: Builds the docker container image of an app
 	@echo "Building Docker Container Image ..."
-	#docker build --progress=plain -t ${DOCKER_REPOSITORY}:${DOCKER_APP_TAG} --target ${PROJECT_NAME} .
-	docker build -t ${DOCKER_CONTAINER_NAME}:${DOCKER_APP_TAG} .
+	#docker build --progress=plain -t ${DOCKER_REPOSITORY}:${DOCKER_IMAGE_TAG} --target ${PROJECT_NAME} .
+	docker build -t ${DOCKER_CONTAINER_NAME}:${DOCKER_IMAGE_TAG} .
 
 # Runs the Docker Container
 docker-run-container: ## Runs Docker Container
 	@# Help: Runs the docker container of an app as background service
 	@echo "Running Docker Container ..."
-	@#docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d -e APP_NAME=${APP_NAME} ${DOCKER_APP_TAG}
-	docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
-	@#docker container run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d ${PROJECT_NAME}:${DOCKER_APP_TAG}
+	@#docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d -e APP_NAME=${APP_NAME} ${DOCKER_IMAGE_TAG}
+	docker run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d ${PROJECT_NAME}:${DOCKER_IMAGE_TAG}
+	@#docker container run --name ${DOCKER_CONTAINER_NAME} --rm -p ${HOST_PORT}:${CONTAINER_PORT} -d ${PROJECT_NAME}:${DOCKER_IMAGE_TAG}
 
 
 # Builds Docker Image and Run it.
