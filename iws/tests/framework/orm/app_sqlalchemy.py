@@ -6,9 +6,9 @@ from datetime import datetime
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
-from framework.orm.sqlalchemy.entity import AbstractEntity
-from rest.account.entities import User, Address
-from rest.role.entity import Role
+from framework.orm.sqlalchemy.schema import BaseSchema
+from rest.account.schema import User, Address
+from rest.role.schema import Role
 
 
 class SqlAlchemyTableObject:
@@ -21,7 +21,8 @@ class SqlAlchemyTableObject:
         print(f"create_database\n")
         # Using our table metadata and our engine, we can generate our schema at once in our target SQLite database,
         # using a method called 'MetaData.create_all()':
-        AbstractEntity.metadata.create_all(self.engine)
+        # AbstractEntity.metadata.create_all(bind=self.engine)
+        BaseSchema.metadata.create_all(bind=self.engine)
         print()
 
     def populate_database(self):

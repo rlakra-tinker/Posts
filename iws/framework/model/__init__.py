@@ -86,8 +86,14 @@ class ErrorModel(AbstractPydanticModel):
     message: str = None
     debug_info: Optional[Dict[str, object]] = None
 
+    def to_json(self):
+        """Returns the JSON representation of this object."""
+        logger.debug(f"to_json() => type={type(self)}, object={str(self)}")
+        return self.model_dump_json()
+
     @staticmethod
-    def error(http_status: HTTPStatus, message: str = None, exception: Exception = None, is_critical: bool = False):
+    def buildError(http_status: HTTPStatus, message: str = None, exception: Exception = None,
+                   is_critical: bool = False):
         """
         Builds the error object for the provided arguments
         Parameters:
@@ -96,6 +102,8 @@ class ErrorModel(AbstractPydanticModel):
             exception: exception for the error message
             is_critical: is error a critical error
         """
+        logger.debug(f"buildError({http_status}, {message}, {exception}, {is_critical})")
+
         # set message, if missing
         if message is None:
             if exception is not None:
@@ -115,9 +123,9 @@ class ErrorModel(AbstractPydanticModel):
             return ErrorModel(status=http_status.status_code, message=message)
 
     @classmethod
-    def error_response(cls, http_status: HTTPStatus, message: str = None, exception: Exception = None,
-                       is_critical: bool = False):
-        return ErrorModel.error(http_status, message, exception, is_critical).to_json()
+    def jsonResponse(cls, http_status: HTTPStatus, message: str = None, exception: Exception = None,
+                     is_critical: bool = False):
+        return ErrorModel.buildError(http_status, message, exception, is_critical).to_json()
 
     def __str__(self):
         """Returns the string representation of this object"""
@@ -131,8 +139,8 @@ class ErrorModel(AbstractPydanticModel):
 class ResponseModel(AbstractPydanticModel):
     """ResponseModel represents the response object"""
     status: int
-    data: List[Optional[AbstractModel]] = None
-    errors: List[ErrorModel] = None
+    data: Optional[List[AbstractModel]] = None
+    errors: Optional[List[ErrorModel]] = None
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -194,32 +202,38 @@ class ResponseModel(AbstractPydanticModel):
                       exception: Exception = None, is_critical: bool = False):
         logger.debug(f"+buildResponse({http_status}, {entity}, {message}, {exception}, {is_critical})")
         response = None
-        if isinstance(entity, ErrorModel):  # check if an error entity
+        if isinstance(entity, ErrorModel):  # check if an ErrorModel entity
             logger.debug(f"isinstance(entity, ErrorModel) => {isinstance(entity, ErrorModel)}")
-            error = ErrorModel.error(http_status, message, exception, is_critical)
+            errorModel = ErrorModel.buildError(http_status, message, exception, is_critical)
             # update entity's message and exception if missing
-            if not error.message:
-                error.message = entity.message if entity.message else error.message
+            if not errorModel.message:
+                errorModel.message = entity.message if entity.message else errorModel.message
 
-            # build response and add error in the list
+            # build response and add errorModel in the list
             response = ResponseModel(status=http_status.status_code)
-            response.add(error)
+            response.add(errorModel)
         elif isinstance(entity, AbstractModel):
             logger.debug(f"isinstance(entity, AbstractModel) => {isinstance(entity, AbstractModel)}")
             response = ResponseModel(status=http_status.status_code)
-            # build error response, if exception is provided
+            # build errorModel response, if exception is provided
             if HTTPStatus.is_success_status(http_status):
                 # if not exception or not message:
                 response.add(entity)
             else:
-                response.add(ErrorModel.error(http_status, message, exception, is_critical))
+                response.add(ErrorModel.buildError(http_status, message, exception, is_critical))
         elif exception:
             logger.debug(f"elif exception => exception={exception}")
             response = ResponseModel(status=http_status.status_code)
-            # build error response, if exception is provided
-            response.add(ErrorModel.error(http_status, message, exception, is_critical))
+            # build errorModel response, if exception is provided
+            response.add(ErrorModel.buildError(http_status, message, exception, is_critical))
+        elif not HTTPStatus.is_success_status(http_status):
+            logger.debug(f"not HTTPStatus.is_success_status() => {HTTPStatus.is_success_status(http_status)}")
+            response = ResponseModel(status=http_status.status_code)
+            # build errorModel response, if exception is provided
+            response.add(ErrorModel.buildError(http_status, message, exception, is_critical))
         else:
             logger.debug(f"else => ")
+
             response = ResponseModel(status=http_status.status_code)
 
         logger.debug(f"-buildResponse(), response={response}")

@@ -3,8 +3,8 @@
 #
 from datetime import datetime
 
-from rest.account.entities import User, Address
-from rest.role.entity import Role
+from rest.account.schema import User, Address
+from rest.role.schema import Role
 
 
 class SqlAlchemyClassicalModel:

@@ -45,3 +45,4 @@ When you register the Flask Blueprint in an application, you extend the applicat
 
 """
 from rest.role import routes
+from rest.role.v2.routes import *

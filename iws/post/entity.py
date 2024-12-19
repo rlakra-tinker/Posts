@@ -27,3 +27,29 @@ class Document(BaseEntity):
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
         return str(self)
+
+
+#
+# Author: Rohtash Lakra
+#
+from framework.entity.abstract import BaseEntity
+
+
+class Document(BaseEntity):
+
+    @staticmethod
+    def __new__(cls, *args, **kwargs):
+        return super().__new__(cls)
+
+    def __init__(self, id: int = None, filename: str = None, data: str = None):
+        super().__init__(id)
+        self.filename = filename
+        self.data = data
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return f"{type(self).__name__} <id={self.id}, filename={self.filename}, data={self.data}>"
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)

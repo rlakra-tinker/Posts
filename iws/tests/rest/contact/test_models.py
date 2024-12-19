@@ -89,8 +89,8 @@ class ModelsTest(AbstractTestCase):
         """Tests an ResponseEntity object"""
         print("\n+test_response()")
         contact = self.new_contact(id=16, first_name="Roh", last_name="Lakra", country="USA", subject="Failure")
-        errors = [ErrorModel.error(HTTPStatus.INVALID_DATA, message='First name should provide!'),
-                  ErrorModel.error(HTTPStatus.INVALID_DATA, message='Last name should provide!')]
+        errors = [ErrorModel.buildError(HTTPStatus.INVALID_DATA, message='First name should provide!'),
+                  ErrorModel.buildError(HTTPStatus.INVALID_DATA, message='Last name should provide!')]
         # response = ResponseModel(status=HTTPStatus.BAD_REQUEST.status_code, data=contact, errors=errors)
         response = ResponseModel(status=HTTPStatus.BAD_REQUEST.status_code)
         response.add(contact)

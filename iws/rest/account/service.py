@@ -1,33 +1,33 @@
 #
 # Author: Rohtash Lakra
 #
-from rest.account.repository import AccountRepository
 from framework.service import AbstractService
-from rest.account.models import Account
+from rest.account.model import User
+from rest.account.repository import UserRepository
 
 
-class AccountService(AbstractService):
+class UserService(AbstractService):
 
     def __init__(self):
-        self.dao = AccountRepository()
+        self.dao = UserRepository()
 
-    def find_by_id(self, id:int):
+    def find_by_id(self, id: int):
         """
         Returns the next ID of the account
         """
-        last_id = super(AccountService, self).find_by_id(id)
+        last_id = super(UserService, self).find_by_id(id)
         if not last_id:
             last_id = 0
+
         if not self.accounts and len(self.accounts) > 0:
             last_id = max(account["id"] for account in self.accounts)
 
         return last_id + 1
 
-    def register(self, account: Account):
-        account = self.dao.create(account)
-        return account
+    def register(self, user: User):
+        user = self.dao.create(user)
+        return user
 
-
-    def update(self, account: Account):
-        account = self.dao.create(account)
-        return account
+    def update(self, user: User):
+        user = self.dao.create(user)
+        return user

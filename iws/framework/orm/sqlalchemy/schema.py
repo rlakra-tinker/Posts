@@ -1,12 +1,16 @@
 #
 # Author: Rohtash Lakra
 #
+# References: -
+# - https://docs.sqlalchemy.org/en/20/orm/quickstart.html
+# - https://docs.sqlalchemy.org/en/20/orm/inheritance.html
+#
 from datetime import datetime
 from enum import unique, auto
 from math import ceil
 
 from sqlalchemy import func, orm, String
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, declarative_base
 
 from framework.enums import AutoUpperCase
 
@@ -149,9 +153,12 @@ class AbstractSchema(Auditable):
     All ORM mapped classes require at least one column be declared as part of the primary key, typically by using
     the 'Column.primary_key' parameter on those 'mapped_column()' objects that should be part of the key.
     """
+    # primary_key=True, therefore will be NOT NULL
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
+    # not Optional[], therefore will be NOT NULL
     created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # not Optional[], therefore will be NOT NULL
     updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
 
     def __init__(self, **kwargs):
@@ -188,6 +195,20 @@ class AbstractSchema(Auditable):
         """Returns the string representation of this object"""
         return f"created_at={self.created_at}, updated_at={self.updated_at}>"
 
+    # def load_and_not_raise(self, data):
+    #     try:
+    #         return self.load(data)
+    #     except ValidationError as e:
+    #         err = get_error(exception=None, msg=e.messages, status=422)
+    #         return abort(make_response(err, err.get('error').get('status')))
+    #
+    # def validate_and_raise(self, data):
+    #     errors = self.validate(data)
+    #
+    #     if errors:
+    #         err = get_error(exception=None, msg=errors, status=422)
+    #         return abort(make_response(err, err.get('error').get('status')))
+
 
 """
 Create the declarative base. This will become the common source for all future SQLAlchemy classes.
@@ -199,78 +220,79 @@ class User(Model):
 
 """
 
-
 # Model = declarative_base(cls=AbstractSchema)
-# BaseSchema = declarative_base(cls=AbstractSchema)
+BaseSchema = declarative_base(cls=AbstractSchema)
 
-class BaseSchema(DeclarativeBase):
-    """
-    AbstractSchema define module-level constructs that will form the structures which we will be querying from the
-    database. This structure, known as a Declarative Mapping, defines at once both a Python object model, and database
-    metadata that describes real SQL tables that exist, or will exist, in a particular database:
 
-    The mapping starts with a base class, which above is called 'BaseSchema', and is created by making a simple
-    subclass against the 'DeclarativeBase' class.
-
-    Individual mapped classes are then created by making subclasses of 'BaseSchema'.
-    A mapped class typically refers to a single particular database table, the name of which is indicated by using
-    the '__tablename__' class-level attribute.
-
-    Normally, when one would like to map two different subclasses to individual tables, and leave the base class
-    unmapped, this can be achieved very easily. When using Declarative, just declare the base class with
-    the '__abstract__' indicator:
-    """
-    __abstract__ = True
-
-    """
-    ID - Primary Key
-
-    All ORM mapped classes require at least one column be declared as part of the primary key, typically by using
-    the 'Column.primary_key' parameter on those 'mapped_column()' objects that should be part of the key.
-    """
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-
-    # auditable fields
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-    updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-
-    def __init__(self, **kwargs):
-        """
-        Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
-        A constructor similar to that supplied by Declarative is illustrated:
-        """
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
-
-    def set_attrs(self, **kwargs):
-        """
-        Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
-        A constructor similar to that supplied by Declarative is illustrated:
-        """
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
-
-    # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
-    query_class = BaseQuery
-
-    # an instance of `query_class`. Can be used to query the database for instances of this model.
-    query = None
-
-    def __str__(self) -> str:
-        """Returns the string representation of this object"""
-        return f"BaseSchema <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
-
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
-
-    def auditable(self) -> str:
-        """Returns the string representation of this object"""
-        return f"created_at={self.created_at}, updated_at={self.updated_at}>"
+# class BaseSchema(DeclarativeBase):
+#     """
+#     AbstractSchema define module-level constructs that will form the structures which we will be querying from the
+#     database. This structure, known as a Declarative Mapping, defines at once both a Python object model, and database
+#     metadata that describes real SQL tables that exist, or will exist, in a particular database:
+#
+#     The mapping starts with a base class, which above is called 'BaseSchema', and is created by making a simple
+#     subclass against the 'DeclarativeBase' class.
+#
+#     Individual mapped classes are then created by making subclasses of 'BaseSchema'.
+#     A mapped class typically refers to a single particular database table, the name of which is indicated by using
+#     the '__tablename__' class-level attribute.
+#
+#     Normally, when one would like to map two different subclasses to individual tables, and leave the base class
+#     unmapped, this can be achieved very easily. When using Declarative, just declare the base class with
+#     the '__abstract__' indicator:
+#     """
+#     __abstract__ = True
+#
+#     """
+#     ID - Primary Key
+#
+#     All ORM mapped classes require at least one column be declared as part of the primary key, typically by using
+#     the 'Column.primary_key' parameter on those 'mapped_column()' objects that should be part of the key.
+#     """
+#     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+#
+#     # auditable fields
+#     created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+#     updated_at: Mapped[datetime] = mapped_column(insert_default=func.now())
+#
+#     def __init__(self, **kwargs):
+#         """
+#         Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
+#         A constructor similar to that supplied by Declarative is illustrated:
+#         """
+#         for key in kwargs:
+#             setattr(self, key, kwargs[key])
+#
+#     def set_attrs(self, **kwargs):
+#         """
+#         Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
+#         A constructor similar to that supplied by Declarative is illustrated:
+#         """
+#         for key in kwargs:
+#             setattr(self, key, kwargs[key])
+#
+#     # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
+#     query_class = BaseQuery
+#
+#     # an instance of `query_class`. Can be used to query the database for instances of this model.
+#     query = None
+#
+#     def __str__(self) -> str:
+#         """Returns the string representation of this object"""
+#         return f"BaseSchema <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+#
+#     def __repr__(self) -> str:
+#         """Returns the string representation of this object"""
+#         return str(self)
+#
+#     def auditable(self) -> str:
+#         """Returns the string representation of this object"""
+#         return f"created_at={self.created_at}, updated_at={self.updated_at}>"
 
 
 class NamedSchema(BaseSchema):
-    """NamedEntity Entity"""
+    """NamedEntity Schema"""
     __abstract__ = True
 
+    # not Optional[], therefore will be NOT NULL
     name: Mapped[str] = mapped_column(String(64))

@@ -4,12 +4,11 @@
 #
 from flask import render_template, make_response, request, redirect, url_for, current_app
 
-from account.models import User
+from account.entity import User
 from account.v1 import bp as bp_v1_accounts
 from framework.http import HTTPStatus
 from framework.model import ErrorModel, ResponseModel
-from rest.role.entity import Role
-from rest.account.entities import User, UserRole, Address
+from rest.account.model import User
 
 # holds accounts in memory
 
@@ -89,7 +88,8 @@ def login():
             current_app.logger.info('%s failed to log in', user.username)
             # abort(401)
 
-    response = ErrorModel.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    response = ErrorModel.jsonResponse(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    # response = ErrorModel.buildError(HTTPStatus.NOT_FOUND, "Account is not registered!")
     current_app.logger.debug(f"response{response}")
     return make_response(response)
 

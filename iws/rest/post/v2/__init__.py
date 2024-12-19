@@ -4,7 +4,7 @@
 #
 from flask import Blueprint
 
-bp = Blueprint("roles", __name__, url_prefix="/roles")
+bp = Blueprint("posts", __name__, url_prefix="/posts")
 """
 Making a Flask Blueprint:
 
@@ -44,5 +44,4 @@ Here are the Blueprint objects most used decorators that you may find useful:
 When you register the Flask Blueprint in an application, you extend the application with its contents.
 
 """
-from rest.role import routes
-from rest.role.v1.routes import *
+from rest.post import routes

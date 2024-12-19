@@ -5,6 +5,7 @@ from flask import Blueprint
 
 from rest.account.v1 import bp as account_v1_bp
 from rest.contact.v1 import bp as contact_v1_bp
+from rest.post.v1 import bp as post_v1_bp
 from rest.role.v1 import bp as role_v1_bp
 
 bp = Blueprint("v1", __name__, url_prefix="/v1")
@@ -19,4 +20,5 @@ Parameters:
 # Register REST APIs (end-points) here
 bp.register_blueprint(role_v1_bp)
 bp.register_blueprint(account_v1_bp)
+bp.register_blueprint(post_v1_bp)
 bp.register_blueprint(contact_v1_bp)

@@ -4,16 +4,17 @@
 # - https://realpython.com/flask-blueprint/
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
-from rest.account.v1 import bp as bp_account_v1
 from flask import make_response, request, session, g, redirect, url_for
+
 from framework.http import HTTPStatus
 from framework.model import ErrorModel
-from rest.account.service import AccountService
-from rest.account.models import Account
-
+from rest.account.model import User
+from rest.account.schema import User
+from rest.account.service import UserService
+from rest.account.v1 import bp as bp_account_v1
 
 # account's service
-accountService = AccountService()
+userService = UserService()
 
 
 @bp_account_v1.before_app_request
@@ -22,7 +23,7 @@ def load_logged_in_user():
     if user_id is None:
         g.user = None
     else:
-        # g.user = accountService.find_by_id(user_id)
+        # g.user = userService.find_by_id(user_id)
         g.user = None
 
 
@@ -30,14 +31,14 @@ def load_logged_in_user():
 def register():
     print(request)
     if request.is_json:
-        user = accountService.register()
-        user = Account.model_construct(request.get_json())
-        accountService.add(user)
+        user = userService.register()
+        user = User.model_construct(request.get_json())
+        userService.add(user)
         return user, 201
     else:
         username = request.form['username']
         password = request.form['password']
-        user = accountService.register(username, password)
+        user = userService.register(username, password)
 
         # db = get_db()
         error = None
@@ -50,7 +51,7 @@ def register():
         response = None
         if error is None:
             try:
-                response = accountService.register()
+                response = userService.register()
             except Exception as ex:
                 error = f"User '{username}' is already registered! ex:{ex}"
             else:
@@ -75,7 +76,7 @@ def login():
         #         if account['user_name'] == user.user_name:
         #             return make_response(HTTPStatus.OK, account)
 
-    response = ErrorModel.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    response = ErrorModel.buildError(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(response)
 
     return make_response(response)

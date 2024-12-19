@@ -12,6 +12,7 @@ from framework.exceptions import DuplicateRecordException
 from framework.http import HTTPStatus
 from framework.model import ErrorModel, ResponseModel
 from framework.utils import Utils
+from rest.role.schema import Role
 from rest.role.model import Role
 from rest.role.service import RoleService
 from rest.role.v1 import bp as bp_role_v1
@@ -40,10 +41,10 @@ def create():
                                                   message="Role is successfully created.")
         except DuplicateRecordException as ex:
             message = f"Role={role.name} is already created! ex:{ex}"
-            error = ErrorModel.error(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
+            error = ErrorModel.buildError(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
             response = ResponseModel.jsonResponse(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
         except Exception as ex:
-            error = ErrorModel.error(HTTPStatus.INTERNAL_SERVER_ERROR, str(ex), exception=ex)
+            error = ErrorModel.buildError(HTTPStatus.INTERNAL_SERVER_ERROR, str(ex), exception=ex)
             response = ResponseModel.jsonResponse(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
     else:
         response = errors
@@ -70,6 +71,6 @@ def get():
         return make_response(response.to_json())
     except Exception as ex:
         current_app.logger.error(f"Error={ex}, stack_trace={Utils.stack_trace(ex)}")
-        error = ErrorModel.error(HTTPStatus.NOT_FOUND, message='No round found with ID!', exception=ex)
+        error = ErrorModel.buildError(HTTPStatus.NOT_FOUND, message='No round found with ID!', exception=ex)
         response = ResponseModel.buildResponse(HTTPStatus.NOT_FOUND, error)
         return abort(response.to_json())

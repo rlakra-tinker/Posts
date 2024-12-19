@@ -12,8 +12,8 @@ from sqlalchemy.orm import Session
 
 from common.config import Config
 from framework.enums import KeyEnum
-from framework.orm.sqlalchemy.entity import AbstractEntity
 from framework.orm.sqlalchemy.schema import BaseSchema
+# from framework.orm.sqlalchemy.entity import AbstractEntity
 
 
 # 'click.command()' defines a command line command called init-db that calls the 'init_db' function and shows a success
@@ -115,7 +115,8 @@ class SQLite3Connector(DatabaseConnector):
         """Initializes the database"""
         with self.app.app_context():
             current_app.logger.debug(f"Initializing Database. configs={configs}")
-            dbType = configs.get(KeyEnum.DB_TYPE)
+            dbType = configs.get(KeyEnum.DB_TYPE.name)
+            current_app.logger.debug(f"dbType={dbType}")
             if dbType and KeyEnum.equals(KeyEnum.SQLALCHEMY, dbType):
                 """Initializes the SQLAlchemy database"""
                 # Set up the SQLAlchemy Database to be a local file 'posts.db'
@@ -129,8 +130,8 @@ class SQLite3Connector(DatabaseConnector):
                 self.metadata = MetaData()
                 # MetaData.create_all(BaseSchema, bind=self.engine)
                 # self.metadata.create_all(self.engine)
-                AbstractEntity.metadata.create_all(self.engine)
-                # BaseSchema.metadata.create_all(bind=self.engine)
+                # AbstractEntity.metadata.create_all(bind=self.engine)
+                BaseSchema.metadata.create_all(bind=self.engine)
             else:
                 """Initializes the SQLite Database"""
                 #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
@@ -185,22 +186,38 @@ class SQLite3Connector(DatabaseConnector):
                 current_app.logger.debug('No active connection!')
 
     def save(self, instance):
-        current_app.logger.info(f"save_entity => instance={instance}")
+        """Saves the instance using context manager"""
+        current_app.logger.debug(f"+save(), instance={instance}")
         with Session(self.engine) as session:
-            # add entity
-            session.add(instance)
-            session.commit()
-            current_app.logger.info(f"Persisted a instance successfully!")
+            session.begin()
+            try:
+                session.add(instance)
+            except Exception as ex:
+                current_app.logger.error(f"Failed transaction with error:{ex}")
+                session.rollback()
+                raise ex
+            else:
+                session.commit()
+                current_app.logger.debug("Persisted a instance successfully!")
+        current_app.logger.debug(f"-save()")
 
     def save_all(self, instances: Iterable[object]):
-        current_app.logger.info(f"save_all => instances={instances}")
+        """Saves the instances using context manager"""
+        current_app.logger.debug(f"+save_all(), instances={instances}")
         with Session(self.engine) as session:
-            # add entity
-            session.add_all(instances)
-            session.commit()
-            current_app.logger.info(f"Persisted [{len(instances)}] instances successfully!")
+            session.begin()
+            try:
+                session.add_all(instances)
+            except Exception as ex:
+                current_app.logger.error(f"Failed transaction with error:{ex}")
+                session.rollback()
+                raise ex
+            else:
+                session.commit()
+                current_app.logger.debug(f"Persisted [{len(instances)}] instances successfully!")
+        current_app.logger.debug(f"-save_all()")
 
-    def select(self, entity: AbstractEntity):
-        current_app.logger.info(f"select_entity => entity={entity}")
+    def select(self, entity: BaseSchema):
+        current_app.logger.info(f"select => entity={entity}")
         with Session(self.engine) as session:
             return session.query(entity).first()

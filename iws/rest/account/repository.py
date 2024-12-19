@@ -4,20 +4,20 @@
 import json
 
 from framework.repository import AbstractRepository
-from rest.account.models import Account
+from rest.account.model import User
 
 
-class AccountRepository(AbstractRepository):
+class UserRepository(AbstractRepository):
 
     def __init__(self):
         pass
 
     def find_by_id(self, id: int):
-        return self.execute('SELECT * FROM accounts WHERE id = ?', (id,)).fetchone()
+        return self.execute('SELECT * FROM users WHERE id = ?', (id,)).fetchone()
 
-    def create(self, account: Account):
+    def create(self, account: User):
         create_query = '''
-        INSERT INTO accounts (role_id, user_name, email, first_name, last_name, password, is_admin)
+        INSERT INTO users (role_id, user_name, email, first_name, last_name, password, is_admin)
         VALUES (?, ?, ?, ?, ?, ?, ?)
         '''
 

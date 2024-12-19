@@ -15,20 +15,28 @@ class User(BaseSchema):
     """
     __tablename__ = "users"
 
+    # not Optional[], therefore will be NOT NULL
     user_name: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
     password: Mapped[str] = mapped_column(String(128))
+    # not Optional[], therefore will be NOT NULL
     email: Mapped[str] = mapped_column(String(128))
+    # not Optional[], therefore will be NOT NULL
     first_name: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
     last_name: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
     admin: Mapped[bool] = False
 
     # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
-    addresses: Mapped[List["Address"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    # addresses: Mapped[List["Address"]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    # Optional[], therefore will be NULL
+    addresses: Mapped[Optional[List["Address"]]] = relationship(back_populates="user", cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"User <id={self.id!r}, user_name={self.user_name!r}, email={self.email!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, admin={self.admin!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return f"{type(self).__name__} <id={self.id!r}, user_name={self.user_name!r}, email={self.email!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, admin={self.admin!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -42,13 +50,16 @@ class UserRole(BaseSchema):
     __tablename__ = "user_roles"
 
     # foreign key to "roles.id" and "users.id" are added
+    # not Optional[], therefore will be NOT NULL
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    # not Optional[], therefore will be NOT NULL
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    # not Optional[], therefore will be NOT NULL
     active: Mapped[bool] = True
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"UserRole <id={self.id!r}, role_id={self.role_id!r}, user_id={self.user_id!r}, active={self.active!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return f"{type(self).__name__} <id={self.id!r}, role_id={self.role_id!r}, user_id={self.user_id!r}, active={self.active!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -62,19 +73,27 @@ class Address(BaseSchema):
     __tablename__ = "addresses"
 
     # foreign key to "users.id" is added
+    # not Optional[], therefore will be NOT NULL
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    # not Optional[], therefore will be NOT NULL
     user: Mapped["User"] = relationship(back_populates="addresses")
 
+    # not Optional[], therefore will be NOT NULL
     street1: Mapped[str] = mapped_column(String(64))
+    # Optional[], therefore will be NULL
     street2: Mapped[Optional[str]] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
     city: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
     state: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
     country: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
     zip: Mapped[str] = mapped_column(String(64))
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"Address <id={self.id!r}, user_id={self.user_id!r}, street1={self.street1!r}, street2={self.street2!r}, city={self.city!r}, state={self.state!r}, country={self.country!r}, zip={self.zip!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return f"{type(self).__name__} <id={self.id!r}, user_id={self.user_id!r}, street1={self.street1!r}, street2={self.street2!r}, city={self.city!r}, state={self.state!r}, country={self.country!r}, zip={self.zip!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

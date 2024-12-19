@@ -27,15 +27,15 @@ class ContactService(AbstractService):
         errors = []
         if contact:
             if not contact.first_name:
-                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'first_name is required!'))
+                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'first_name is required!'))
             if not contact.last_name:
-                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'last_name is required!'))
+                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'last_name is required!'))
             if not contact.country:
-                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'country is required!'))
+                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'country is required!'))
             if not contact.subject:
-                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'subject is required!'))
+                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'subject is required!'))
         else:
-            errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'Contact is required!'))
+            errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'Contact is required!'))
 
         return errors
 

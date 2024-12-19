@@ -29,26 +29,35 @@ class AbstractRepository(ABC):
 
     @abstractmethod
     def save(self, instance):
-        logger.debug(f"+save(), entities={instance}")
+        """Saves the instance using context manager"""
+        logger.debug(f"+save(), instance={instance}")
         with Session(self.__engine) as session:
+            session.begin()
             try:
                 session.add(instance)
-                session.commit()
-                logger.debug("Persisted a instance successfully!")
             except Exception as ex:
                 logger.error(f"Failed transaction with error:{ex}")
                 session.rollback()
+                raise ex
+            else:
+                session.commit()
+                logger.debug("Persisted a instance successfully!")
+
         logger.debug(f"-save()")
 
     @abstractmethod
     def save_all(self, instances: Iterable[object]):
+        """Saves the instances using context manager"""
         logger.debug(f"+save_all(), instances={instances}")
         with Session(self.__engine) as session:
+            session.begin()
             try:
                 session.add_all(instances)
-                session.commit()
-                logger.debug(f"Persisted [{len(instances)}] instances successfully!")
             except Exception as ex:
                 logger.error(f"Failed transaction with error:{ex}")
                 session.rollback()
+                raise ex
+            else:
+                session.commit()
+                logger.debug(f"Persisted [{len(instances)}] instances successfully!")
         logger.debug(f"-save_all()")

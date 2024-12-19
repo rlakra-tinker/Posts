@@ -57,8 +57,8 @@ class TestAbstract(AbstractTestCase):
     def test_error_entity(self):
         """Tests an ErrorEntity object"""
         print("+test_error_entity()")
-        error_entity = ErrorModel.error(http_status=HTTPStatus.INTERNAL_SERVER_ERROR,
-                                        message="Internal Server Error!")
+        error_entity = ErrorModel.buildError(http_status=HTTPStatus.INTERNAL_SERVER_ERROR,
+                                             message="Internal Server Error!")
         print(f"error_entity: {error_entity}")
 
         # valid object and expected results
@@ -103,7 +103,7 @@ class TestAbstract(AbstractTestCase):
         self.assertFalse(isinstance(entity_object, ErrorModel))
         self.assertFalse(issubclass(object, AbstractModel))
 
-        errorEntity = ErrorModel.error(http_status=HTTPStatus.BAD_REQUEST, message="Error")
+        errorEntity = ErrorModel.buildError(http_status=HTTPStatus.BAD_REQUEST, message="Error")
         print(f"errorEntity: {errorEntity}")
 
         # valid object and expected results
@@ -140,7 +140,7 @@ class TestAbstract(AbstractTestCase):
     def test_response_entity_error(self):
         """Tests an ResponseEntity object"""
         print("\n+test_response_entity_error()")
-        error_entity = ErrorModel.error(http_status=HTTPStatus.BAD_REQUEST, message="Error")
+        error_entity = ErrorModel.buildError(http_status=HTTPStatus.BAD_REQUEST, message="Error")
         response = ResponseModel.buildResponse(HTTPStatus.BAD_REQUEST, error_entity)
         print(f"response: {response}")
         self.assertIsNotNone(response)

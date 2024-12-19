@@ -8,6 +8,7 @@ from framework.http import HTTPStatus
 from framework.model import ErrorModel, ResponseModel
 from rest.contact.service import ContactService
 from rest.contact.models import Contact
+from rest.contact.schema import Contact
 
 # account's service
 contactService = ContactService()
@@ -45,7 +46,7 @@ def create():
                                                   message="Contact is successfully created.")
         except Exception as ex:
             message = f"Contact={contact.first_name} is already registered! ex:{ex}"
-            error = ErrorModel.error(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
+            error = ErrorModel.buildError(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
             response = ResponseModel.jsonResponse(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
         # else:
         #     return redirect(url_for("iws.rest.v1.contacts.create"))
@@ -68,7 +69,7 @@ def login():
         #         if account['user_name'] == user.user_name:
         #             return make_response(HTTPStatus.OK, account)
 
-    response = ErrorModel.error(HTTPStatus.NOT_FOUND, "Account is not registered!")
+    response = ErrorModel.buildError(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(json.dumps(response))
 
     return make_response(response)

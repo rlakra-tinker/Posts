@@ -27,9 +27,9 @@ class RoleService(AbstractService):
         errors = []
         if role:
             if not role.name:
-                errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'Role name is required!'))
+                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'Role name is required!'))
         else:
-            errors.append(ErrorModel.error(HTTPStatus.INVALID_DATA, 'Role is required!'))
+            errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'Role is required!'))
 
         return errors
 

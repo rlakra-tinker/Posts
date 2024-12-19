@@ -8,9 +8,8 @@ from io import BytesIO
 
 from flask import current_app, render_template, request, redirect, send_file
 
-from post.model.entity import Document
-from globals import connector
 from post.v1 import bp as bp_v1_posts
+from rest.post.schema import Document
 
 
 @bp_v1_posts.get("/")
@@ -56,8 +55,13 @@ def upload():
     print(f"request.method={request.method}")
     if request.method == 'POST':
         file = request.files['file']
-        document = Document(filename=file.filename, data=file.read())
-        connector.save(document)
+        file_data = file.read()
+        # post = Post(title=file.filename, author=file.filename)
+        # attachment = Attachment(post=post, filename=file.filename, data=file_data)
+        # post.addAttachment(attachment)
+        # connector.save(post)
+        document = Document(filename=file.filename, data=file_data)
+        # connector.save(document)
         upload_metadata = {
             "message": f'Uploaded: {file.filename}'
         }
