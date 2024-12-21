@@ -11,18 +11,23 @@ import logging
 import re
 from copy import deepcopy
 
-from flask import g, has_request_context, request
+import requests
+from flask import Flask, g, has_request_context, request
+from flask.logging import default_handler
 from flask_log_request_id import RequestID, RequestIDLogFilter
 
-from framework.enums import EnvType
+from framework.enums import EnvType, KeyEnum
 
-logger = logging.getLogger(__name__)
-# Configure the logger (optional)
-logging.basicConfig(level=logging.DEBUG)
-
+LOG_LEVEL = logging.DEBUG
 DEFAULT_LOG_FORMAT = "[%(asctime)s] [%(process)d] [%(levelname)s] - %(message)s"
 LOG_FORMAT = "[%(asctime)s] [%(process)d] [%(levelname)s] [%(request_id)s] - %(message)s"
+
 DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
+UTF_8 = 'utf-8'
+
+# Configure the logger (optional)
+logging.basicConfig(level=LOG_LEVEL, format=DEFAULT_LOG_FORMAT)
+logger = logging.getLogger(__name__)
 
 # 1. Define the regex patterns of sensitive data
 sensitive_regex_patterns = [
@@ -96,7 +101,8 @@ class DefaultLogger(logging.LoggerAdapter):
     is passed and contains 'debug_data' in dict.
     """
 
-    def __init__(self, app, extra={}):
+    def __init__(self, app: Flask, extra={}):
+        self.app = app
         super().__init__(app.logger, extra)
         # Setup default logging
         # https://pypi.org/project/Flask-3-Log-Request-ID/
@@ -105,14 +111,22 @@ class DefaultLogger(logging.LoggerAdapter):
         # Adding also the gunicorn handlers to the app.logger
         # app.logger.setLevel(logging.DEBUG)
         gunicorn_logger = logging.getLogger('gunicorn.error')
+        app.logger.info(f"app.logger.handlers={app.logger.handlers}")
+        app.logger.info(f"gunicorn_logger.handlers={gunicorn_logger.handlers}")
+        app.logger.handlers = gunicorn_logger.handlers
+        for handler in gunicorn_logger.handlers:
+            app.logger.info(f"handler={handler}")
+            app.logger.addHandler(handler)
+
         # keep lower logger level
         app.logger.info(f"app.logger.level={app.logger.level}, gunicorn_logger.level={gunicorn_logger.level}")
-        if app.logger.getEffectiveLevel() > gunicorn_logger.level:
+        if app.logger.getEffectiveLevel() < gunicorn_logger.level:
+            app.logger.info(f"Using gunicorn_logger.level={gunicorn_logger.level}")
             app.logger.setLevel(gunicorn_logger.level)
 
-        # app.logger.handlers = gunicorn_logger.handlers
-        for handler in gunicorn_logger.handlers:
-            app.logger.addHandler(handler)
+        # Use custom loggers instead
+        app.logger.info(f"default_handler={default_handler}")
+        app.logger.removeHandler(default_handler)
 
         # Use custom loggers instead and remove default handler
         # app.logger.removeHandler(default_handler)
@@ -123,6 +137,21 @@ class DefaultLogger(logging.LoggerAdapter):
             handler.setFormatter(LogJSONFormatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
             handler.addFilter(RequestIDLogFilter())
             handler.addFilter(SensitiveDataFilter())
+
+    def logConfig(self):
+        # logger = self.app.logger
+        # register logger here root logger
+        if EnvType.is_production(EnvType.get_env_type()):
+            logFileName = self.app.get_env(KeyEnum.LOG_FILE_NAME.name)
+            logFileHandler = logging.FileHandler(logFileName)
+            logger.debug(f"logFileName={logFileName}, logFileHandler=[{logFileHandler}]")
+            # set format and filters
+            logFileHandler.setFormatter(LogJSONFormatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
+            logFileHandler.addFilter(RequestIDLogFilter())
+            logFileHandler.addFilter(SensitiveDataFilter())
+            # logging.getLogger().addHandler(logFileHandler)
+            logging.basicConfig(filename=logFileName, encoding=UTF_8, level=LOG_LEVEL, format=LOG_FORMAT)
+            requests.packages.urllib3.add_stderr_logger()
 
     def process(self, msg, kwargs):
         extra = kwargs.get('extra', {})

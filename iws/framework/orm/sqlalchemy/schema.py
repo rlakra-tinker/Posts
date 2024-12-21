@@ -5,14 +5,17 @@
 # - https://docs.sqlalchemy.org/en/20/orm/quickstart.html
 # - https://docs.sqlalchemy.org/en/20/orm/inheritance.html
 #
+import logging
 from datetime import datetime
 from enum import unique, auto
 from math import ceil
 
-from sqlalchemy import func, orm, String
+from sqlalchemy import func, orm, String, event
 from sqlalchemy.orm import Mapped, mapped_column, declarative_base
 
 from framework.enums import AutoUpperCase
+
+logger = logging.getLogger(__name__)
 
 
 @unique
@@ -222,6 +225,13 @@ class User(Model):
 
 # Model = declarative_base(cls=AbstractSchema)
 BaseSchema = declarative_base(cls=AbstractSchema)
+
+
+@event.listens_for(BaseSchema.metadata, "column_reflect")
+def column_reflect(inspector, table, column_info):
+    # set column.key = "attr_<lower_case_name>"
+    logger.info(f"column_reflect({table}, {column_info})")
+    # column_info["key"] = "attr_%s" % column_info["name"].lower()
 
 
 # class BaseSchema(DeclarativeBase):

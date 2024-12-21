@@ -114,6 +114,9 @@ class KeyEnum(AutoUpperCase):
     SQLALCHEMY = auto()
     APP_ENV = auto()
     DB_TYPE = auto()
+    ENV_TYPE = auto()
+    LOG_FILE_NAME = auto()
+    FLASK_ENV = auto()
 
 
 @unique
@@ -170,10 +173,9 @@ class EnvType(BaseEnum):
 
     @classmethod
     def get_env_type(cls):
-        __ENV_TYPE = 'env_type'
-        env_type = os.getenv(__ENV_TYPE)
+        env_type = os.getenv(KeyEnum.ENV_TYPE.name)
         if env_type is None:
-            env_type = os.getenv(__ENV_TYPE.upper())
+            env_type = os.getenv(KeyEnum.ENV_TYPE.name.lower())
             if env_type is None:
                 env_type = EnvType.flask_env()
                 if env_type is None:
@@ -184,9 +186,8 @@ class EnvType(BaseEnum):
     @staticmethod
     def flask_env() -> str:
         """Returns the value of FLASK_ENV env variable value if set otherwise None."""
-        __FLASK_ENV = 'flask_env'
-        flask_env = os.getenv(__FLASK_ENV)
+        flask_env = os.getenv(KeyEnum.FLASK_ENV.name)
         if flask_env is None:
-            flask_env = os.getenv(__FLASK_ENV.upper())
+            flask_env = os.getenv(KeyEnum.FLASK_ENV.name.lower())
 
         return flask_env

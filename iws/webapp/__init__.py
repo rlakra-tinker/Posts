@@ -3,18 +3,15 @@
 # Reference - https://realpython.com/flask-project/
 #
 import importlib.metadata
-import logging
 import os
 import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import requests
 from dotenv import load_dotenv
 from flask import Flask, Blueprint, make_response, current_app, request
 from flask_cors import CORS
-from flask_log_request_id import RequestIDLogFilter
 # https://flask.palletsprojects.com/en/3.0.x/deploying/proxy_fix/
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -35,8 +32,6 @@ class WebApp:
     __HOST = 'host'
     __PORT = 'port'
     __DEBUG = 'debug'
-    __ENV_TYPE = 'env_type'
-    __LOG_FILE_NAME = 'LOG_FILE_NAME'
 
     def __init__(self):
         self.path = Path()
@@ -62,8 +57,8 @@ class WebApp:
             self.set_env(self.__HOST, os.getenv(self.__HOST, "127.0.0.1"))
             self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
             self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
-            self.set_env(self.__ENV_TYPE, EnvType.get_env_type())
-            self.set_env(self.__LOG_FILE_NAME, os.getenv(self.__LOG_FILE_NAME, 'iws.log'))
+            self.set_env(KeyEnum.ENV_TYPE.name, EnvType.get_env_type())
+            self.set_env(KeyEnum.LOG_FILE_NAME.name, os.getenv(KeyEnum.LOG_FILE_NAME.name, 'iws.log'))
             current_app.logger.debug(f"environment={self.environment}")
 
     def set_env(self, key: str, value: Any):
@@ -98,6 +93,7 @@ class WebApp:
 
         # use custom logger adapter
         app.logger = DefaultLogger(app, {})
+        app.logger.logConfig()
 
         # app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
         app.wsgi_app = ProxyFix(app.wsgi_app)
@@ -110,21 +106,6 @@ class WebApp:
         # Check CORS Enabled
         if Config.CORS_ENABLED:
             CORS(app)
-
-        # register logger here root logger
-        if EnvType.is_production(self.get_env(self.__ENV_TYPE)):
-            log_file_name = self.get_env(self.__LOG_FILE_NAME)
-            log_handler = logging.FileHandler(log_file_name)
-            log_format = "%(asctime)s:%(levelname)s:%(request_id)s - %(message)s"
-            logging.Formatter("%(asctime)s:%(levelname)s:%(request_id)s - %(message)s")  # make the format more compact
-            log_handler.addFilter(RequestIDLogFilter())  # Adds request-ID filter
-            with self.app.app_context():
-                current_app.logger.debug(f"log_format={log_format}")
-                current_app.logger.debug(f"log_handler=[{log_handler}]")
-            # logging.getLogger().addHandler(log_handler)
-            logging.basicConfig(filename=log_file_name, encoding='utf-8', level=logging.DEBUG,
-                                format="%(asctime)s:%(levelname)s - %(message)s")
-            requests.packages.urllib3.add_stderr_logger()
 
         # Initialize/Register Flask Extensions/Components, if any
         if not test_mode:

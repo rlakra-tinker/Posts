@@ -1,6 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
+import logging
 from typing import List, Optional
 
 from flask import current_app
@@ -10,7 +11,6 @@ from framework.model import ErrorModel
 from framework.service import AbstractService
 from rest.role.model import Role
 from rest.role.repository import RoleRepository
-import logging
 
 logger = logging.getLogger(__name__)
 

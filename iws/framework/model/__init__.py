@@ -5,14 +5,34 @@
 #
 import logging
 from datetime import datetime
+from enum import unique, auto
 from typing import Optional, Dict, List
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ValidationError, ConfigDict, model_validator, field_validator
 
+from framework.enums import BaseEnum
 from framework.http import HTTPStatus
 from framework.utils import Utils
 
 logger = logging.getLogger(__name__)
+
+
+@unique
+class Status(BaseEnum):
+    """Enum for Status. For readability, add constants in Alphabetical order."""
+    CREATED = auto()
+    DELETED = auto()
+    UPDATED = auto()
+
+
+@unique
+class SyncStatus(BaseEnum):
+    """Enum for SyncStatus. For readability, add constants in Alphabetical order."""
+    COMPLETED = auto()
+    FAILED = auto()
+    IGNORED = auto()
+    PENDING = auto()
+    SCHEDULED = auto()
 
 
 # AbstractModel
@@ -42,6 +62,11 @@ class AbstractModel(AbstractPydanticModel):
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
 
+    @model_validator(mode="before")
+    def _model_validator(cls, values):
+        logger.info(f"_model_validator({values})")
+        return values
+
     def get_id(self):
         return self.id
 
@@ -55,6 +80,21 @@ class AbstractModel(AbstractPydanticModel):
         """Returns the string representation of this object"""
         return f"created_at={self.get_created_at()}, updated_at={self.get_updated_at()}>"
 
+    def load_and_not_raise(self, data):
+        try:
+            return self.load(data)
+        except ValidationError as ex:
+            logger.error(f"load_and_not_raise() => Error:{ex.errors()}")
+            # err = get_error(exception=None, msg=e.messages, status=422)
+            # return abort(make_response(err, err.get('error').get('status')))
+
+    def validate_and_raise(self, data):
+        errors = self.validate(data)
+        if errors:
+            logger.error(f"validate_and_raise() => Error:{errors}")
+            # err = get_error(exception=None, msg=errors, status=422)
+            # return abort(make_response(err, err.get('error').get('status')))
+
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return f"{type(self).__name__} <id={self.get_id()}, {self._auditable()}>"
@@ -67,6 +107,22 @@ class AbstractModel(AbstractPydanticModel):
 class NamedModel(AbstractModel):
     """NamedModel used an entity with a property called 'name' in it"""
     name: str
+
+    @model_validator(mode="before")
+    def _model_validator(cls, values):
+        logger.info(f"_model_validator({values})")
+        if not "name" in values:
+            raise ValueError("'name' should be provided to the model!")
+
+        return values
+
+    @field_validator('name')
+    def name_must_provide(cls, value):
+        logger.info(f"name_must_provide({value})")
+        if value is None or len(value) == 0:
+            raise ValueError("'name' should not be null or empty!")
+
+        return value
 
     def get_name(self):
         return self.name
