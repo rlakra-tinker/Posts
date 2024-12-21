@@ -18,15 +18,24 @@ from flask_log_request_id import RequestID, RequestIDLogFilter
 
 from framework.enums import EnvType, KeyEnum
 
+UTF_8 = 'utf-8'
 LOG_LEVEL = logging.DEBUG
 DEFAULT_LOG_FORMAT = "[%(asctime)s] [%(process)d] [%(levelname)s] - %(message)s"
-LOG_FORMAT = "[%(asctime)s] [%(process)d] [%(levelname)s] [%(request_id)s] - %(message)s"
+REQUEST_ID_LOG_FORMAT = "[%(asctime)s] [%(process)d] [%(levelname)s] [%(request_id)s] - %(message)s"
+DETAILED_LOG_FORMAT = "[%(asctime)s] [%(process)d] [%(levelname)s] [%(filename)s:%(lineno)s] - %(message)s"
 
-DATE_FORMAT = "%Y-%m-%d %H:%M:%S %z"
-UTF_8 = 'utf-8'
+DATE_FORMAT_TZ = "%Y-%m-%d %H:%M:%S %z"
+DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
+DATE_FORMAT_MSEC = "%Y-%m-%d %H:%M:%S.%f,%03d"
 
-# Configure the logger (optional)
-logging.basicConfig(level=LOG_LEVEL, format=DEFAULT_LOG_FORMAT)
+# Configure app default loggers
+logging.basicConfig(level=LOG_LEVEL, format=DEFAULT_LOG_FORMAT, force=True)
+logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+# datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f %z")[:23]
+# logging.Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT)
+
+
+# init logger
 logger = logging.getLogger(__name__)
 
 # 1. Define the regex patterns of sensitive data
@@ -101,44 +110,42 @@ class DefaultLogger(logging.LoggerAdapter):
     is passed and contains 'debug_data' in dict.
     """
 
-    def __init__(self, app: Flask, extra={}):
+    def __init__(self, app: Flask, level: int = LOG_LEVEL, extra={}):
         self.app = app
+        app.logger.setLevel(level)
         super().__init__(app.logger, extra)
         # Setup default logging
         # https://pypi.org/project/Flask-3-Log-Request-ID/
         RequestID(app)
 
         # Adding also the gunicorn handlers to the app.logger
-        # app.logger.setLevel(logging.DEBUG)
         gunicorn_logger = logging.getLogger('gunicorn.error')
-        app.logger.info(f"app.logger.handlers={app.logger.handlers}")
-        app.logger.info(f"gunicorn_logger.handlers={gunicorn_logger.handlers}")
+        app.logger.debug(f"app.logger.handlers={app.logger.handlers}")
+        app.logger.debug(f"gunicorn_logger.handlers={gunicorn_logger.handlers}")
         app.logger.handlers = gunicorn_logger.handlers
-        for handler in gunicorn_logger.handlers:
-            app.logger.info(f"handler={handler}")
-            app.logger.addHandler(handler)
+        # for handler in gunicorn_logger.handlers:
+        #     app.logger.info(f"handler={handler}")
+        #     app.logger.addHandler(handler)
 
         # keep lower logger level
-        app.logger.info(f"app.logger.level={app.logger.level}, gunicorn_logger.level={gunicorn_logger.level}")
+        app.logger.debug(f"app.logger.level={app.logger.level}, gunicorn_logger.level={gunicorn_logger.level}")
         if app.logger.getEffectiveLevel() < gunicorn_logger.level:
             app.logger.info(f"Using gunicorn_logger.level={gunicorn_logger.level}")
             app.logger.setLevel(gunicorn_logger.level)
 
         # Use custom loggers instead
-        app.logger.info(f"default_handler={default_handler}")
+        app.logger.debug(f"default_handler={default_handler}")
         app.logger.removeHandler(default_handler)
-
-        # Use custom loggers instead and remove default handler
-        # app.logger.removeHandler(default_handler)
 
         # update log handlers with customer json formatter
         for handler in app.logger.handlers:
             # all log formatter and request-id filter
-            handler.setFormatter(LogJSONFormatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
+            handler.setFormatter(LogJSONFormatter(fmt=DEFAULT_LOG_FORMAT))
             handler.addFilter(RequestIDLogFilter())
             handler.addFilter(SensitiveDataFilter())
 
     def logConfig(self):
+        logger.debug("logConfig()")
         # logger = self.app.logger
         # register logger here root logger
         if EnvType.is_production(EnvType.get_env_type()):
@@ -146,11 +153,11 @@ class DefaultLogger(logging.LoggerAdapter):
             logFileHandler = logging.FileHandler(logFileName)
             logger.debug(f"logFileName={logFileName}, logFileHandler=[{logFileHandler}]")
             # set format and filters
-            logFileHandler.setFormatter(LogJSONFormatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT))
+            logFileHandler.setFormatter(LogJSONFormatter(fmt=DEFAULT_LOG_FORMAT))
             logFileHandler.addFilter(RequestIDLogFilter())
             logFileHandler.addFilter(SensitiveDataFilter())
             # logging.getLogger().addHandler(logFileHandler)
-            logging.basicConfig(filename=logFileName, encoding=UTF_8, level=LOG_LEVEL, format=LOG_FORMAT)
+            logging.basicConfig(filename=logFileName, encoding=UTF_8, level=LOG_LEVEL, format=DEFAULT_LOG_FORMAT)
             requests.packages.urllib3.add_stderr_logger()
 
     def process(self, msg, kwargs):
@@ -225,7 +232,7 @@ class LogJSONFormatter(logging.Formatter):
         if EnvType.is_testing(EnvType.get_env_type()):
             return message
 
-        log_message = f'[{self.formatTime(record, DATE_FORMAT)}] [{record.process}] [{record.levelname}]'
+        log_message = f'[{self.formatTime(record, DATE_FORMAT_MSEC)}] [{record.process}] [{record.levelname}]'
 
         if has_request_context() and hasattr(g, 'log_request_id'):
             log_message += f' [{g.log_request_id}]'

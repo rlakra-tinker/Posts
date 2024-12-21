@@ -3,6 +3,7 @@
 # Reference - https://realpython.com/flask-project/
 #
 import importlib.metadata
+import logging
 import os
 import sys
 from datetime import datetime
@@ -26,6 +27,8 @@ from globals import connector
 from rest import bp as rest_bp
 from webapp.routes import bp as webapp_bp
 
+logger = logging.getLogger(__name__)
+
 
 class WebApp:
     """Create WebApp class"""
@@ -36,9 +39,9 @@ class WebApp:
     def __init__(self):
         self.path = Path()
         self.basedir = str(self.path.cwd())
-        print(f"basedir={self.basedir}")
+        logger.debug(f"basedir={self.basedir}")
         # sys.path.append(self.basedir)
-        print(f"sys.path={sys.path}")
+        # logger.debug(f"sys.path={sys.path}")
         self.environment: dict = {}
         self.app: Flask = None
 
@@ -92,7 +95,7 @@ class WebApp:
         # app.add_api("swagger.yml")
 
         # use custom logger adapter
-        app.logger = DefaultLogger(app, {})
+        app.logger = DefaultLogger(app)
         app.logger.logConfig()
 
         # app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
