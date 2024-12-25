@@ -1,11 +1,12 @@
 #
 # Author: Rohtash Lakra
 #
-from typing import Dict, Set, List
+from typing import Dict
+
+from framework.http import HTTPStatus
+from framework.model import ErrorModel
 from framework.service import AbstractService
 from rest.contact.models import Contact
-from framework.model import ErrorModel
-from framework.http import HTTPStatus
 
 
 class ContactService(AbstractService):
@@ -47,4 +48,3 @@ class ContactService(AbstractService):
         print(f"contact.id: {contact.id}")
         self.contacts[contact.id] = contact
         return self.contacts[contact.id]
-

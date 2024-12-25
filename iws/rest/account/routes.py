@@ -9,7 +9,7 @@ from flask import make_response, request, session, g, redirect, url_for
 from framework.http import HTTPStatus
 from framework.model import ErrorModel
 from rest.account.model import User
-from rest.account.schema import User
+from rest.account.schema import UserSchema
 from rest.account.service import UserService
 from rest.account.v1 import bp as bp_account_v1
 
@@ -31,9 +31,9 @@ def load_logged_in_user():
 def register():
     print(request)
     if request.is_json:
-        user = User(**request.get_json())
+        user = UserSchema(**request.get_json())
         user = userService.register()
-        user = User.model_construct(request.get_json())
+        user = UserSchema.model_construct(request.get_json())
         userService.add(user)
         return user, 201
     else:

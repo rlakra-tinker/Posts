@@ -2,6 +2,7 @@
 # Author: Rohtash Lakra
 #
 import logging
+from abc import ABC
 from typing import Any
 from typing import Mapping
 
@@ -45,7 +46,7 @@ class RepositoryManager(object):
         pass
 
 
-class AbstractRepository(SqlAlchemyRepository):
+class AbstractRepository(SqlAlchemyRepository, ABC):
     """The abstract repository of all other classes"""
 
     def __init__(self, engine):

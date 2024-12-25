@@ -10,7 +10,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from framework.orm.sqlalchemy.schema import BaseSchema
 
 
-class Person(BaseSchema):
+class PersonSchema(BaseSchema):
     """[Person]"""
     __abstract__ = True
 
@@ -32,7 +32,7 @@ class Person(BaseSchema):
         return str(self)
 
 
-class User(Person):
+class UserSchema(PersonSchema):
     """
     [users] Table
     """
@@ -60,7 +60,8 @@ class User(Person):
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
     # addresses: Mapped[List["Address"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     # Optional[], therefore will be NULL
-    addresses: Mapped[Optional[List["Address"]]] = relationship(back_populates="user", cascade="all, delete-orphan")
+    addresses: Mapped[Optional[List["AddressSchema"]]] = relationship(back_populates="user",
+                                                                      cascade="all, delete-orphan")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -71,7 +72,7 @@ class User(Person):
         return str(self)
 
 
-class UserRole(BaseSchema):
+class UserRoleSchema(BaseSchema):
     """
     [user_roles] Table
     """
@@ -94,7 +95,7 @@ class UserRole(BaseSchema):
         return str(self)
 
 
-class Address(BaseSchema):
+class AddressSchema(BaseSchema):
     """
     [addresses] Table
     """
@@ -104,7 +105,7 @@ class Address(BaseSchema):
     # not Optional[], therefore will be NOT NULL
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     # not Optional[], therefore will be NOT NULL
-    user: Mapped["User"] = relationship(back_populates="addresses")
+    user: Mapped["UserSchema"] = relationship(back_populates="addresses")
 
     # not Optional[], therefore will be NOT NULL
     street1: Mapped[str] = mapped_column(String(64))

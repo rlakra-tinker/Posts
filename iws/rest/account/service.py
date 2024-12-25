@@ -1,15 +1,22 @@
 #
 # Author: Rohtash Lakra
 #
+import logging
+from abc import ABC
+
 from framework.service import AbstractService
+from globals import connector
 from rest.account.model import User
 from rest.account.repository import UserRepository
 
+logger = logging.getLogger(__name__)
 
-class UserService(AbstractService):
+
+class UserService(AbstractService, ABC):
 
     def __init__(self):
-        self.dao = UserRepository()
+        logger.debug("UserService()")
+        self.repository = UserRepository(engine=connector.engine)
 
     def find_by_id(self, id: int):
         """

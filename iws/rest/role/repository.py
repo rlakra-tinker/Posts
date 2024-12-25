@@ -2,6 +2,7 @@
 # Author: Rohtash Lakra
 #
 import logging
+from abc import ABC
 from typing import List, Optional, Dict, Any
 
 from flask import current_app
@@ -15,10 +16,39 @@ from rest.role.schema import RoleSchema
 logger = logging.getLogger(__name__)
 
 
-class RoleRepository(AbstractRepository):
+class RoleRepository(AbstractRepository, ABC):
 
     def __init__(self, engine):
         super().__init__(engine)
+
+    # @override
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[RoleSchema]]:
+        """Returns records by filter or empty list"""
+        logger.debug(f"+findByFilter({filters})")
+        listOfRoles = List[Optional[RoleSchema]]
+        with Session(self.get_engine()) as session:
+            try:
+                if filters:
+                    listOfRoles = session.query(RoleSchema).filter_by(**filters).all()
+                else:
+                    listOfRoles = session.query(RoleSchema).all()
+
+                logger.debug(f"Loaded [{len(listOfRoles)}] rows => listOfRoles={listOfRoles}")
+            except NoResultFound as ex:
+                logger.error(f"NoResultFound while loading records! Error={ex}")
+                # session.rollback()
+                raise ex
+            except MultipleResultsFound as ex:
+                logger.error(f"MultipleResultsFound while loading records! Error={ex}")
+                # session.rollback()
+                raise ex
+            except Exception as ex:
+                logger.error(f"Exception while loading records! Error={ex}")
+                # session.rollback()
+                raise ex
+
+        logger.debug(f"-findByFilter(), listOfRoles={listOfRoles}")
+        return listOfRoles
 
     def create(self, role: RoleSchema) -> RoleSchema:
         """Inserts a new role"""
@@ -54,7 +84,7 @@ class RoleRepository(AbstractRepository):
     def find_by_id(self, id) -> RoleSchema:
         return self.execute('SELECT * FROM roles WHERE id = ?', (id,)).fetchone()
 
-    def exists(self, id: int) -> bool:
+    def existsById(self, id: int) -> bool:
         current_app.logger.info(f"+exists({id})")
         role = self.find_by_id(id)
         current_app.logger.info(f"-exists(), role: {role}")
@@ -67,42 +97,34 @@ class RoleRepository(AbstractRepository):
         result = cursor.fetchone()
         current_app.logger.info(f"-find_by_name(), result: {result}")
 
-    #     >>> stmt = select(User).where(User.name == "spongebob")
-    # >>> with Session(engine) as session:
-    # ...     for row in session.execute(stmt):
-    # ...         print(row)
-
-    # session.query(func.count(distinct(User.name)))
-
     def findAll(self, filters: Dict[str, Any]) -> List[Optional[RoleSchema]]:
-        logger.debug(f"+findAll({filters})")
-        results = List[Optional[RoleSchema]]
-        with Session(self.get_engine()) as session:
-            try:
-                if filters:
-                    # if filters.get('name'):
-                    # results = session.query(RoleSchema).filter(RoleSchema.name == filters.get('name')).all()
-                    results = session.query(RoleSchema).filter_by(**filters).all()
-                else:
-                    results = session.query(RoleSchema).all()
-
-                # results = [row._asdict() for row in rows]
-                logger.debug(f"Loaded [{len(results)}] rows => results={results}")
-            except NoResultFound as ex:
-                logger.error(f"NoResultFound while loading records! Error={ex}")
-                # session.rollback()
-                raise ex
-            except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while loading records! Error={ex}")
-                # session.rollback()
-                raise ex
-            except Exception as ex:
-                logger.error(f"Exception while loading records! Error={ex}")
-                # session.rollback()
-                raise ex
-
-        logger.info(f"-findAll(), results={results}")
-        return results
+        """Returns records by filter or empty list"""
+        return self.findByFilter(filters=filters)
+        # logger.debug(f"+findAll({filters})")
+        # results = List[Optional[RoleSchema]]
+        # with Session(self.get_engine()) as session:
+        #     try:
+        #         if filters:
+        #             results = session.query(RoleSchema).filter_by(**filters).all()
+        #         else:
+        #             results = session.query(RoleSchema).all()
+        #
+        #         logger.debug(f"Loaded [{len(results)}] rows => results={results}")
+        #     except NoResultFound as ex:
+        #         logger.error(f"NoResultFound while loading records! Error={ex}")
+        #         # session.rollback()
+        #         raise ex
+        #     except MultipleResultsFound as ex:
+        #         logger.error(f"MultipleResultsFound while loading records! Error={ex}")
+        #         # session.rollback()
+        #         raise ex
+        #     except Exception as ex:
+        #         logger.error(f"Exception while loading records! Error={ex}")
+        #         # session.rollback()
+        #         raise ex
+        #
+        # logger.info(f"-findAll(), results={results}")
+        # return results
 
     def findByName(self, name: str) -> RoleSchema:
         logger.debug(f"+findByName({name})")

@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from framework.orm.repository import createEngine
 from framework.orm.sqlalchemy.schema import BaseSchema
-from rest.account.schema import User, Address
+from rest.account.schema import UserSchema, AddressSchema
 from rest.role.schema import RoleSchema
 
 
@@ -36,14 +36,14 @@ class SqlAlchemyTableObject:
             session.add_all([admin_role, user_role, guest_role])
 
             # create users
-            roh = User(
+            roh = UserSchema(
                 user_name="roh@lakra.com",
                 password="Roh",
                 email="roh@lakra.com",
                 first_name="Rohtash",
                 last_name="Lakra",
                 admin=True,
-                addresses=[Address(
+                addresses=[AddressSchema(
                     street1="Tennison Rd",
                     city="Hayward",
                     state="California",
@@ -52,21 +52,21 @@ class SqlAlchemyTableObject:
                 )],
             )
 
-            san = User(
+            san = UserSchema(
                 user_name="san@lakra.com",
                 password="San",
                 email="san@lakra.com",
                 first_name="Sangita",
                 last_name="Lakra",
                 admin=True,
-                addresses=[Address(
+                addresses=[AddressSchema(
                     street1="Mission Blvd",
                     city="Hayward",
                     state="California",
                     country="US",
                     zip="94544"
                 ),
-                    Address(
+                    AddressSchema(
                         street1="Mission Rd",
                         city="Fremont",
                         state="California",
@@ -96,7 +96,7 @@ class SqlAlchemyTableObject:
         # Simple SELECT
         from sqlalchemy import select
         session = Session(self.engine)
-        stmt = select(User)
+        stmt = select(UserSchema)
         for user in session.scalars(stmt):
             print(user)
         print()
@@ -106,7 +106,7 @@ class SqlAlchemyTableObject:
         # Simple SELECT
         from sqlalchemy import select
         session = Session(self.engine)
-        stmt = select(User).where(User.first_name.in_(["Rohtash", "Sangita"]))
+        stmt = select(UserSchema).where(UserSchema.first_name.in_(["Rohtash", "Sangita"]))
         for user in session.scalars(stmt):
             print(user)
         print()
@@ -116,10 +116,10 @@ class SqlAlchemyTableObject:
         from sqlalchemy import select
         session = Session(self.engine)
         stmt = (
-            select(Address)
-            .join(Address.user)
-            .where(Address.state == "California")
-            .where(User.first_name == "Rohtash")
+            select(AddressSchema)
+            .join(AddressSchema.user)
+            .where(AddressSchema.state == "California")
+            .where(UserSchema.first_name == "Rohtash")
         )
         roh_address = session.scalars(stmt).one()
         print(roh_address)
@@ -130,10 +130,10 @@ class SqlAlchemyTableObject:
         from sqlalchemy import select
         session = Session(self.engine)
         stmt = (
-            select(Address)
-            .join(Address.user)
-            .where(Address.state == "California")
-            .where(User.first_name == "Rohtash")
+            select(AddressSchema)
+            .join(AddressSchema.user)
+            .where(AddressSchema.state == "California")
+            .where(UserSchema.first_name == "Rohtash")
         )
         roh_address = session.scalars(stmt).one()
         print(f"roh_address\n{roh_address}")
@@ -141,11 +141,11 @@ class SqlAlchemyTableObject:
         print(f"After update roh_address\n{roh_address}")
 
         # add new address
-        stmt = select(User).where(User.first_name == "Sangita")
+        stmt = select(UserSchema).where(UserSchema.first_name == "Sangita")
         san = session.scalars(stmt).one()
         print(f"san\n{san}")
         san.addresses.append(
-            Address(
+            AddressSchema(
                 street1="Mission Creek",
                 city="Fremont",
                 state="California",
@@ -164,12 +164,12 @@ class SqlAlchemyTableObject:
         from sqlalchemy import select
         session = Session(self.engine)
 
-        stmt = select(Address).where(Address.zip == "94536")
+        stmt = select(AddressSchema).where(AddressSchema.zip == "94536")
         san_address = session.scalars(stmt).one()
         print(f"san_address\n{san_address}")
         print()
 
-        san = session.get(User, 2)
+        san = session.get(UserSchema, 2)
         print(f"san\n{san}")
         print()
 
@@ -190,7 +190,7 @@ class SqlAlchemyClassicalObject:
         return RoleSchema(name=roleName, created_at=now, updated_at=now)
 
     def create_address(self, street1, city, state, country, zip):
-        return Address(
+        return AddressSchema(
             street1=street1,
             city=city,
             state=state,
@@ -198,8 +198,8 @@ class SqlAlchemyClassicalObject:
             zip=zip
         )
 
-    def create_user(self, userName, password, email, firstName, lastName, isAdmin, addresses: [Address]):
-        return User(
+    def create_user(self, userName, password, email, firstName, lastName, isAdmin, addresses: [AddressSchema]):
+        return UserSchema(
             user_name="roh@lakra.com",
             password="Roh",
             email="roh@lakra.com",

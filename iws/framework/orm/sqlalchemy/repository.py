@@ -3,8 +3,8 @@
 #
 import json
 import logging
-from abc import ABC
-from typing import Iterable
+from abc import ABC, abstractmethod
+from typing import Iterable, Dict, Any
 from typing import List, Optional
 
 from sqlalchemy import text
@@ -21,6 +21,10 @@ class SqlAlchemyRepository(AbstractRepository, ABC):
 
     def __init__(self, engine):
         super().__init__(engine)
+
+    @abstractmethod
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+        pass
 
     def save(self, instance: BaseSchema) -> BaseSchema:
         """Persists the given entity into database"""

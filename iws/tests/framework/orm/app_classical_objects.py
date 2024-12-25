@@ -3,7 +3,7 @@
 #
 from datetime import datetime
 
-from rest.account.schema import User, Address
+from rest.account.schema import UserSchema, AddressSchema
 from rest.role.schema import RoleSchema
 
 
@@ -14,7 +14,7 @@ class SqlAlchemyClassicalModel:
         return RoleSchema(name=roleName, created_at=now, updated_at=now)
 
     def create_address(self, street1, city, state, country, zip):
-        return Address(
+        return AddressSchema(
             street1=street1,
             city=city,
             state=state,
@@ -22,8 +22,8 @@ class SqlAlchemyClassicalModel:
             zip=zip
         )
 
-    def create_user(self, userName, password, email, firstName, lastName, isAdmin, addresses: [Address]):
-        user = User(
+    def create_user(self, userName, password, email, firstName, lastName, isAdmin, addresses: [AddressSchema]):
+        user = UserSchema(
             user_name="roh@lakra.com",
             password="Roh",
             email="roh@lakra.com",
