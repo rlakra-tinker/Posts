@@ -1,9 +1,11 @@
 #
 # Author: Rohtash Lakra
 #
-from flask import g, request, current_app
 import uuid
-from enum import auto, unique, Enum
+from enum import auto, unique
+
+from flask import g, request, current_app
+
 from framework.enums import AutoUpperCase
 
 
@@ -82,6 +84,7 @@ class HTTPStatus(AutoUpperCase):
     400	Bad Request - The request was malformed.
     401	Unauthorized - The client is not authorized to perform the requested action.
     404	Not Found - The requested resource was not found.
+    409 Conflict - This response is sent when a request conflicts with the current state of the server. In WebDAV remote web authoring, 409 responses are errors sent to the client so that a user might be able to resolve a conflict and resubmit the request.
     415	Unsupported Media Type - The request data format is not supported by the server.
     422	Unprocessable Entity - The request data was properly formatted but contained invalid or missing data.
     429 Too Many Requests -
@@ -100,23 +103,29 @@ class HTTPStatus(AutoUpperCase):
     BAD_REQUEST = (400, 'Bad Request')  # Retrieve an existing resource.
     UNAUTHORIZED = (401, 'Unauthorized')  # Retrieve an existing resource.
     NOT_FOUND = (404, 'Not Found')  # Retrieve an existing resource.
+    # The 409 responses are errors sent to the client so that a user might be able to resolve a conflict and resubmit
+    # the request.
+    CONFLICT = (409, 'Conflict', 'This response is sent when a request conflicts with the current state of the server.')
     UNSUPPORTED_MEDIA_TYPE = (415, 'Unsupported Media Type')  # Retrieve an existing resource.
     INVALID_DATA = (422, 'Unprocessable Entity')  # Retrieve an existing resource.
     TOO_MANY_REQUESTS = (429, 'Too Many Requests')  # Retrieve an existing resource.
     INTERNAL_SERVER_ERROR = (500, 'Internal Server Error')  # Retrieve an existing resource.
 
-    def __new__(cls, status_code: int, message: str):
-        obj = object.__new__(cls)
-        obj.status_code = status_code
-        obj.message = message
-        return obj
+    def __new__(cls, status_code: int, message: str, description: str = None):
+        http_status = object.__new__(cls)
+        http_status.status_code = status_code
+        http_status.message = message
+        http_status.description = description
 
-    def __init__(self, status_code: int, message: str):
+        return http_status
+
+    def __init__(self, status_code: int, message: str, description: str = None):
         self.status_code = status_code
         self.message = message
+        self.description = description
 
     def __repr__(self):
-        return f"{self.name} <{self.status_code}, {self.message}>"
+        return f"{self.name} <{self.status_code}, {self.message}, {self.description}>"
 
     @staticmethod
     def by_status(status: int):

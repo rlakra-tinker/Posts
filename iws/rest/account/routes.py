@@ -31,6 +31,7 @@ def load_logged_in_user():
 def register():
     print(request)
     if request.is_json:
+        user = User(**request.get_json())
         user = userService.register()
         user = User.model_construct(request.get_json())
         userService.add(user)

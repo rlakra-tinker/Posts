@@ -4,10 +4,13 @@
 from abc import abstractmethod
 
 
-class AbstractService:
+class AbstractService(object):
     """
     An abstract service for all other services inherits.
     """
+
+    def __init__(self):
+        pass
 
     def load(schema_class, json, only=None, exclude=[], partial=False, many=False):
         return schema_class(only=only, exclude=exclude, partial=partial, many=many).load_and_not_raise(json)

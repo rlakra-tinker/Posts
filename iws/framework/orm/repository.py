@@ -4,10 +4,23 @@
 import logging
 from abc import ABC, abstractmethod
 from typing import Iterable
+from typing import Union
 
+from sqlalchemy import Engine, URL, create_engine
 from sqlalchemy.orm import Session
 
 logger = logging.getLogger(__name__)
+
+
+def createEngine(dbUri: Union[str, URL], debug: bool = False) -> Engine:
+    """Create a new :class:`Engine` instance.
+
+    The debug=True parameter indicates that SQL emitted by connections will be logged to standard out.
+    """
+    logger.debug(f"+createEngine({dbUri}, {debug})")
+    engine = create_engine(dbUri, echo=debug)
+    logger.debug(f"-createEngine(), engine={engine}")
+    return engine
 
 
 class AbstractRepository(ABC):
@@ -32,8 +45,8 @@ class AbstractRepository(ABC):
         """Saves the instance using context manager"""
         logger.debug(f"+save(), instance={instance}")
         with Session(self.__engine) as session:
-            session.begin()
             try:
+                session.begin()
                 session.add(instance)
             except Exception as ex:
                 logger.error(f"Failed transaction with error:{ex}")
@@ -50,8 +63,8 @@ class AbstractRepository(ABC):
         """Saves the instances using context manager"""
         logger.debug(f"+save_all(), instances={instances}")
         with Session(self.__engine) as session:
-            session.begin()
             try:
+                session.begin()
                 session.add_all(instances)
             except Exception as ex:
                 logger.error(f"Failed transaction with error:{ex}")

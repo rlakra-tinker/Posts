@@ -4,14 +4,14 @@
 from datetime import datetime
 
 from rest.account.schema import User, Address
-from rest.role.schema import Role
+from rest.role.schema import RoleSchema
 
 
 class SqlAlchemyClassicalModel:
 
     def create_role(self, roleName):
         now = datetime.now()
-        return Role(name=roleName, created_at=now, updated_at=now)
+        return RoleSchema(name=roleName, created_at=now, updated_at=now)
 
     def create_address(self, street1, city, state, country, zip):
         return Address(

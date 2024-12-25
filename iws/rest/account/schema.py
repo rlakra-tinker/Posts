@@ -1,15 +1,38 @@
 #
 # Author: Rohtash Lakra
 #
+from datetime import datetime
 from typing import List, Optional
 
-from sqlalchemy import String, ForeignKey
+from sqlalchemy import String, ForeignKey, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from framework.orm.sqlalchemy.schema import BaseSchema
 
 
-class User(BaseSchema):
+class Person(BaseSchema):
+    """[Person]"""
+    __abstract__ = True
+
+    # not Optional[], therefore will be NOT NULL
+    email: Mapped[str] = mapped_column(String(128))
+    # not Optional[], therefore will be NOT NULL
+    first_name: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
+    last_name: Mapped[str] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
+    birth_date: Mapped[datetime] = mapped_column(nullable=False)
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return f"{type(self).__name__} <id={self.id!r}, email={self.email!r}, first_name={self.first_name!r}, last_name={self.last_name!r}>"
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
+
+
+class User(Person):
     """
     [users] Table
     """
@@ -20,13 +43,18 @@ class User(BaseSchema):
     # not Optional[], therefore will be NOT NULL
     password: Mapped[str] = mapped_column(String(128))
     # not Optional[], therefore will be NOT NULL
-    email: Mapped[str] = mapped_column(String(128))
-    # not Optional[], therefore will be NOT NULL
-    first_name: Mapped[str] = mapped_column(String(64))
-    # not Optional[], therefore will be NOT NULL
-    last_name: Mapped[str] = mapped_column(String(64))
-    # not Optional[], therefore will be NOT NULL
     admin: Mapped[bool] = False
+
+    # not Optional[], therefore will be NOT NULL
+    last_seen: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # not Optional[], therefore will be NOT NULL
+    avatar_url: Mapped[str] = mapped_column(String(128))
+
+    # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
+    # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
+    # addresses: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan")
+    # Optional[], therefore will be NULL
+    # roles: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan")
 
     # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.

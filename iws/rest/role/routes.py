@@ -4,73 +4,112 @@
 # - https://realpython.com/flask-blueprint/
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
-import json
+import logging
 
-from flask import make_response, request, abort, current_app, jsonify
+from flask import make_response, request, abort
 
-from framework.exceptions import DuplicateRecordException
+from framework.exception import DuplicateRecordException, ValidationException
 from framework.http import HTTPStatus
 from framework.model import ErrorModel, ResponseModel
 from framework.utils import Utils
-from rest.role.schema import Role
 from rest.role.model import Role
 from rest.role.service import RoleService
 from rest.role.v1 import bp as bp_role_v1
 
-# account's service
-roleService = RoleService()
+logger = logging.getLogger(__name__)
 
+
+# class RoleController:
+#
+#     # roleService = RoleService()
+#
+#     def __init__(self):
+#         logger.debug("RoleController()")
+#         self.roleService = RoleService()
 
 @bp_role_v1.post("/")
 def create():
-    current_app.logger.debug(f"create => {request}")
+    logger.debug(f"create => {request}")
     if request.is_json:
         body = request.get_json()
-        current_app.logger.debug(f"body: {body}")
-        name = body.get('name', None)
-        active = body.get('active', False)
-        role = Role.create(name=name, active=active)
+        logger.debug(f"body={body}")
+        role = Role(**body)
+        logger.debug(f"role={role}")
+        # role = RoleSchema(name=name, active=active)
+        # role = Role.create(name=name, active=active)
 
-    errors = roleService.validate(role)
-    current_app.logger.debug(f"errors: {json.dumps(errors)}")
-    if not errors:
-        try:
-            role = roleService.create(role)
-            current_app.logger.debug(f"role: {role}")
-            response = ResponseModel.jsonResponse(HTTPStatus.CREATED, entity=role,
-                                                  message="Role is successfully created.")
-        except DuplicateRecordException as ex:
-            message = f"Role={role.name} is already created! ex:{ex}"
-            error = ErrorModel.buildError(HTTPStatus.INTERNAL_SERVER_ERROR, message, exception=ex)
-            response = ResponseModel.jsonResponse(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
-        except Exception as ex:
-            error = ErrorModel.buildError(HTTPStatus.INTERNAL_SERVER_ERROR, str(ex), exception=ex)
-            response = ResponseModel.jsonResponse(HTTPStatus.INTERNAL_SERVER_ERROR, error, exception=ex)
-    else:
-        response = errors
+    try:
+        roleService = RoleService()
+        roleService.validate(role)
+        role = roleService.create(role)
+        logger.debug(f"role={role}")
 
-    current_app.logger.debug(f"response: {response}")
-    return make_response(jsonify(response))
-    # return make_response(response)
-    # TODO: REDIRECT TO LOGIN PAGE
-    # return redirect(url_for("iws.webapp.contact"))
+        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Role is successfully created.")
+        response.addInstance(role)
+        # response = response.to_json()
+    except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except DuplicateRecordException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except Exception as ex:
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+
+    logger.debug(f"response={response}")
+    return make_response(response.to_json(), response.status)
+
+
+@bp_role_v1.post("/batch")
+def create_batch():
+    logger.debug(f"create => {request}")
+    try:
+        roles = []
+        if request.is_json:
+            body = request.get_json()
+            logger.debug(f"type={type(body)}, body={body}")
+            if isinstance(body, list):
+                roles = [Role(**entry) for entry in body]
+            elif isinstance(body, dict):
+                roles.append(Role(**body))
+            else:
+                # handle form fields here.
+                pass
+
+        logger.debug(f"roles={roles}")
+        roleService = RoleService()
+        roleService.validates(roles)
+        roles = roleService.createBatch(roles)
+        logger.debug(f"roles={roles}")
+
+        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Roles are successfully created.")
+        response.addInstances(roles)
+    except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except DuplicateRecordException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except Exception as ex:
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+
+    logger.debug(f"response={response}")
+    return make_response(response.to_json(), response.status)
 
 
 @bp_role_v1.get("/")
 def get():
-    current_app.logger.debug(f"get => {request}, request.args={request.args}, is_json:{request.is_json}")
+    logger.debug(f"get => {request}, request.args={request.args}, is_json:{request.is_json}")
     params = request.args
-    # body = request.get_json() if request.is_json else {}
-    # current_app.logger.debug(f"body={body}")
     try:
-        roles = roleService.find_all(params)
-        current_app.logger.debug(f"roles={roles}")
+        roleService = RoleService()
+        roles = roleService.findAll(params)
+        logger.debug(f"roles={roles}")
+
         response = ResponseModel.buildResponse(HTTPStatus.OK)
-        response.addData(roles)
-        current_app.logger.debug(f"response={response}")
-        return make_response(response.to_json())
+        if not roles:
+            response.message = "No Records Exists!"
+        response.addInstances(roles)
+        logger.debug(f"response={response}")
+        return make_response(response.to_json(), response.status)
     except Exception as ex:
-        current_app.logger.error(f"Error={ex}, stack_trace={Utils.stack_trace(ex)}")
+        logger.error(f"Error={ex}, stack_trace={Utils.stack_trace(ex)}")
         error = ErrorModel.buildError(HTTPStatus.NOT_FOUND, message='No round found with ID!', exception=ex)
         response = ResponseModel.buildResponse(HTTPStatus.NOT_FOUND, error)
-        return abort(response.to_json())
+        return abort(response.to_json(), response.status)

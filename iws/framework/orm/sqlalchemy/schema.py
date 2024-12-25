@@ -188,7 +188,7 @@ class AbstractSchema(Auditable):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"AbstractSchema <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return f"{type(self).__name__} <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

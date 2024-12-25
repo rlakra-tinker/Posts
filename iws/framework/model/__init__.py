@@ -11,6 +11,7 @@ from typing import Optional, Dict, List
 from pydantic import BaseModel, ValidationError, ConfigDict, model_validator, field_validator
 
 from framework.enums import BaseEnum
+from framework.exception import AbstractException, ValidationException, DuplicateRecordException
 from framework.http import HTTPStatus
 from framework.utils import Utils
 
@@ -37,13 +38,12 @@ class SyncStatus(BaseEnum):
 
 # AbstractModel
 class AbstractPydanticModel(BaseModel):
-    """AbstractPydanticModel is a base model for all other models inherit and provides basic configuration parameters.
-    """
+    """AbstractPydanticModel is a base model for all models inherit and provides basic configuration parameters."""
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
     def to_json(self):
         """Returns the JSON representation of this object."""
-        logger.debug(f"to_json() => type={type(self)}, object={str(self)}")
+        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     def __str__(self):
@@ -56,16 +56,28 @@ class AbstractPydanticModel(BaseModel):
 
 
 class AbstractModel(AbstractPydanticModel):
-    """AbstractModel is a base model for all other models inherit and provides basic configuration parameters.
-    """
+    """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
+
     id: int = None
     created_at: datetime = datetime.now()
     updated_at: datetime = datetime.now()
 
+    # @root_validator()
+    # def on_create(cls, values):
+    #     logger.debug(f"on_create({values})")
+    #     print("Put your logic here!")
+    #     return values
+
+    @classmethod
     @model_validator(mode="before")
-    def _model_validator(cls, values):
-        logger.info(f"_model_validator({values})")
+    def pre_validator(cls, values):
+        logger.debug(f"pre_validator({values})")
         return values
+
+    @model_validator(mode="after")
+    def post_validator(self, values):
+        logger.debug(f"post_validator({values})")
+        return self
 
     def get_id(self):
         return self.id
@@ -108,21 +120,28 @@ class NamedModel(AbstractModel):
     """NamedModel used an entity with a property called 'name' in it"""
     name: str
 
+    @classmethod
     @model_validator(mode="before")
-    def _model_validator(cls, values):
-        logger.info(f"_model_validator({values})")
-        if not "name" in values:
-            raise ValueError("'name' should be provided to the model!")
+    def pre_validator(cls, values):
+        logger.debug(f"pre_validator({values})")
+        if "name" not in values:
+            raise ValueError("The model 'name' should be provided!")
 
         return values
 
+    @classmethod
     @field_validator('name')
-    def name_must_provide(cls, value):
-        logger.info(f"name_must_provide({value})")
+    def name_validator(cls, value):
+        logger.info(f"name_validator({value})")
         if value is None or len(value) == 0:
-            raise ValueError("'name' should not be null or empty!")
+            raise ValueError("The model 'name' should not be null or empty!")
 
         return value
+
+    @model_validator(mode="after")
+    def post_validator(self, values):
+        logger.debug(f"post_validator({values})")
+        return self
 
     def get_name(self):
         return self.name
@@ -144,7 +163,7 @@ class ErrorModel(AbstractPydanticModel):
 
     def to_json(self):
         """Returns the JSON representation of this object."""
-        logger.debug(f"to_json() => type={type(self)}, object={str(self)}")
+        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     @staticmethod
@@ -195,6 +214,7 @@ class ErrorModel(AbstractPydanticModel):
 class ResponseModel(AbstractPydanticModel):
     """ResponseModel represents the response object"""
     status: int
+    message: Optional[str] = None
     data: Optional[List[AbstractModel]] = None
     errors: Optional[List[ErrorModel]] = None
 
@@ -208,103 +228,126 @@ class ResponseModel(AbstractPydanticModel):
 
     def to_json(self):
         """Returns the JSON representation of this object."""
-        logger.debug(f"to_json() => type={type(self)}, object={str(self)}")
+        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        # return self.model_dump()
         return self.model_dump_json()
 
-    def add(self, entity: AbstractPydanticModel = None):
+    def addInstance(self, instance: AbstractPydanticModel = None):
         """Adds an object into the list of data or errors"""
-        logger.debug(f"add(), entity={entity}")
-        if isinstance(entity, ErrorModel):
-            if self.errors is None and entity:
+        logger.debug(f"+addInstance({instance})")
+        if isinstance(instance, ErrorModel):
+            if self.errors is None and instance:
                 self.errors = []
-            self.errors.append(entity)
-        elif isinstance(entity, AbstractModel):
-            if self.data is None and entity:
+
+            self.errors.append(instance)
+
+        elif isinstance(instance, AbstractModel):
+            if self.data is None and instance:
                 self.data = []
-            self.data.append(entity)
+
+            self.data.append(instance)
         else:
-            logger.debug(f"Invalid entity:{entity}!")
+            logger.debug(f"Invalid instance:{instance}!")
 
-    def addData(self, entities: List[AbstractModel] = None):
-        """Adds an object into the list of data or errors"""
-        logger.debug(f"addData(), entities={entities}")
-        if entities:
-            if self.data is None:
-                self.data = []
-            else:
-                self.data.extend(entities)
-        elif entities is not None and not entities:  # Emtpy list
-            if self.data is None:
-                self.data = []
+        logger.debug(f"-addInstance(), data={self.data}, errors={self.errors}")
 
-    def addError(self, entities: List[ErrorModel] = None):
-        """Adds an object into the list of data or errors"""
-        logger.debug(f"addError(), entities={entities}")
-        if entities:
-            if self.errors is None:
-                self.errors = []
-            else:
-                self.data.extend(entities)
-        elif entities is not None and not entities:  # Emtpy list
-            if self.errors is None:
-                self.errors = []
+    def addInstances(self, instances: List[AbstractPydanticModel] = None):
+        logger.debug(f"+addInstances(), instances={instances}")
+        for instance in instances:
+            self.addInstance(instance)
+
+        logger.debug(f"-addInstances()")
 
     def hasError(self) -> bool:
         """Returns true if any errors otherwise false"""
         return self.errors is not None
 
     @classmethod
-    def buildResponse(cls, http_status: HTTPStatus, entity: AbstractPydanticModel = None, message: str = None,
+    def buildResponse(cls, http_status: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
                       exception: Exception = None, is_critical: bool = False):
-        logger.debug(f"+buildResponse({http_status}, {entity}, {message}, {exception}, {is_critical})")
-        response = None
-        if isinstance(entity, ErrorModel):  # check if an ErrorModel entity
-            logger.debug(f"isinstance(entity, ErrorModel) => {isinstance(entity, ErrorModel)}")
+        logger.debug(f"+buildResponse({http_status}, {instance}, {message}, {exception}, {is_critical})")
+        if isinstance(instance, ErrorModel):  # check if an ErrorModel entity
+            logger.debug(f"isinstance(entity, ErrorModel) => {isinstance(instance, ErrorModel)}")
             errorModel = ErrorModel.buildError(http_status, message, exception, is_critical)
             # update entity's message and exception if missing
             if not errorModel.message:
-                errorModel.message = entity.message if entity.message else errorModel.message
+                errorModel.message = instance.message if instance.message else errorModel.message
 
             # build response and add errorModel in the list
             response = ResponseModel(status=http_status.status_code)
-            response.add(errorModel)
-        elif isinstance(entity, AbstractModel):
-            logger.debug(f"isinstance(entity, AbstractModel) => {isinstance(entity, AbstractModel)}")
+            response.addInstance(errorModel)
+        elif isinstance(instance, AbstractModel):
+            logger.debug(f"isinstance(entity, AbstractModel) => {isinstance(instance, AbstractModel)}")
             response = ResponseModel(status=http_status.status_code)
             # build errorModel response, if exception is provided
             if HTTPStatus.is_success_status(http_status):
                 # if not exception or not message:
-                response.add(entity)
+                response.addInstance(instance)
             else:
-                response.add(ErrorModel.buildError(http_status, message, exception, is_critical))
+                response.addInstance(ErrorModel.buildError(http_status, message, exception, is_critical))
         elif exception:
-            logger.debug(f"elif exception => exception={exception}")
+            logger.debug(f"elif exception => type={type(exception)}, exception={exception}")
             response = ResponseModel(status=http_status.status_code)
             # build errorModel response, if exception is provided
-            response.add(ErrorModel.buildError(http_status, message, exception, is_critical))
+            response.addInstance(ErrorModel.buildError(http_status, message, exception, is_critical))
         elif not HTTPStatus.is_success_status(http_status):
             logger.debug(f"not HTTPStatus.is_success_status() => {HTTPStatus.is_success_status(http_status)}")
             response = ResponseModel(status=http_status.status_code)
             # build errorModel response, if exception is provided
-            response.add(ErrorModel.buildError(http_status, message, exception, is_critical))
+            response.addInstance(ErrorModel.buildError(http_status, message, exception, is_critical))
         else:
             logger.debug(f"else => ")
-
             response = ResponseModel(status=http_status.status_code)
 
         logger.debug(f"-buildResponse(), response={response}")
         return response
 
     @classmethod
-    def jsonResponse(cls, http_status: HTTPStatus, entity: AbstractPydanticModel = None, message: str = None,
-                     exception: Exception = None, is_critical: bool = False):
-        return ResponseModel.buildResponse(http_status, [entity], message, exception, is_critical).to_json()
-        # return ResponseEntity.response(http_status, entity, message, exception, is_critical).model_dump_json()
+    def buildResponseWithException(cls, exception: AbstractException):
+        logger.debug(f"+buildResponseWithException() => type={type(exception)}")
+        # build response and add errorModel in the list
+        if isinstance(exception, ValidationException):  # check if an AbstractException entity
+            logger.debug(f"ValidationException => {isinstance(exception, ValidationException)}")
+            response = ResponseModel(status=exception.httpStatus.status_code)
+            for message in exception.messages:
+                response.addInstance(ErrorModel.buildError(http_status=exception.httpStatus, message=message))
+        elif isinstance(exception, DuplicateRecordException):
+            logger.debug(f"DuplicateRecordException => {isinstance(exception, DuplicateRecordException)}")
+            response = ResponseModel(status=exception.httpStatus.status_code)
+            response.addInstance(
+                ErrorModel.buildError(http_status=exception.httpStatus, message=exception.messages[:-1]))
+            # response = ResponseModel.buildResponse(HTTPStatus.CONFLICT, message=str(exception))
+        elif isinstance(exception, AbstractException):
+            logger.debug(f"isinstance(exception, AbstractException) => {isinstance(exception, AbstractException)}")
+            response = ResponseModel(status=exception.httpStatus.status_code)
+            for message in exception.messages:
+                response.addInstance(ErrorModel.buildError(http_status=exception.httpStatus, message=message))
+            response = ResponseModel.buildResponse(HTTPStatus.CONFLICT, message=str(exception))
+        elif isinstance(exception, Exception):
+            logger.debug(f"isinstance(exception, Exception) => {isinstance(exception, Exception)}")
+            response = ResponseModel(status=HTTPStatus.INTERNAL_SERVER_ERROR)
+            # build errorModel response, if exception is provided
+            response.addInstance(ErrorModel.buildError(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(exception)))
+
+        logger.debug(f"-buildResponseWithException(), type={type(exception)} response={response}")
+        return response
 
     @classmethod
-    def jsonResponses(cls, entities: List[Optional[AbstractPydanticModel]] = []):
+    def jsonResponseWithException(cls, exception: AbstractException):
+        logger.debug(f"+jsonResponseWithException({exception})")
+        response = cls.buildResponseWithException(exception).to_json()
+        logger.debug(f"-jsonResponseWithException(), response={response}")
+        return response
+
+    @classmethod
+    def jsonResponse(cls, http_status: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
+                     exception: Exception = None, is_critical: bool = False):
+        return ResponseModel.buildResponse(http_status, [instance], message, exception, is_critical).to_json()
+
+    @classmethod
+    def jsonResponses(cls, instances: List[Optional[AbstractPydanticModel]] = []):
         responses = []
-        for entity in entities:
+        for entity in instances:
             logger.debug(f"jsonResponses() => type={type(entity)}, object={str(entity)}, json={entity.to_json()}")
             responses.append(entity.to_json())
 

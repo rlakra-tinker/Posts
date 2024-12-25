@@ -5,7 +5,6 @@
 import importlib.metadata
 import logging
 import os
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -45,24 +44,24 @@ class WebApp:
         self.environment: dict = {}
         self.app: Flask = None
 
-    def _load_env(self, test_mode: bool = False):
-        with self.app.app_context():
-            flask_version = importlib.metadata.version("flask")
-            current_app.logger.debug(
-                f"Running Application [{self.app.name}] on version [{flask_version}] with testMode [{test_mode}] ...")
-            current_app.logger.info(f"ENV_TYPE={EnvType.get_env_type()}")
-            # Load the environment variables
-            env_file_path = self.path.cwd().joinpath('.env')  # self.path.cwd() / '.env'
-            current_app.logger.debug(f"env_file_path={env_file_path}")
+    def __load_env(self, test_mode: bool = False):
+        logger.debug(f"__load_env({test_mode})")
+        # with self.app.app_context():
+        flask_version = importlib.metadata.version("flask")
+        logger.debug(f"Running Application [{self.app.name}] on version [{flask_version}] with testMode [{test_mode}]")
+        logger.info(f"ENV_TYPE={EnvType.get_env_type()}")
+        # Load the environment variables
+        env_file_path = self.path.cwd().joinpath('.env')  # self.path.cwd() / '.env'
+        logger.debug(f"env_file_path={env_file_path}")
 
-            # loads .env file and updates the local env object
-            load_dotenv(dotenv_path=env_file_path)
-            self.set_env(self.__HOST, os.getenv(self.__HOST, "127.0.0.1"))
-            self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
-            self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
-            self.set_env(KeyEnum.ENV_TYPE.name, EnvType.get_env_type())
-            self.set_env(KeyEnum.LOG_FILE_NAME.name, os.getenv(KeyEnum.LOG_FILE_NAME.name, 'iws.log'))
-            current_app.logger.debug(f"environment={self.environment}")
+        # loads .env file and updates the local env object
+        load_dotenv(dotenv_path=env_file_path)
+        self.set_env(self.__HOST, os.getenv(self.__HOST, "127.0.0.1"))
+        self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
+        self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
+        self.set_env(KeyEnum.ENV_TYPE.name, EnvType.get_env_type())
+        self.set_env(KeyEnum.LOG_FILE_NAME.name, os.getenv(KeyEnum.LOG_FILE_NAME.name, 'iws.log'))
+        logger.debug(f"environment={self.environment}")
 
     def set_env(self, key: str, value: Any):
         self.environment[key] = value
@@ -102,7 +101,7 @@ class WebApp:
         app.wsgi_app = ProxyFix(app.wsgi_app)
         # wsgi_app = ProxyFix(app.wsgi_app)
         self.app = app
-        self._load_env(test_mode=test_mode)
+        self.__load_env(test_mode=test_mode)
         # load app's configs
         app.config.from_object(config_class)
 
@@ -113,6 +112,7 @@ class WebApp:
         # Initialize/Register Flask Extensions/Components, if any
         if not test_mode:
             connector.init(app)
+            connector.init_db({KeyEnum.DB_TYPE.name: KeyEnum.SQLALCHEMY.name})
 
         # Initialize/Register Default Error Handlers, if any
 
@@ -175,8 +175,8 @@ class WebApp:
 
         # Initialize/Register Request's behavior/db connection
         if not test_mode:
-            connector.init_db({KeyEnum.DB_TYPE.name: KeyEnum.SQLALCHEMY.name})
             # app.before_request(connector.open_connection())
             # app.teardown_request(connector.close_connection())
+            pass
 
         return app

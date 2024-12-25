@@ -93,8 +93,8 @@ class ModelsTest(AbstractTestCase):
                   ErrorModel.buildError(HTTPStatus.INVALID_DATA, message='Last name should provide!')]
         # response = ResponseModel(status=HTTPStatus.BAD_REQUEST.status_code, data=contact, errors=errors)
         response = ResponseModel(status=HTTPStatus.BAD_REQUEST.status_code)
-        response.add(contact)
-        response.addError(errors)
+        response.addInstance(contact)
+        response.addInstances(errors)
         print(f"response: {response}")
         self.assertIsNotNone(response)
         self.assertEqual(HTTPStatus.BAD_REQUEST.status_code, response.status)

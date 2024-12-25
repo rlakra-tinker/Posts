@@ -42,7 +42,7 @@ def create():
     if not errors:
         try:
             contact = contactService.create(contact)
-            response = ResponseModel.jsonResponse(HTTPStatus.CREATED, entity=contact,
+            response = ResponseModel.jsonResponse(HTTPStatus.CREATED, instance=contact,
                                                   message="Contact is successfully created.")
         except Exception as ex:
             message = f"Contact={contact.first_name} is already registered! ex:{ex}"

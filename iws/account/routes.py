@@ -49,7 +49,7 @@ def register():
         # response_json = ResponseEntity.build_response_json(HTTPStatus.CREATED, user)
         response_json = user.json()
     else:
-        response_json = ResponseModel.jsonResponse(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, entity=user,
+        response_json = ResponseModel.jsonResponse(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, instance=user,
                                                    message="Invalid JSON object!")
 
     return make_response(response_json)

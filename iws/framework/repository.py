@@ -1,13 +1,16 @@
 #
 # Author: Rohtash Lakra
 #
+import logging
 from typing import Any
 from typing import Mapping
 
-from flask import current_app
 from werkzeug.datastructures import MultiDict
 
+from framework.orm.sqlalchemy.repository import SqlAlchemyRepository
 from globals import connector
+
+logger = logging.getLogger(__name__)
 
 
 class RepositoryManager(object):
@@ -42,12 +45,15 @@ class RepositoryManager(object):
         pass
 
 
-class AbstractRepository(object):
+class AbstractRepository(SqlAlchemyRepository):
     """The abstract repository of all other classes"""
+
+    def __init__(self, engine):
+        super().__init__(engine)
 
     def execute(self, statement, params={}, many: bool = False):
         """Executes the query"""
-        current_app.logger.info(f"execute({statement}, {params}, {many}), connector => {connector}")
+        logger.info(f"execute({statement}, {params}, {many}), connector => {connector}")
         # print(f"execute({params}, {many}), connector => {connector}")
         connection = connector.get_connection()
         if many:
@@ -56,7 +62,7 @@ class AbstractRepository(object):
             return connection.execute(statement, params)
 
     def build_filters(self, filters, connector='AND', operators={}, return_tuple=False):
-        current_app.logger.debug(f"+build_filters({filters}, {connector}, {operators}, {return_tuple})")
+        logger.debug(f"+build_filters({filters}, {connector}, {operators}, {return_tuple})")
         filter_clause = ""
         query_params = {}
         if filters:
@@ -109,20 +115,29 @@ class AbstractRepository(object):
 
         # return response
         if return_tuple:
-            current_app.logger.debug(f"-build_filters(), filter_clause={filter_clause}, query_params={query_params}")
+            logger.debug(f"-build_filters(), filter_clause={filter_clause}, query_params={query_params}")
             return filter_clause, query_params
         else:
-            current_app.logger.debug(f"-build_filters(), filter_clause={filter_clause}")
+            logger.debug(f"-build_filters(), filter_clause={filter_clause}")
             filter_clause
 
     def where_clause(self, filters, connector='AND', operators={}):
-        current_app.logger.debug(f"where_clause({filters}, {connector}, {operators})")
+        logger.debug(f"where_clause({filters}, {connector}, {operators})")
         filter_clause, query_params = self.build_filters(filters, connector, operators, return_tuple=True)
         return 'WHERE ' + filter_clause, query_params if filters else filter_clause
 
-    def build_update_set_fields(self, update_json):
-        update_keys = list(update_json.keys())
-        update_fields = ''.join([update_key + '=%(' + update_key + ')s, ' for update_key in update_keys[0:-1]]) + \
-                        update_keys[-1] + '=%(' + update_keys[-1] + ')s'
+    def __format_field(self, field):
+        return "{}=%({})s".format(field, field)
 
-        return 'SET ' + update_fields
+    def build_update_set_fields(self, update_json):
+        logger.debug(f"+build_update_set_fields({update_json})")
+        update_keys = list(update_json.keys())
+        update_fields = "{} {}".format(
+            ", ".join([self.__format_field(update_key) for update_key in update_keys[0:-1]]),
+            self.__format_field(update_keys[-1])
+        )
+        # update_fields = ''.join([update_key + '=%(' + update_key + ')s, ' for update_key in update_keys[0:-1]]) + update_keys[-1] + '=%(' + update_keys[-1] + ')s'
+
+        update_set_fields = "SET {}".format(update_fields)
+        logger.debug(f"-build_update_set_fields(), update_set_fields={update_set_fields}")
+        return update_set_fields

@@ -1,18 +1,24 @@
 #
 # Author: Rohtash Lakra
 #
+import logging
 import sqlite3
 from pathlib import Path
 from typing import Iterable
 
 import click
 from flask import Flask, g, current_app
-from sqlalchemy import create_engine, MetaData
+from sqlalchemy import MetaData
 from sqlalchemy.orm import Session
 
 from common.config import Config
 from framework.enums import KeyEnum
+from framework.orm.repository import createEngine
 from framework.orm.sqlalchemy.schema import BaseSchema
+
+logger = logging.getLogger(__name__)
+
+
 # from framework.orm.sqlalchemy.entity import AbstractEntity
 
 
@@ -122,8 +128,7 @@ class SQLite3Connector(DatabaseConnector):
                 # Set up the SQLAlchemy Database to be a local file 'posts.db'
                 self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
                 # SQLAlchemy DB Creation
-                # The echo=True parameter indicates that SQL emitted by connections will be logged to standard out.
-                self.engine = create_engine(self.db_uri, echo=True)
+                self.engine = createEngine(self.db_uri, debug=True)
                 self.session = Session()
                 # Using our table metadata and our engine, we can generate our schema at once in our target SQLite
                 # database, using a method called 'MetaData.create_all()':
@@ -189,8 +194,8 @@ class SQLite3Connector(DatabaseConnector):
         """Saves the instance using context manager"""
         current_app.logger.debug(f"+save(), instance={instance}")
         with Session(self.engine) as session:
-            session.begin()
             try:
+                session.begin()
                 session.add(instance)
             except Exception as ex:
                 current_app.logger.error(f"Failed transaction with error:{ex}")
@@ -205,8 +210,8 @@ class SQLite3Connector(DatabaseConnector):
         """Saves the instances using context manager"""
         current_app.logger.debug(f"+save_all(), instances={instances}")
         with Session(self.engine) as session:
-            session.begin()
             try:
+                session.begin()
                 session.add_all(instances)
             except Exception as ex:
                 current_app.logger.error(f"Failed transaction with error:{ex}")

@@ -4,16 +4,12 @@
 # - https://realpython.com/flask-blueprint/
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
-import json
 
-from flask import make_response, request, abort, current_app, jsonify
+from flask import request, current_app
 
-from framework.exceptions import DuplicateRecordException
-from framework.http import HTTPStatus
-from framework.model import ErrorModel, ResponseModel
-from framework.utils import Utils
-from rest.post.v1 import bp as bp_post_v1
 from rest.post.schema import Post
+from rest.post.v1 import bp as bp_post_v1
+
 
 # post's service
 
@@ -65,12 +61,12 @@ def get():
     #     roles = roleService.find_all(params)
     #     current_app.logger.debug(f"roles={roles}")
     #     response = ResponseModel.buildResponse(HTTPStatus.OK)
-    #     response.addData(roles)
+    #     response.addInstance(roles)
     #     current_app.logger.debug(f"response={response}")
-    #     return make_response(response.to_json())
+    #     return make_response(response.to_json(), response.status)
     # except Exception as ex:
     #     current_app.logger.error(f"Error={ex}, stack_trace={Utils.stack_trace(ex)}")
     #     error = ErrorModel.error(HTTPStatus.NOT_FOUND, message='No round found with ID!', exception=ex)
     #     response = ResponseModel.buildResponse(HTTPStatus.NOT_FOUND, error)
-    #     return abort(response.to_json())
+    #     return abort(response.to_json(), response.status)
     return None

@@ -3,19 +3,19 @@
 #
 from datetime import datetime
 
-from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
+from framework.orm.repository import createEngine
 from framework.orm.sqlalchemy.schema import BaseSchema
 from rest.account.schema import User, Address
-from rest.role.schema import Role
+from rest.role.schema import RoleSchema
 
 
 class SqlAlchemyTableObject:
 
     def __init__(self):
         # The echo=True parameter indicates that SQL emitted by connections will be logged to standard out.
-        self.engine = create_engine("sqlite://", echo=True)
+        self.engine = createEngine("sqlite:///testPosts.db", True)
 
     def create_database(self):
         print(f"create_database\n")
@@ -29,9 +29,9 @@ class SqlAlchemyTableObject:
         print(f"populate_database\n")
         with Session(self.engine) as session:
             # create roles
-            admin_role = Role(name="ADMIN")
-            user_role = Role(name="USER")
-            guest_role = Role(name="GUEST")
+            admin_role = RoleSchema(name="ADMIN")
+            user_role = RoleSchema(name="USER")
+            guest_role = RoleSchema(name="GUEST")
             # add all roles
             session.add_all([admin_role, user_role, guest_role])
 
@@ -86,7 +86,7 @@ class SqlAlchemyTableObject:
         # Simple SELECT
         from sqlalchemy import select
         session = Session(self.engine)
-        stmt = select(Role)
+        stmt = select(RoleSchema)
         for role in session.scalars(stmt):
             print(role)
         print()
@@ -187,7 +187,7 @@ class SqlAlchemyClassicalObject:
 
     def create_role(self, roleName):
         now = datetime.now()
-        return Role(name=roleName, created_at=now, updated_at=now)
+        return RoleSchema(name=roleName, created_at=now, updated_at=now)
 
     def create_address(self, street1, city, state, country, zip):
         return Address(
