@@ -27,6 +27,7 @@ class JsonEncoder(JSONEncoder):
                 and not inspect.isroutine(value)
             )
             return self.default(obj_dict)
+
         return obj
 
 

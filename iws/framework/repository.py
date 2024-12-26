@@ -3,12 +3,13 @@
 #
 import logging
 from abc import ABC
-from typing import Any
+from typing import Dict, List, Optional, Any
 from typing import Mapping
 
 from werkzeug.datastructures import MultiDict
 
 from framework.orm.sqlalchemy.repository import SqlAlchemyRepository
+from framework.orm.sqlalchemy.schema import BaseSchema
 from globals import connector
 
 logger = logging.getLogger(__name__)
@@ -51,6 +52,10 @@ class AbstractRepository(SqlAlchemyRepository, ABC):
 
     def __init__(self, engine):
         super().__init__(engine)
+
+    # @abstractmethod
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+        pass
 
     def execute(self, statement, params={}, many: bool = False):
         """Executes the query"""

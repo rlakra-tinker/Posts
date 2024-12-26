@@ -23,7 +23,6 @@ class SqlAlchemyRepository(AbstractRepository, ABC):
     def __init__(self, engine):
         super().__init__(engine)
 
-    @abstractmethod
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
         pass
 
