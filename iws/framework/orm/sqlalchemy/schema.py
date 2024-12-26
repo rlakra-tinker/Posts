@@ -11,8 +11,9 @@ from datetime import datetime
 from enum import unique, auto
 from math import ceil
 
-from sqlalchemy import func, orm, String, event
+from sqlalchemy import func, orm, String, event, inspect
 from sqlalchemy.orm import Mapped, mapped_column, declarative_base, DeclarativeMeta
+from sqlalchemy.orm.query import attributes
 
 from framework.enums import AutoUpperCase
 
@@ -130,6 +131,83 @@ class QueryProperty(object):
             return query_property
 
 
+class Serializable(object):
+    __exclude__ = ('id',)
+    __include__ = ()
+    __write_only__ = ()
+
+    @classmethod
+    def from_json(cls, json, instance=None):
+        self = cls() if instance is None else instance
+        exclude = (cls.__exclude__ or ()) + Serializable.__exclude__
+        include = cls.__include__ or ()
+
+        if json:
+            for key, value in json.iteritems():
+                # ignore all non user data, e.g. only
+                if (not (key in exclude) | (key in include)) and isinstance(getattr(cls, key, None),
+                                                                            attributes.QueryableAttribute):
+                    setattr(self, key, value)
+
+        return self
+
+    def deserialize(self, json):
+        return self.__class__.from_json(json, instance=self) if json else None
+
+    @classmethod
+    def serialize_list(cls, instances=[]):
+        output = []
+        for instance in instances:
+            if isinstance(instance, Serializable):
+                output.append(instance.serialize())
+            else:
+                output.append(instance)
+
+        return output
+
+    def serialize(self, **kwargs):
+        # init write only props
+        if len(getattr(self.__class__, '__write_only__', ())) == 0:
+            self.__class__.__write_only__ = ()
+
+        dictionary = {}
+        expand = kwargs.get('expand', ()) or ()
+        key = 'props'
+
+        if expand:
+            # expand all the fields
+            for key in expand:
+                getattr(self, key)
+
+        iterable = self.__dict__.items()
+        is_custom_property_set = False
+
+        # include only properties passed as parameter
+        if (key in kwargs) and (kwargs.get(key, None) is not None):
+            is_custom_property_set = True
+            iterable = kwargs.get(key, None)
+
+        # loop through all accessible properties
+        for key in iterable:
+            accessor = key
+            if isinstance(key, tuple):
+                accessor = key[0]
+
+            if not (accessor in self.__class__.__write_only__) and not accessor.startswith('_'):
+                # force select from db to get relationships
+                if is_custom_property_set:
+                    getattr(self, accessor, None)
+                if isinstance(self.__dict__.get(accessor), list):
+                    dictionary[accessor] = self.__class__.serialize_list(instances=self.__dict__.get(accessor))
+                # check if those properties are read only
+                elif isinstance(self.__dict__.get(accessor), Serializable):
+                    dictionary[accessor] = self.__dict__.get(accessor).serialize()
+                else:
+                    dictionary[accessor] = self.__dict__.get(accessor)
+
+        return dictionary
+
+
 def set_query_property(model_class, session):
     """A helper method for attaching the query property to the model."""
     model_class.query = QueryProperty(session)
@@ -209,6 +287,9 @@ class AbstractSchema(Auditable):
 
     def to_json(self):
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}
+
+    def toJson(self):
+        return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
 
     # def load_and_not_raise(self, data):
     #     try:

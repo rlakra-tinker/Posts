@@ -74,6 +74,10 @@ class Utils(BaseEnum):
         logger.debug(f"-measure_ttfb(), url={url}, ttfb={ttfb}")
         return ttfb
 
+    @staticmethod
+    def now():
+        return time.time()
+
 
 class StopWatch(object):
     """Test support functionality for other tests."""

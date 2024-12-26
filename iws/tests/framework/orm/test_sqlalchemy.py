@@ -5,6 +5,7 @@
 import json
 import logging
 import unittest
+from datetime import datetime
 
 from framework.orm.sqlalchemy.schema import DefaultJSONEncoder, RecursiveJSONEncoder
 from rest.account.schema import UserSchema, AddressSchema
@@ -24,6 +25,32 @@ class SqlAlchemyTest(AbstractTestCase):
         role_json = json.dumps(roleSchema, cls=DefaultJSONEncoder)
         logger.debug(f"roleSchema={roleSchema}, role_json={role_json}")
         print()
+
+    def test_json(self):
+        logger.debug(f"+test_json()")
+        user = UserSchema(
+            user_name="roh@lakra.com",
+            password="Roh",
+            email="roh@lakra.com",
+            first_name="Rohtash",
+            last_name="Lakra",
+            admin=True,
+            # birth_date=datetime.now(),
+            # last_seen=datetime.now(),
+            addresses=[]
+        )
+
+        self.assertIsNotNone(user)
+        user_json = user.to_json()
+        self.assertIsNotNone(user_json)
+        logger.debug(f"user={user}")
+        logger.debug(f"user_json={user_json}")
+        logger.debug(f"json={json.dumps(user_json)}")
+        print()
+        jsonUser = user.toJson()
+        self.assertIsNotNone(jsonUser)
+        logger.debug(f"user={user}, jsonUser={jsonUser}, json={json.dumps(jsonUser)}")
+        logger.debug(f"-test_json()")
 
     def test_recursive_encoder(self):
         logger.debug(f"test_recursive_encoder()")
