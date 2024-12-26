@@ -98,5 +98,29 @@ class RoleRepository(AbstractRepository, ABC):
         logger.info(f"-update(), results={results}")
         return results
 
-    def delete(self, id: int):
-        pass
+    def delete(self, id: int) -> None:
+        logger.debug(f"+delete({id})")
+        with Session(self.get_engine()) as session:
+            try:
+                listOfRoles = self.findByFilter({"id": id})
+                # roles = session.query(RoleSchema).filter(RoleSchema.id == id).all()
+                for roleSchema in listOfRoles:
+                    logger.debug(f"Deleting role with id=[{roleSchema.id}]")
+                    session.delete(roleSchema)
+
+                # session.delete(roleSchema)
+                logger.debug(f"Deleted [{len(listOfRoles)}] rows successfully.")
+            except NoResultFound as ex:
+                logger.error(f"NoResultFound while updating records! Error={ex}")
+                session.rollback()
+                raise ex
+            except MultipleResultsFound as ex:
+                logger.error(f"MultipleResultsFound while updating records! Error={ex}")
+                session.rollback()
+                raise ex
+            except Exception as ex:
+                logger.error(f"Exception while updating records! Error={ex}")
+                session.rollback()
+                raise ex
+
+        logger.info(f"-delete()")

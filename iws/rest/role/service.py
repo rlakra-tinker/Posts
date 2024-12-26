@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from framework.exception import DuplicateRecordException, ValidationException
 from framework.http import HTTPStatus
-from framework.orm.sqlalchemy.schema import BaseSchema
+from framework.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from globals import connector
@@ -63,7 +63,7 @@ class RoleService(AbstractService):
         logger.debug(f"-validate()")
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
         logger.debug(f"+findByFilter({filters})")
         roleSchemas = self.repository.findByFilter(filters)
         # logger.debug(f"roleSchemas => type={type(roleSchemas)}, values={roleSchemas}")
@@ -71,8 +71,8 @@ class RoleService(AbstractService):
         for roleSchema in roleSchemas:
             # logger.debug(f"roleSchema type={type(roleSchema)}, value={roleSchema}")
             roleModel = self.fromSchema(roleSchema)
-            roleModels.append(roleModel)
             # logger.debug(f"type={type(roleModel)}, roleModel={roleModel}")
+            roleModels.append(roleModel)
             # roleModelValidate = Role.model_validate(roleSchema)
             # logger.debug(f"type={type(roleModelValidate)}, roleModelValidate={roleModelValidate}")
 
@@ -160,6 +160,9 @@ class RoleService(AbstractService):
         return role
 
     def delete(self, id: int) -> None:
+        logger.debug(f"+delete({id})")
         # check record exists by id
         if self.existsByFilter({"id": id}):
-            pass
+            self.repository.delete(id)
+
+        logger.debug(f"-delete()")

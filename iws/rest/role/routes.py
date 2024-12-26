@@ -139,3 +139,28 @@ def update():
 
     logger.debug(f"response={response}")
     return make_response(response.to_json(), response.status)
+
+
+@bp_role_v1.delete("/<id>")
+def delete(id: int):
+    logger.debug(f"delete({id}) => {request}, request.args={request.args}, is_json:{request.is_json}")
+    if request.is_json:
+        body = request.get_json()
+        logger.debug(f"body={body}")
+        role = Role(**body)
+        logger.debug(f"role={role}")
+
+    try:
+        roleService = RoleService()
+        roleService.delete(id)
+        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully deleted.")
+        # response.addInstance(role)
+    except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    # except DuplicateRecordException as ex:
+    #     response = ResponseModel.buildResponseWithException(ex)
+    except Exception as ex:
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+
+    logger.debug(f"response={response}")
+    return make_response(response.to_json(), response.status)

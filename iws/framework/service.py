@@ -36,7 +36,7 @@ class AbstractService(object):
         pass
 
     @abstractmethod
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
         logger.debug(f"findByFilter({filters})")
         pass
 
