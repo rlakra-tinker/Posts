@@ -59,8 +59,8 @@ class AbstractModel(AbstractPydanticModel):
     """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
 
     id: int = None
-    created_at: datetime = datetime.now()
-    updated_at: datetime = datetime.now()
+    created_at: datetime = None
+    updated_at: datetime = None
 
     # @root_validator()
     # def on_create(cls, values):

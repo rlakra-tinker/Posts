@@ -10,7 +10,8 @@ from flask import make_response, request, abort
 
 from framework.exception import DuplicateRecordException, ValidationException
 from framework.http import HTTPStatus
-from framework.model import ErrorModel, ResponseModel
+from framework.model import ResponseModel
+from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.utils import Utils
 from rest.role.model import Role
 from rest.role.service import RoleService
@@ -29,7 +30,8 @@ logger = logging.getLogger(__name__)
 
 @bp_role_v1.post("/")
 def create():
-    logger.debug(f"create => {request}")
+    logger.debug(f"create => {request}, request.args={request.args}, is_json:{request.is_json}")
+    # post_data = request.form.to_dict(flat=False)
     if request.is_json:
         body = request.get_json()
         logger.debug(f"body={body}")
@@ -40,7 +42,7 @@ def create():
 
     try:
         roleService = RoleService()
-        roleService.validate(role)
+        roleService.validate(SchemaOperation.CREATE, role)
         role = roleService.create(role)
         logger.debug(f"role={role}")
 
@@ -60,7 +62,7 @@ def create():
 
 @bp_role_v1.post("/batch")
 def create_batch():
-    logger.debug(f"create => {request}")
+    logger.debug(f"create_batch => {request}, request.args={request.args}, is_json:{request.is_json}")
     try:
         roles = []
         if request.is_json:
@@ -96,12 +98,10 @@ def create_batch():
 @bp_role_v1.get("/")
 def get():
     logger.debug(f"get => {request}, request.args={request.args}, is_json:{request.is_json}")
-    params = request.args
     try:
         roleService = RoleService()
-        roles = roleService.findAll(params)
+        roles = roleService.findByFilter(request.args)
         logger.debug(f"roles={roles}")
-
         response = ResponseModel.buildResponse(HTTPStatus.OK)
         if not roles:
             response.message = "No Records Exists!"
@@ -110,6 +110,32 @@ def get():
         return make_response(response.to_json(), response.status)
     except Exception as ex:
         logger.error(f"Error={ex}, stack_trace={Utils.stack_trace(ex)}")
-        error = ErrorModel.buildError(HTTPStatus.NOT_FOUND, message='No round found with ID!', exception=ex)
-        response = ResponseModel.buildResponse(HTTPStatus.NOT_FOUND, error)
+        response = ResponseModel.buildResponseWithException(ex)
         return abort(response.to_json(), response.status)
+
+
+@bp_role_v1.put("/")
+def update():
+    logger.debug(f"update => {request}, request.args={request.args}, is_json:{request.is_json}")
+    if request.is_json:
+        body = request.get_json()
+        logger.debug(f"body={body}")
+        role = Role(**body)
+        logger.debug(f"role={role}")
+
+    try:
+        roleService = RoleService()
+        roleService.validate(SchemaOperation.UPDATE, role)
+        role = roleService.update(role)
+        logger.debug(f"role={role}")
+        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully updated.")
+        response.addInstance(role)
+    except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    # except DuplicateRecordException as ex:
+    #     response = ResponseModel.buildResponseWithException(ex)
+    except Exception as ex:
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+
+    logger.debug(f"response={response}")
+    return make_response(response.to_json(), response.status)

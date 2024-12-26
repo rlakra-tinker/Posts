@@ -10,6 +10,7 @@ from typing import List, Optional
 from sqlalchemy import text
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, SQLAlchemyError
 from sqlalchemy.orm import Session
+from sqlalchemy.orm.mapper import Mapper
 
 from framework.orm.repository import AbstractRepository
 from framework.orm.sqlalchemy.schema import BaseSchema
@@ -143,3 +144,25 @@ class SqlAlchemyRepository(AbstractRepository, ABC):
                 session.rollback()
             else:
                 session.commit()
+
+    def update(self, mapper: Mapper[BaseSchema], mappings: List[BaseSchema]) -> List[Optional[BaseSchema]]:
+        """Updates an instance into database via the ORM flush process."""
+        logger.debug(f"+update(), mapper={mapper}, mappings={mappings}")
+        if mappings is not None:
+            with Session(self.get_engine()) as session:
+                try:
+                    session.bulk_update_mappings(mapper, mappings)
+                    session.flush()
+                    session.commit()
+                    logger.debug(f"Persisted a instance successfully!")
+                except Exception as ex:
+                    logger.error(f"Failed transaction with error:{ex}")
+                    session.rollback()
+                else:
+                    # Refresh to get any other DB-generated values
+                    session.refresh(mappings)
+        else:
+            logger.warning(f"No instance provided to update!")
+
+        logger.debug(f"-update(), mappings={mappings}")
+        return mappings

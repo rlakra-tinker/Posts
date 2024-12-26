@@ -13,20 +13,20 @@ class AbstractException(Exception):
 
     def __init__(self, httpStatus: HTTPStatus, messages: List[Optional[str]] = None, **kwargs):
         # def __init__(self, http_status: HTTPStatus, messages: List[Optional[str]] = None):
-        logger.debug(f"+__init__ => type={type(self)},  httpStatus={httpStatus}, messages={messages}, kwargs={kwargs}")
+        # logger.debug(f"+__init__ => type={type(self)},  httpStatus={httpStatus}, messages={messages}, kwargs={kwargs}")
         self.httpStatus = httpStatus
         self.messages = messages
         super().__init__(kwargs)
-        logger.debug(f"-__init__ ()")
+        # logger.debug(f"-__init__ ()")
 
     @classmethod
     def __new__(cls, *args, **kwargs):
-        logger.debug(f"+__new__ => type={type(cls)},  args={args}, kwargs={kwargs}")
+        # logger.debug(f"+__new__ => type={type(cls)},  args={args}, kwargs={kwargs}")
         instance = super(AbstractException, cls).__new__(cls)
         # logger.debug(f"instance => type={type(instance)}")
         # instance.__init__(*args, **kwargs)
 
-        logger.debug(f"-__new__ returning <==  {instance}")
+        # logger.debug(f"-__new__ returning <==  {instance}")
         return instance
 
     # @property

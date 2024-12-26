@@ -7,6 +7,7 @@ from typing import List, Optional, Dict, Any
 from framework.exception import DuplicateRecordException, ValidationException
 from framework.http import HTTPStatus
 from framework.orm.sqlalchemy.schema import BaseSchema
+from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from globals import connector
 from rest.role.model import Role
@@ -34,45 +35,24 @@ class RoleService(AbstractService):
         return RoleSchema(id=role.id, name=role.name, active=role.active, created_at=role.created_at,
                           updated_at=role.updated_at)
 
-    # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
-        logger.debug(f"+findByFilter({filters})")
-        roleSchemas = self.repository.findAll(filters)
-        logger.debug(f"roleSchemas => type={type(roleSchemas)}, values={roleSchemas}")
-        roleModels = []
-        for roleSchema in roleSchemas:
-            logger.debug(f"roleSchema type={type(roleSchema)}, value={roleSchema}")
-            roleModel = self.fromSchema(roleSchema)
-            logger.debug(f"type={type(roleModel)}, roleModel={roleModel}")
-            # roleModelValidate = Role.model_validate(roleSchema)
-            # logger.debug(f"type={type(roleModelValidate)}, roleModelValidate={roleModelValidate}")
-            roleModels.append(roleModel)
-
-        # allRoles = [Role(**roleSchema) for roleSchema in roles]
-        # logger.debug(f"Loaded [{len(allRoles)}] => allRows={allRoles}")
-        logger.debug(f"-findByFilter(), roleModels={roleModels}")
-        return roleModels
-
-    # @override
-    def existsByFilter(self, filters: Dict[str, Any]) -> bool:
-        """Returns True if the records exist by filter otherwise False"""
-        logger.debug(f"+existsByFilter({filters})")
-        roleModels = self.repository.findAll(filters)
-        result = True if roleModels else False
-        logger.debug(f"-existsByFilter(), result={result}")
-        return result
-
-    def validate(self, role: Role) -> None:
-        logger.debug(f"+validate({role})")
+    def validate(self, operation: SchemaOperation, role: Role) -> None:
+        logger.debug(f"+validate({operation}, {role})")
+        # super().validate(operation, role)
         error_messages = []
 
         # validate the object
         if not role:
             error_messages.append('Role is required!')
 
-        # validate the required fields
-        if not role.name:
-            error_messages.append('Role name is required!')
+        match operation.name:
+            case SchemaOperation.CREATE.name:
+                # validate the required fields
+                if not role.name:
+                    error_messages.append("Role 'name' is required!")
+
+            case SchemaOperation.UPDATE.name:
+                if not role.id:
+                    error_messages.append("Role 'id' is required!")
 
         # throw an error if any validation error
         if error_messages and len(error_messages) > 0:
@@ -81,6 +61,32 @@ class RoleService(AbstractService):
             raise error
 
         logger.debug(f"-validate()")
+
+    # @override
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+        logger.debug(f"+findByFilter({filters})")
+        roleSchemas = self.repository.findByFilter(filters)
+        # logger.debug(f"roleSchemas => type={type(roleSchemas)}, values={roleSchemas}")
+        roleModels = []
+        for roleSchema in roleSchemas:
+            # logger.debug(f"roleSchema type={type(roleSchema)}, value={roleSchema}")
+            roleModel = self.fromSchema(roleSchema)
+            roleModels.append(roleModel)
+            # logger.debug(f"type={type(roleModel)}, roleModel={roleModel}")
+            # roleModelValidate = Role.model_validate(roleSchema)
+            # logger.debug(f"type={type(roleModelValidate)}, roleModelValidate={roleModelValidate}")
+
+        logger.debug(f"-findByFilter(), roleModels={roleModels}")
+        return roleModels
+
+    # @override
+    def existsByFilter(self, filters: Dict[str, Any]) -> bool:
+        """Returns True if the records exist by filter otherwise False"""
+        logger.debug(f"+existsByFilter({filters})")
+        listOfRoles = self.repository.findByFilter(filters)
+        result = True if listOfRoles else False
+        logger.debug(f"-existsByFilter(), result={result}")
+        return result
 
     def validates(self, roles: List[Role]) -> None:
         logger.debug(f"+validates({roles})")
@@ -111,7 +117,7 @@ class RoleService(AbstractService):
         roleSchema = self.fromModel(role)
         roleSchema = self.repository.save(roleSchema)
         if roleSchema and roleSchema.id is None:
-            roleSchema = self.repository.findByName(role.name)
+            roleSchema = self.repository.findByFilter({"name": role.name})
 
         role = self.fromSchema(roleSchema)
         # role = Role.model_validate(roleSchema)
@@ -130,35 +136,28 @@ class RoleService(AbstractService):
         logger.debug(f"-createBatch(), results={results}")
         return results
 
-    def find_all(self, filters) -> List[Optional[Role]]:
-        logger.debug(f"find_all({filters})")
-        return self.repository.filter(filters)
-
-    def findAll(self, filters: Dict[str, Any]) -> List[Optional[Role]]:
-        logger.debug(f"+findAll({filters})")
-        roleSchemas = self.repository.findAll(filters)
-        logger.debug(f"roleSchemas => type={type(roleSchemas)}, values={roleSchemas}")
-        roleModels = []
-        for roleSchema in roleSchemas:
-            logger.debug(f"roleSchema type={type(roleSchema)}, value={roleSchema}")
-            roleModel = self.fromSchema(roleSchema)
-            logger.debug(f"type={type(roleModel)}, roleModel={roleModel}")
-            # roleModelValidate = Role.model_validate(roleSchema)
-            # logger.debug(f"type={type(roleModelValidate)}, roleModelValidate={roleModelValidate}")
-            roleModels.append(roleModel)
-
-        # allRoles = [Role(**roleSchema) for roleSchema in roles]
-        # logger.debug(f"Loaded [{len(allRoles)}] => allRows={allRoles}")
-        logger.debug(f"-findAll(), roleModels={roleModels}")
-        return roleModels
-
     def update(self, role: Role) -> Role:
-        if not role or not role.id:
-            raise ValueError('The Role should have an ID!')
-
+        """Updates the role"""
+        logger.debug(f"+update({role})")
+        # self.validate(SchemaOperation.UPDATE, role)
         # check record exists by id
-        if self.existsByFilter({"id": role.id}):
-            pass
+        # if not self.existsByFilter({"id": role.id}):
+        #     raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Role doesn't exist!")
+        roleSchemas = self.repository.findByFilter({"id": role.id})
+        roleSchema = roleSchemas[0]
+        if role.name and roleSchema.name != role.name:
+            roleSchema.name = role.name
+
+        if role.active and roleSchema.active != role.active:
+            roleSchema.active = role.active
+
+        # roleSchema = self.fromModel(oldRole)
+        self.repository.update(roleSchema)
+        # roleSchema = self.repository.update(mapper=RoleSchema, mappings=[roleSchema])
+        roleSchema = self.repository.findByFilter({"id": role.id})[0]
+        role = self.fromSchema(roleSchema)
+        logger.debug(f"-update(), role={role}")
+        return role
 
     def delete(self, id: int) -> None:
         # check record exists by id

@@ -21,10 +21,14 @@ logger = logging.getLogger(__name__)
 @unique
 class SchemaOperation(AutoUpperCase):
     """Entity Operations"""
-    DELETED = auto()
-    INSERTED = auto()
-    LOADED = auto()
-    UPDATED = auto()
+    # Adds new data or records to the database
+    CREATE = auto()
+    # Removes data from the database
+    DELETE = auto()
+    # Retrieves data from the database
+    READ = auto()
+    # Modifies existing data in the database
+    UPDATE = auto()
 
 
 class Pagination(object):
@@ -78,6 +82,10 @@ class BaseQuery(orm.Query):
     the 'Model.query_class' attribute. This is a subclass of a standard SQLAlchemy 'sqlalchemy.orm.query.Query' class,
     and has all the methods of a standard query as well.
     """
+
+    def __init__(self):
+        # super().__init__(entities=None)
+        self.DEFAULT_PER_PAGE = 20
 
     def paginate(self, page: int, page_size: int = 20, throw_error: bool = True):
         """Return `Pagination` instance using already defined query parameters.
@@ -197,6 +205,9 @@ class AbstractSchema(Auditable):
     def auditable(self) -> str:
         """Returns the string representation of this object"""
         return f"created_at={self.created_at}, updated_at={self.updated_at}>"
+
+    def to_json(self):
+        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
 
     # def load_and_not_raise(self, data):
     #     try:
