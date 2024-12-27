@@ -12,7 +12,7 @@ from typing import Optional, Dict, List, Any
 from pydantic import BaseModel, ValidationError, ConfigDict, model_validator, field_validator
 
 from framework.enums import BaseEnum
-from framework.exception import AbstractException, ValidationException, DuplicateRecordException
+from framework.exception import AbstractException, ValidationException, DuplicateRecordException, NoRecordFoundException
 from framework.http import HTTPStatus
 from framework.utils import Utils
 
@@ -248,7 +248,7 @@ class ResponseModel(AbstractPydanticModel):
         if jsonObjects['data']:
             jsonData = []
             for item in jsonObjects['data']:
-                logger.debug(f"entry type={type(item)}, item={item}, json={item.to_json()}")
+                # logger.debug(f"entry type={type(item)}, item={item}, json={item.to_json()}")
                 jsonData.append(json.loads(item.to_json()))
 
             jsonObjects['data'] = jsonData
@@ -257,7 +257,7 @@ class ResponseModel(AbstractPydanticModel):
         if jsonObjects['errors']:
             jsonErrors = []
             for item in jsonObjects['errors']:
-                logger.debug(f"entry type={type(item)}, item={item}, json={item.to_json()}")
+                # logger.debug(f"entry type={type(item)}, item={item}, json={item.to_json()}")
                 jsonErrors.append(json.loads(item.to_json()))
 
             jsonObjects['errors'] = jsonErrors
@@ -369,12 +369,19 @@ class ResponseModel(AbstractPydanticModel):
             response = ResponseModel(status=exception.httpStatus.status_code)
             response.addInstance(
                 ErrorModel.buildError(http_status=exception.httpStatus, message=exception.messages[:-1]))
+        elif isinstance(exception, NoRecordFoundException):
+            logger.debug(f"NoRecordFoundException => {isinstance(exception, NoRecordFoundException)}")
+            response = ResponseModel(status=exception.httpStatus.status_code)
+            response.addInstance(
+                ErrorModel.buildError(http_status=exception.httpStatus, message=exception.messages[:-1])
+            )
             # response = ResponseModel.buildResponse(HTTPStatus.CONFLICT, message=str(exception))
         elif isinstance(exception, AbstractException):
             logger.debug(f"isinstance(exception, AbstractException) => {isinstance(exception, AbstractException)}")
             response = ResponseModel(status=exception.httpStatus.status_code)
             for message in exception.messages:
                 response.addInstance(ErrorModel.buildError(http_status=exception.httpStatus, message=message))
+
             response = ResponseModel.buildResponse(HTTPStatus.CONFLICT, message=str(exception))
         elif isinstance(exception, Exception):
             logger.debug(f"isinstance(exception, Exception) => {isinstance(exception, Exception)}")

@@ -10,6 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractException(Exception):
+    """ AbstractException class is the base for all non-exit exceptions. """
 
     def __init__(self, httpStatus: HTTPStatus, messages: List[Optional[str]] = None, **kwargs):
         # def __init__(self, http_status: HTTPStatus, messages: List[Optional[str]] = None):

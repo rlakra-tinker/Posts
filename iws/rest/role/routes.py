@@ -8,7 +8,7 @@ import logging
 
 from flask import make_response, request, abort
 
-from framework.exception import DuplicateRecordException, ValidationException
+from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
 from framework.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
@@ -61,8 +61,8 @@ def create():
 
 
 @bp_role_v1.post("/batch")
-def create_batch():
-    logger.debug(f"create_batch => {request}, request.args={request.args}, is_json:{request.is_json}")
+def bulkCreate():
+    logger.debug(f"+bulkCreate() => {request}, request.args={request.args}, is_json:{request.is_json}")
     try:
         roles = []
         if request.is_json:
@@ -79,7 +79,7 @@ def create_batch():
         logger.debug(f"roles={roles}")
         roleService = RoleService()
         roleService.validates(SchemaOperation.CREATE, roles)
-        roles = roleService.createBatch(roles)
+        roles = roleService.bulkCreate(roles)
         logger.debug(f"roles={roles}")
 
         response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Roles are successfully created.")
@@ -91,7 +91,7 @@ def create_batch():
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
-    logger.debug(f"response={response}")
+    logger.debug(f"-bulkCreate(), response:{response}")
     return make_response(response.to_json(), response.status)
 
 
@@ -101,10 +101,10 @@ def get():
     try:
         roleService = RoleService()
         roles = roleService.findByFilter(request.args)
-        logger.debug(f"roles={roles}")
+        # logger.debug(f"roles={roles}")
         response = ResponseModel.buildResponse(HTTPStatus.OK)
         if not roles:
-            response.message = "No Records Exists!"
+            response.message = "No Records Exist!"
         response.addInstances(roles)
         logger.debug(f"response={response}")
         return make_response(response.to_json(), response.status)
@@ -132,8 +132,6 @@ def update():
         response.addInstance(role)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
-    # except DuplicateRecordException as ex:
-    #     response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
@@ -154,11 +152,8 @@ def delete(id: int):
         roleService = RoleService()
         roleService.delete(id)
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully deleted.")
-        # response.addInstance(role)
-    except ValidationException as ex:
+    except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
-    # except DuplicateRecordException as ex:
-    #     response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 

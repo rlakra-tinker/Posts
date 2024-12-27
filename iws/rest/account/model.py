@@ -1,13 +1,17 @@
 #
 # Author: Rohtash Lakra
 #
-
+import logging
 from typing import Optional, List
 
 from framework.model import AbstractModel
 
+logger = logging.getLogger(__name__)
+
 
 class User(AbstractModel):
+    """User contains properties specific to this object."""
+
     role_id: int = None
     user_name: str = None
     password: str = None
@@ -17,6 +21,11 @@ class User(AbstractModel):
     password: str = None
     is_admin: bool = False
     addresses: Optional[List["Address"]] = []
+
+    def to_json(self) -> str:
+        """Returns the JSON representation of this object."""
+        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        return self.model_dump_json()
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -28,6 +37,8 @@ class User(AbstractModel):
 
 
 class Address(AbstractModel):
+    """Address contains properties specific to this object."""
+
     user_id: int = None
     street1: str = None
     street2: Optional[str] = None
@@ -35,6 +46,11 @@ class Address(AbstractModel):
     state: str = None
     country: str = None
     zip: str = None
+
+    def to_json(self) -> str:
+        """Returns the JSON representation of this object."""
+        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        return self.model_dump_json()
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""

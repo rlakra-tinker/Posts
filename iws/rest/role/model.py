@@ -13,6 +13,8 @@ logger = logging.getLogger(__name__)
 
 
 class Role(AbstractModel):
+    """Role contains properties specific to this object."""
+
     name: str = None
     active: bool = False
     meta_data: Dict[str, Any] = None

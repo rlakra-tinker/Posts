@@ -1,11 +1,10 @@
 #
 # Author: Rohtash Lakra
 #
-import datetime
 import logging
 from typing import List, Optional, Dict, Any
 
-from framework.exception import DuplicateRecordException, ValidationException
+from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
 from framework.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
@@ -126,15 +125,15 @@ class RoleService(AbstractService):
         logger.debug(f"-create(), role={role}")
         return role
 
-    def createBatch(self, roles: List[Role]) -> List[Role]:
+    def bulkCreate(self, roles: List[Role]) -> List[Role]:
         """Crates a new role"""
-        logger.debug(f"+createBatch({roles})")
+        logger.debug(f"+bulkCreate({roles})")
         results = []
         for role in roles:
             result = self.create(role)
             results.append(result)
 
-        logger.debug(f"-createBatch(), results={results}")
+        logger.debug(f"-bulkCreate(), results={results}")
         return results
 
     def update(self, role: Role) -> Role:
@@ -168,5 +167,7 @@ class RoleService(AbstractService):
         # check record exists by id
         if self.existsByFilter({"id": id}):
             self.repository.delete(id)
+        else:
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Role doesn't exist!")
 
         logger.debug(f"-delete()")
