@@ -5,7 +5,7 @@ import logging
 from abc import ABC
 from typing import List, Optional, Dict, Any
 
-from sqlalchemy import update
+from sqlalchemy import update, func
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import Session
 
@@ -99,6 +99,7 @@ class RoleRepository(AbstractRepository, ABC):
         logger.debug(f"+update({roleSchema})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
+                roleSchema.updated_at = func.now()
                 results = session.execute(
                     update(RoleSchema)
                     .values(roleSchema.to_json())

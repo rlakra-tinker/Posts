@@ -13,12 +13,11 @@ logger = logging.getLogger(__name__)
 
 
 class Role(AbstractModel):
-
     name: str = None
     active: bool = False
     meta_data: Dict[str, Any] = None
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Returns the JSON representation of this object."""
         logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()

@@ -3,6 +3,7 @@
 # Reference(s):
 #  - https://docs.pydantic.dev/latest/
 #
+import json
 import logging
 from datetime import datetime
 from enum import unique, auto
@@ -41,7 +42,7 @@ class AbstractPydanticModel(BaseModel):
     """AbstractPydanticModel is a base model for all models inherit and provides basic configuration parameters."""
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Returns the JSON representation of this object."""
         logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
@@ -63,7 +64,8 @@ class AbstractPydanticModel(BaseModel):
 
     def toJSONObject(self) -> Any:
         # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
-        pass
+        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        return self.model_dump(mode="json")
 
     def __str__(self):
         """Returns the string representation of this object."""
@@ -180,7 +182,7 @@ class ErrorModel(AbstractPydanticModel):
     message: str = None
     debug_info: Optional[Dict[str, object]] = None
 
-    def to_json(self):
+    def to_json(self) -> str:
         """Returns the JSON representation of this object."""
         logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
@@ -237,6 +239,44 @@ class ResponseModel(AbstractPydanticModel):
     data: Optional[List[AbstractModel]] = None
     errors: Optional[List[ErrorModel]] = None
 
+    def to_json(self) -> str:
+        """Returns the JSON representation of this object."""
+        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        jsonObjects = {field: getattr(self, field) for field in self.getAllFields()}
+        # logger.debug(f"jsonObjects type={type(jsonObjects)}, jsonObjects={jsonObjects}")
+        # parse list of data to json
+        if jsonObjects['data']:
+            jsonData = []
+            for item in jsonObjects['data']:
+                logger.debug(f"entry type={type(item)}, item={item}, json={item.to_json()}")
+                jsonData.append(json.loads(item.to_json()))
+
+            jsonObjects['data'] = jsonData
+
+        # parse list of errors to json
+        if jsonObjects['errors']:
+            jsonErrors = []
+            for item in jsonObjects['errors']:
+                logger.debug(f"entry type={type(item)}, item={item}, json={item.to_json()}")
+                jsonErrors.append(json.loads(item.to_json()))
+
+            jsonObjects['errors'] = jsonErrors
+
+        return jsonObjects
+
+    def toJSONObject(self) -> Any:
+        # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
+        # return self.model_dump(mode="json", serialize_as_any=True)
+        # return self.model_dump(mode="json")
+        jsonObject = self.model_dump(mode="json")
+        for entry in self.data:
+            logger.debug(f"entry type={type(entry)}, object={entry}")
+
+        jsonObject["data"] = self.data.model_dump(mode="json")
+        jsonObject["errors"] = self.errors.model_dump(mode="json")
+
+        return jsonObject
+
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return f"{type(self).__name__} <status={self.status}, data={self.data}, errors={self.errors}>"
@@ -244,10 +284,6 @@ class ResponseModel(AbstractPydanticModel):
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
         return str(self)
-
-    def toJSONObject(self) -> Any:
-        return self.model_dump()
-        # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
 
     def addInstance(self, instance: AbstractPydanticModel = None):
         """Adds an object into the list of data or errors"""
