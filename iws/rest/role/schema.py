@@ -16,7 +16,7 @@ class RoleSchema(NamedSchema):
     __tablename__ = "roles"
 
     # not Optional[], therefore will be NOT NULL
-    active: Mapped[bool] = False
+    active: Mapped[bool] = mapped_column(unique=False, default=False)
     # Optional[], therefore will be NULL
     meta_data: Mapped[Optional[PickleType]] = mapped_column(JSON)
 

@@ -78,7 +78,7 @@ def create_batch():
 
         logger.debug(f"roles={roles}")
         roleService = RoleService()
-        roleService.validates(roles)
+        roleService.validates(SchemaOperation.CREATE, roles)
         roles = roleService.createBatch(roles)
         logger.debug(f"roles={roles}")
 

@@ -55,6 +55,7 @@ class UserSchema(PersonSchema):
     # addresses: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan")
     # Optional[], therefore will be NULL
     # roles: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan")
+    # roles: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan", secondary="users")
 
     # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
@@ -104,6 +105,7 @@ class AddressSchema(BaseSchema):
     # foreign key to "users.id" is added
     # not Optional[], therefore will be NOT NULL
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
     # not Optional[], therefore will be NOT NULL
     user: Mapped["UserSchema"] = relationship(back_populates="addresses")
 

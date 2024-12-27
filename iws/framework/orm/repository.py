@@ -19,13 +19,14 @@ def createEngine(dbUri: Union[str, URL], debug: bool = False) -> Engine:
     """
     logger.debug(f"+createEngine({dbUri}, {debug})")
     engine = create_engine(dbUri, echo=debug)
+    engine.execution_options(isolation_level="AUTOCOMMIT")
     logger.debug(f"-createEngine(), engine={engine}")
     return engine
 
 
 class AbstractRepository(ABC):
 
-    def __init__(self, engine):
+    def __init__(self, engine: Engine):
         super().__init__()
         self.__engine = engine
 
@@ -37,7 +38,7 @@ class AbstractRepository(ABC):
         """Returns the string representation of this object."""
         return str(self)
 
-    def get_engine(self):
+    def get_engine(self) -> Engine:
         return self.__engine
 
     @abstractmethod

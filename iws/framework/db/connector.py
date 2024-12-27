@@ -8,7 +8,7 @@ from typing import Iterable
 
 import click
 from flask import Flask, g, current_app
-from sqlalchemy import MetaData
+from sqlalchemy import MetaData, Engine
 from sqlalchemy.orm import Session
 
 from common.config import Config
@@ -74,9 +74,9 @@ class SQLite3Connector(DatabaseConnector):
         self.db_user_name = None
         self.db_password = None
         self.db_uri = None
-        self.engine = None
-        self.metadata = None
-        self.session = None
+        self.engine: Engine = None
+        # self.metadata = None
+        # self.session = None
 
         # paths
         self.cur_dir = Path(__file__).parent
@@ -129,10 +129,10 @@ class SQLite3Connector(DatabaseConnector):
                 self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
                 # SQLAlchemy DB Creation
                 self.engine = createEngine(self.db_uri, debug=True)
-                self.session = Session()
+                # self.session = Session()
                 # Using our table metadata and our engine, we can generate our schema at once in our target SQLite
                 # database, using a method called 'MetaData.create_all()':
-                self.metadata = MetaData()
+                # self.metadata = MetaData()
                 # MetaData.create_all(BaseSchema, bind=self.engine)
                 # self.metadata.create_all(self.engine)
                 # AbstractEntity.metadata.create_all(bind=self.engine)

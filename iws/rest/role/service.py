@@ -1,6 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
+import datetime
 import logging
 from typing import List, Optional, Dict, Any
 
@@ -25,15 +26,15 @@ class RoleService(AbstractService):
 
     # @override
     def fromSchema(self, roleSchema: RoleSchema) -> Role:
-        return Role(id=roleSchema.id, name=roleSchema.name, active=roleSchema.active, created_at=roleSchema.created_at,
-                    updated_at=roleSchema.updated_at)
-
-        pass
+        # return Role(id=roleSchema.id, name=roleSchema.name, active=roleSchema.active, created_at=roleSchema.created_at,
+        #             updated_at=roleSchema.updated_at)
+        return Role(**roleSchema.toJSONObject())
 
     # @override
     def fromModel(self, role: Role) -> RoleSchema:
-        return RoleSchema(id=role.id, name=role.name, active=role.active, created_at=role.created_at,
-                          updated_at=role.updated_at)
+        # return RoleSchema(id=role.id, name=role.name, active=role.active, created_at=role.created_at,
+        #                   updated_at=role.updated_at)
+        return RoleSchema(**role.toJSONObject())
 
     def validate(self, operation: SchemaOperation, role: Role) -> None:
         logger.debug(f"+validate({operation}, {role})")
@@ -88,8 +89,8 @@ class RoleService(AbstractService):
         logger.debug(f"-existsByFilter(), result={result}")
         return result
 
-    def validates(self, roles: List[Role]) -> None:
-        logger.debug(f"+validates({roles})")
+    def validates(self, operation: SchemaOperation, roles: List[Role]) -> None:
+        logger.debug(f"+validates({operation}, {roles})")
         error_messages = []
 
         # validate the object
@@ -97,7 +98,7 @@ class RoleService(AbstractService):
             error_messages.append('Roles is required!')
 
         for role in roles:
-            self.validate(role)
+            self.validate(operation, role)
 
         # throw an error if any validation error
         if error_messages and len(error_messages) > 0:
@@ -150,6 +151,9 @@ class RoleService(AbstractService):
 
         if role.active and roleSchema.active != role.active:
             roleSchema.active = role.active
+
+        if role.meta_data and roleSchema.meta_data != role.meta_data:
+            roleSchema.meta_data = role.meta_data
 
         # roleSchema = self.fromModel(oldRole)
         self.repository.update(roleSchema)

@@ -6,7 +6,7 @@
 import logging
 from datetime import datetime
 from enum import unique, auto
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Any
 
 from pydantic import BaseModel, ValidationError, ConfigDict, model_validator, field_validator
 
@@ -45,6 +45,25 @@ class AbstractPydanticModel(BaseModel):
         """Returns the JSON representation of this object."""
         logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
+
+    def getAllFields(self, alias=False) -> list:
+        # return list(self.schema(by_alias=alias).get("properties").keys())
+        return list(self.model_json_schema(by_alias=alias).get("properties").keys())
+
+    @classmethod
+    def getClassFields(cls, by_alias=False) -> list[str]:
+        field_names = []
+        for key, value in cls.model_fields.items():
+            if by_alias and value.alias:
+                field_names.append(value.alias)
+            else:
+                field_names.append(key)
+
+        return field_names
+
+    def toJSONObject(self) -> Any:
+        # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
+        pass
 
     def __str__(self):
         """Returns the string representation of this object."""
@@ -226,11 +245,9 @@ class ResponseModel(AbstractPydanticModel):
         """Returns the string representation of this object"""
         return str(self)
 
-    def to_json(self):
-        """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
-        # return self.model_dump()
-        return self.model_dump_json()
+    def toJSONObject(self) -> Any:
+        return self.model_dump()
+        # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
 
     def addInstance(self, instance: AbstractPydanticModel = None):
         """Adds an object into the list of data or errors"""

@@ -10,6 +10,7 @@ import json
 import logging
 import re
 from copy import deepcopy
+from sys import stdout
 
 import requests
 from flask import Flask, g, has_request_context, request
@@ -282,3 +283,37 @@ class LogJSONFormatter(logging.Formatter):
             message = f"Error formatting log: {e}"
 
         return log_message + f' - {message}'
+
+
+class ColoredLogFactory:
+    """Custom color logger."""
+
+    def formatter(log: dict) -> str:
+        """
+        Format log colors based on level.
+
+        :param dict log: Logged event stored as map containing contextual metadata.
+
+        :returns: str
+        """
+        if log["level"].name == "INFO":
+            return "<fg #5278a3>{time:MM-DD-YYYY HH:mm:ss}</fg #5278a3> | <fg #b3cfe7>{level}</fg #b3cfe7>: <light-white>{message}</light-white>\n"
+        if log["level"].name == "WARNING":
+            return "<fg #5278a3>{time:MM-DD-YYYY HH:mm:ss}</fg #5278a3> | <fg #b09057>{level}</fg #b09057>: <light-white>{message}</light-white>\n"
+        if log["level"].name == "SUCCESS":
+            return "<fg #5278a3>{time:MM-DD-YYYY HH:mm:ss}</fg #5278a3> | <fg #6dac77>{level}</fg #6dac77>: <light-white>{message}</light-white>\n"
+        if log["level"].name == "ERROR":
+            return "<fg #5278a3>{time:MM-DD-YYYY HH:mm:ss}</fg #5278a3> | <fg #a35252>{level}</fg #a35252>: <light-white>{message}</light-white>\n"
+
+        return "<fg #5278a3>{time:MM-DD-YYYY HH:mm:ss}</fg #5278a3> | <fg #b3cfe7>{level}</fg #b3cfe7>: <light-white>{message}</light-white>\n"
+
+    def get_logger(self):
+        """Create custom logger."""
+        self.remove()
+        self.add(stdout, colorize=True, format=self.formatter())
+
+        return self
+
+
+# logFactory = ColoredLogFactory()
+# LOGGER = logFactory.get_logger()
