@@ -3,14 +3,15 @@
 #
 # from werkzeug.security import generate_password_hash, gen_salt
 # from framework.db.sqlite import SQLite3Database
-from framework.repository import AbstractRepository
+from framework.orm.sqlalchemy.repository import SqlAlchemyRepository
+from globals import connector
 
 
-class ContactRepository(AbstractRepository):
+class ContactRepository(SqlAlchemyRepository):
+    """The ContactRepository handles a schema-centric database persistence for contacts."""
 
     def __init__(self):
-        self.db = None
-        # self.db = SQLite3Database()
+        super().__init__(engine=connector.engine)
 
     def register(self, username, password):
         """

@@ -9,7 +9,6 @@ from framework.http import HTTPStatus
 from framework.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
-from globals import connector
 from rest.role.model import Role
 from rest.role.repository import RoleRepository
 from rest.role.schema import RoleSchema
@@ -21,7 +20,7 @@ class RoleService(AbstractService):
 
     def __init__(self):
         logger.debug("RoleService()")
-        self.repository = RoleRepository(engine=connector.engine)
+        self.repository = RoleRepository()
 
     # @override
     def fromSchema(self, roleSchema: RoleSchema) -> Role:
@@ -42,7 +41,7 @@ class RoleService(AbstractService):
 
         # validate the object
         if not role:
-            error_messages.append('Role is required!')
+            error_messages.append("'Role' is not fully defined!")
 
         match operation.name:
             case SchemaOperation.CREATE.name:
@@ -83,8 +82,8 @@ class RoleService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        listOfRoles = self.repository.findByFilter(filters)
-        result = True if listOfRoles else False
+        roleSchemas = self.repository.findByFilter(filters)
+        result = True if roleSchemas else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
 

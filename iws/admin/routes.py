@@ -12,7 +12,7 @@ from framework.model import ErrorModel
 accounts = []
 
 
-# Returns the next ID of the account
+# Returns the next ID of the user
 def _find_next_id():
     last_id = 0
     if not accounts and len(accounts) > 0:
@@ -21,20 +21,20 @@ def _find_next_id():
     return last_id + 1
 
 
-# register a new account
+# register a new user
 @bp_v1_admin.route("/")
 def index():
     """
-    register a new account
+    register a new user
     """
     return render_template("admin/index.html")
 
 
-# register a new account
+# register a new user
 @bp_v1_admin.get("/register")
 def register():
     """
-    register a new account
+    register a new user
     """
     return render_template("admin/register.html")
 
@@ -51,11 +51,11 @@ def post_register():
     return make_response(ErrorModel(HTTPStatus.UNSUPPORTED_MEDIA_TYPE, "Invalid JSON object!"))
 
 
-# login to an account
+# login to an user
 @bp_v1_admin.get("/login")
 def login():
     """
-    login to an account
+    login to an user
     """
     return render_template("admin/login.html")
 

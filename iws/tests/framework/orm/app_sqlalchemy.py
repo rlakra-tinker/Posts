@@ -7,7 +7,7 @@ from sqlalchemy.orm import Session
 
 from framework.orm.repository import createEngine
 from framework.orm.sqlalchemy.schema import BaseSchema
-from rest.account.schema import UserSchema, AddressSchema
+from rest.user.schema import UserSchema, AddressSchema
 from rest.role.schema import RoleSchema
 
 

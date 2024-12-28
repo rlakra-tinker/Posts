@@ -16,7 +16,7 @@ class ContactService(AbstractService):
 
     def find_by_id(self):
         """
-        Returns the next ID of the account
+        Returns the next ID of the user
         """
         last_id = super(ContactService, self).find_by_id()
         if not self.contacts and len(self.contacts) > 0:

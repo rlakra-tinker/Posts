@@ -36,7 +36,7 @@ class RepositoryTest(unittest.TestCase):
 
         # repository object
         engine = createEngine("sqlite:///testPosts.db", True)
-        repository = SqlAlchemyRepository(engine)
+        repository = SqlAlchemyRepository(engine=engine)
         self.assertIsNotNone(repository)
         logger.debug(repository)
         expected = 'SqlAlchemyRepository <engine=Engine(sqlite:///testPosts.db)>'

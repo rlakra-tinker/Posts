@@ -1,12 +1,16 @@
 #
 # Author: Rohtash Lakra
 #
+import logging
 import uuid
 from enum import auto, unique
+from typing import Dict, Any
 
-from flask import g, request, current_app
+from flask import g, request, current_app, Request
 
 from framework.enums import AutoUpperCase
+
+logger = logging.getLogger(__name__)
 
 
 def log_decorator(func):
@@ -48,6 +52,15 @@ def log_decorator(func):
         return response
 
     return wrapper
+
+
+def buildModel(request: Request) -> Dict[str, Any]:
+    logger.debug(f"+buildModel({request})")
+    body = {",".join([":".join([key, value])]) for key, value in request.form[0]} if request.form else None
+    # for key, value in request.form:
+    #     body[key] = value
+    logger.debug(f"-buildModel(), body={body}")
+    return body
 
 
 @unique

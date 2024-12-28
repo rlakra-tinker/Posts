@@ -3,11 +3,10 @@
 #
 import json
 import logging
-from abc import ABC, abstractmethod
 from typing import Iterable, Dict, Any
 from typing import List, Optional
 
-from sqlalchemy import text
+from sqlalchemy import text, Engine
 from sqlalchemy.exc import NoResultFound, MultipleResultsFound, SQLAlchemyError
 from sqlalchemy.orm import Session
 from sqlalchemy.orm.mapper import Mapper
@@ -18,10 +17,11 @@ from framework.orm.sqlalchemy.schema import BaseSchema
 logger = logging.getLogger(__name__)
 
 
-class SqlAlchemyRepository(AbstractRepository, ABC):
+class SqlAlchemyRepository(AbstractRepository):
+    """The base repository of all ORM repositories."""
 
-    def __init__(self, engine):
-        super().__init__(engine)
+    def __init__(self, engine: Engine):
+        super().__init__(engine=engine)
 
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
         pass

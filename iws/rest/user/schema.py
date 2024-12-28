@@ -55,7 +55,7 @@ class UserSchema(PersonSchema):
     # addresses: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan")
     # Optional[], therefore will be NULL
     # roles: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan")
-    # roles: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan", secondary="users")
+    # roles: Mapped[List["UserRoleSchema"]] = relationship(back_populates="roles", cascade="all, delete-orphan", secondary="users")
 
     # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.

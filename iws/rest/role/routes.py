@@ -6,13 +6,12 @@
 #
 import logging
 
-from flask import make_response, request, abort
+from flask import make_response, request
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
 from framework.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
-from framework.utils import Utils
 from rest.role.model import Role
 from rest.role.service import RoleService
 from rest.role.v1 import bp as bp_role_v1
@@ -30,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 @bp_role_v1.post("/")
 def create():
-    logger.debug(f"create => {request}, request.args={request.args}, is_json:{request.is_json}")
+    logger.debug(f"+create() => request={request}, args={request.args}, is_json:{request.is_json}")
     # post_data = request.form.to_dict(flat=False)
     if request.is_json:
         body = request.get_json()
@@ -41,11 +40,12 @@ def create():
         # role = Role.create(name=name, active=active)
 
     try:
+
         roleService = RoleService()
         roleService.validate(SchemaOperation.CREATE, role)
         role = roleService.create(role)
         logger.debug(f"role={role}")
-
+        # build success response
         response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Role is successfully created.")
         response.addInstance(role)
         # response = response.to_json()
@@ -56,13 +56,13 @@ def create():
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
-    logger.debug(f"response={response}")
+    logger.debug(f"-create() <= response={response}")
     return make_response(response.to_json(), response.status)
 
 
 @bp_role_v1.post("/batch")
 def bulkCreate():
-    logger.debug(f"+bulkCreate() => {request}, request.args={request.args}, is_json:{request.is_json}")
+    logger.debug(f"+bulkCreate() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
         roles = []
         if request.is_json:
@@ -74,14 +74,15 @@ def bulkCreate():
                 roles.append(Role(**body))
             else:
                 # handle form fields here.
-                pass
+                body = request.form.to_dict()
+                roles.append(Role(**body))
 
         logger.debug(f"roles={roles}")
         roleService = RoleService()
         roleService.validates(SchemaOperation.CREATE, roles)
         roles = roleService.bulkCreate(roles)
         logger.debug(f"roles={roles}")
-
+        # build success response
         response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Roles are successfully created.")
         response.addInstances(roles)
     except ValidationException as ex:
@@ -91,32 +92,33 @@ def bulkCreate():
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
-    logger.debug(f"-bulkCreate(), response:{response}")
+    logger.debug(f"-bulkCreate() <= response={response}")
     return make_response(response.to_json(), response.status)
 
 
 @bp_role_v1.get("/")
 def get():
-    logger.debug(f"get => {request}, request.args={request.args}, is_json:{request.is_json}")
+    logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
         roleService = RoleService()
         roles = roleService.findByFilter(request.args)
-        # logger.debug(f"roles={roles}")
+
+        # build success response
         response = ResponseModel.buildResponse(HTTPStatus.OK)
-        if not roles:
+        if roles:
+            response.addInstances(roles)
+        else:
             response.message = "No Records Exist!"
-        response.addInstances(roles)
-        logger.debug(f"response={response}")
-        return make_response(response.to_json(), response.status)
     except Exception as ex:
-        logger.error(f"Error={ex}, stack_trace={Utils.stack_trace(ex)}")
-        response = ResponseModel.buildResponseWithException(ex)
-        return abort(response.to_json(), response.status)
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+
+    logger.debug(f"-get() <= response={response}")
+    return make_response(response.to_json(), response.status)
 
 
 @bp_role_v1.put("/")
 def update():
-    logger.debug(f"update => {request}, request.args={request.args}, is_json:{request.is_json}")
+    logger.debug(f"+update() => request={request}, args={request.args}, is_json:{request.is_json}")
     if request.is_json:
         body = request.get_json()
         logger.debug(f"body={body}")
@@ -128,6 +130,8 @@ def update():
         roleService.validate(SchemaOperation.UPDATE, role)
         role = roleService.update(role)
         logger.debug(f"role={role}")
+
+        # build success response
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully updated.")
         response.addInstance(role)
     except ValidationException as ex:
@@ -135,13 +139,13 @@ def update():
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
-    logger.debug(f"response={response}")
+    logger.debug(f"-update() <= response={response}")
     return make_response(response.to_json(), response.status)
 
 
 @bp_role_v1.delete("/<id>")
 def delete(id: int):
-    logger.debug(f"delete({id}) => {request}, request.args={request.args}, is_json:{request.is_json}")
+    logger.debug(f"+delete({id}) => request={request}, args={request.args}, is_json:{request.is_json}")
     if request.is_json:
         body = request.get_json()
         logger.debug(f"body={body}")
@@ -151,11 +155,13 @@ def delete(id: int):
     try:
         roleService = RoleService()
         roleService.delete(id)
+
+        # build success response
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully deleted.")
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
-    logger.debug(f"response={response}")
+    logger.debug(f"-delete() <= response={response}")
     return make_response(response.to_json(), response.status)

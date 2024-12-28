@@ -3,7 +3,7 @@
 #
 from datetime import datetime
 
-from rest.account.schema import UserSchema, AddressSchema
+from rest.user.schema import UserSchema, AddressSchema
 from rest.role.schema import RoleSchema
 
 

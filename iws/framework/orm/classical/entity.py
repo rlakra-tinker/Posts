@@ -9,6 +9,7 @@ from json import JSONEncoder, JSONDecoder
 
 
 class JsonEncoder(JSONEncoder):
+
     def default(self, obj):
         if hasattr(obj, "to_json"):
             return self.default(obj.to_json())

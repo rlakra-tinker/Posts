@@ -3,7 +3,7 @@
 #
 from flask import Blueprint
 
-from rest.account.v2 import bp as account_v2_bp
+from rest.user.v2 import bp as account_v2_bp
 from rest.contact.v2 import bp as contact_v2_bp
 from rest.post.v2 import bp as post_v2_bp
 from rest.role.v2 import bp as role_v2_bp

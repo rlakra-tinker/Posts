@@ -10,7 +10,7 @@ from rest.contact.service import ContactService
 from rest.contact.models import Contact
 from rest.contact.schema import Contact
 
-# account's service
+# user's service
 contactService = ContactService()
 
 
@@ -65,9 +65,9 @@ def login():
         user = request.get_json()
         print(f"user:{user}")
         # if not accounts:
-        #     for account in accounts:
-        #         if account['user_name'] == user.user_name:
-        #             return make_response(HTTPStatus.OK, account)
+        #     for user in accounts:
+        #         if user['user_name'] == user.user_name:
+        #             return make_response(HTTPStatus.OK, user)
 
     response = ErrorModel.buildError(HTTPStatus.NOT_FOUND, "Account is not registered!")
     print(json.dumps(response))
