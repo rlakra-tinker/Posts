@@ -4,7 +4,7 @@
 from typing import Dict
 
 from framework.http import HTTPStatus
-from framework.model import ErrorModel
+from framework.orm.pydantic.model import ErrorModel
 from framework.service import AbstractService
 from rest.contact.models import Contact
 

@@ -5,7 +5,7 @@ import json
 import logging
 
 from framework.http import HTTPStatus
-from framework.model import AbstractPydanticModel, AbstractModel, NamedModel, ErrorModel, ResponseModel
+from framework.orm.pydantic.model import AbstractPydanticModel, AbstractModel, NamedModel, ErrorModel, ResponseModel
 from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)

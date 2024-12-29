@@ -5,7 +5,6 @@
 # - https://docs.sqlalchemy.org/en/20/orm/quickstart.html
 # - https://docs.sqlalchemy.org/en/20/orm/inheritance.html
 #
-import json
 import logging
 from datetime import datetime
 from enum import unique, auto
@@ -13,7 +12,7 @@ from math import ceil
 from typing import Any
 
 from sqlalchemy import func, orm, String, event, inspect
-from sqlalchemy.orm import Mapped, mapped_column, DeclarativeMeta, DeclarativeBase
+from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.orm.query import attributes
 
 from framework.enums import AutoUpperCase
@@ -395,62 +394,3 @@ class NamedSchema(BaseSchema):
 
     # not Optional[], therefore will be NOT NULL
     name: Mapped[str] = mapped_column(String(64))
-
-
-class DefaultJSONEncoder(json.JSONEncoder):
-
-    def default(self, obj):
-        if isinstance(obj.__class__, DeclarativeMeta):
-            # an SQLAlchemy class and exclude metadata
-            fields = {}
-            for field in [x for x in dir(obj) if not x.startswith('_') and x != 'metadata']:
-                try:
-                    data = obj.__getattribute__(field)
-                    if isinstance(data, datetime):  # handle datatime
-                        data = data.isoformat()
-
-                    json.dumps(data)  # jsonify the field's data and failed if not encoded
-                    fields[field] = data
-                except TypeError:
-                    fields[field] = None
-
-            # a json-encoder dict
-            return fields
-
-        return json.JSONEncoder.default(self, obj)
-
-
-# def recursive_encoder():
-#     # _visited = []
-
-class RecursiveJSONEncoder(DefaultJSONEncoder):
-    _visited = []
-
-    def default(self, instance):
-        if isinstance(instance.__class__, DeclarativeMeta):
-            # avoid self re-visit
-            if instance in self._visited:
-                return None
-
-            # mark visited
-            self._visited.append(instance)
-
-            # an SQLAlchemy class and exclude metadata
-            fields = {}
-            for field in [x for x in dir(instance) if not x.startswith('_') and x != 'metadata']:
-                try:
-                    data = instance.__getattribute__(field)
-                    if isinstance(data, datetime):  # handle datatime
-                        data = data.isoformat()
-
-                    json.dumps(data)  # jsonify the field's data and failed if not encoded
-                    fields[field] = data
-                except TypeError:
-                    fields[field] = None
-
-            # a json-encoder dict
-            return fields
-
-        return json.JSONEncoder.default(self, instance)
-
-    # return RecursiveJ/SONEncoder

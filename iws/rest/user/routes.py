@@ -12,8 +12,8 @@ from flask import session, g, redirect, url_for
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.model import ErrorModel
-from framework.model import ResponseModel
+from framework.orm.pydantic.model import ErrorModel
+from framework.orm.pydantic.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from rest.user.model import User
 from rest.user.service import UserService
@@ -64,8 +64,7 @@ def register():
         logger.debug(f"user={user}")
         # userService = UserService()
         userService.validate(SchemaOperation.CREATE, user)
-        user = userService.create(user)
-        # user = userService.register(username, password)
+        user = userService.register(user)
 
         # build success response
         response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="User is successfully created.")
@@ -133,7 +132,7 @@ def create():
     try:
         userService = UserService()
         userService.validate(SchemaOperation.CREATE, user)
-        user = userService.create(user)
+        user = userService.register(user)
         logger.debug(f"user={user}")
         # build success response
         response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="User is successfully created.")

@@ -6,7 +6,7 @@ import logging
 from flask import request, make_response
 
 from framework.http import HTTPStatus
-from framework.model import ResponseModel
+from framework.orm.pydantic.model import ResponseModel
 from rest.role.model import Role
 from rest.role.v2 import bp as bp_v2_role
 

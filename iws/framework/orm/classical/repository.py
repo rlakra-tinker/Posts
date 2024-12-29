@@ -3,7 +3,7 @@
 #
 
 import logging
-from typing import Mapping, Iterable
+from typing import Mapping, Iterable, Dict, Any, List, Optional
 
 from werkzeug.datastructures import MultiDict
 
@@ -15,6 +15,9 @@ logger = logging.getLogger(__name__)
 
 class ClassicalRepository(AbstractRepository):
     """The base repository of all non-ORM repositories."""
+
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[Any]]:
+        pass
 
     def __init__(self):
         super().__init__(engine=connector.engine)

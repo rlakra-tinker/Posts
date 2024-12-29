@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from framework.model import AbstractModel
+from framework.orm.pydantic.model import AbstractModel
 
 
 class Contact(AbstractModel):

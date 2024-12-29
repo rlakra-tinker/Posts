@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.model import AbstractModel
+from framework.orm.pydantic.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from rest.user.model import User
@@ -116,9 +116,9 @@ class UserService(AbstractService):
 
         logger.debug(f"-validates()")
 
-    def create(self, user: User) -> User:
+    def register(self, user: User) -> User:
         """Crates a new user"""
-        logger.debug(f"+create({user})")
+        logger.debug(f"+register({user})")
         if self.existsByFilter({"email": user.email}):
             raise DuplicateRecordException(HTTPStatus.CONFLICT, f"User '{user.email}' is already registered!")
 
@@ -128,7 +128,6 @@ class UserService(AbstractService):
         roleService = RoleService()
         roleModel = roleService.findByFilter({"name": "Manager"})
         logger.debug(f"roleModel={roleModel}")
-        userSchema.role
         userSchema = self.repository.save(userSchema)
         if userSchema and userSchema.id is None:
             userSchema = self.repository.findByFilter({"name": user.name})
@@ -136,7 +135,7 @@ class UserService(AbstractService):
         user = self.fromSchema(userSchema)
         # user = User.model_validate(userSchema)
 
-        logger.debug(f"-create(), user={user}")
+        logger.debug(f"-register(), user={user}")
         return user
 
     def bulkCreate(self, users: List[User]) -> List[User]:
@@ -144,7 +143,7 @@ class UserService(AbstractService):
         logger.debug(f"+bulkCreate({users})")
         results = []
         for user in users:
-            result = self.create(user)
+            result = self.register(user)
             results.append(result)
 
         logger.debug(f"-bulkCreate(), results={results}")

@@ -2,7 +2,7 @@
 # Author: Rohtash Lakra
 #
 from tests.base import AbstractTestCase
-from framework.entity.abstract import AbstractEntity, BaseEntity, NamedEntity, ErrorEntity, ErrorResponse
+from framework.orm.pydantic.entity import AbstractEntity, BaseEntity, NamedEntity, ErrorEntity, ErrorResponse
 
 
 class TestAbstract(AbstractTestCase):

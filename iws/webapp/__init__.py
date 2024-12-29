@@ -21,7 +21,7 @@ from framework.enums import EnvType
 from framework.enums import KeyEnum
 from framework.http import HTTPStatus
 from framework.logger import DefaultLogger
-from framework.model import ResponseModel
+from framework.orm.pydantic.model import ResponseModel
 from globals import connector
 from rest import bp as rest_bp
 from webapp.routes import bp as webapp_bp

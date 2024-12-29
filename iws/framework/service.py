@@ -5,7 +5,7 @@ import logging
 from abc import abstractmethod
 from typing import List, Optional, Dict, Any
 
-from framework.model import AbstractModel
+from framework.orm.pydantic.model import AbstractModel
 from framework.orm.sqlalchemy.schema import BaseSchema, SchemaOperation
 
 logger = logging.getLogger(__name__)

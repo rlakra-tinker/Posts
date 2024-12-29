@@ -6,7 +6,7 @@ from flask import render_template, make_response, request, redirect, url_for
 
 from admin.v1 import bp as bp_v1_admin
 from framework.http import HTTPStatus
-from framework.model import ErrorModel
+from framework.orm.pydantic.model import ErrorModel
 
 # holds accounts in memory
 accounts = []

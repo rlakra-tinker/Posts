@@ -1,35 +1,9 @@
 #
 # Author: Rohtash Lakra
 #
-from typing import Protocol
-from datetime import datetime
 import json
-import inspect
-from json import JSONEncoder, JSONDecoder
-
-
-class JsonEncoder(JSONEncoder):
-
-    def default(self, obj):
-        if hasattr(obj, "to_json"):
-            return self.default(obj.to_json())
-        elif hasattr(obj, "__dict__"):
-            obj_dict = dict(
-                (key, value)
-                for key, value in inspect.getmembers(obj)
-                if not key.startswith("__")
-                and not inspect.isabstract(value)
-                and not inspect.isbuiltin(value)
-                and not inspect.isfunction(value)
-                and not inspect.isgenerator(value)
-                and not inspect.isgeneratorfunction(value)
-                and not inspect.ismethod(value)
-                and not inspect.ismethoddescriptor(value)
-                and not inspect.isroutine(value)
-            )
-            return self.default(obj_dict)
-
-        return obj
+from datetime import datetime
+from typing import Protocol
 
 
 class AbstractEntity(Protocol):
@@ -163,7 +137,8 @@ class User(BaseEntity):
                  id: int = None,
                  admin: bool = False,
                  created_at: datetime = datetime.now(),
-                 updated_at: datetime = datetime.now()):
+                 updated_at: datetime = datetime.now(),
+                 addresses: list[Address] = None):
         BaseEntity.__init__(self, id)
         self.user_name = user_name
         self.password = password
@@ -173,7 +148,7 @@ class User(BaseEntity):
         self.admin = admin
         self.created_at = created_at
         self.updated_at = updated_at
-        self.addresses: [Address] = []
+        self.addresses: [Address] = [] if addresses is None else list(addresses)
 
     def add_address(self, address: Address):
         self.addresses.append(address)

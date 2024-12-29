@@ -10,7 +10,7 @@ from flask import make_response, request
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.model import ResponseModel
+from framework.orm.pydantic.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from rest.role.model import Role
 from rest.role.service import RoleService

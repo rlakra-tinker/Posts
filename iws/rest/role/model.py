@@ -7,7 +7,7 @@ from typing import Dict, Any
 
 from pydantic import model_validator
 
-from framework.model import AbstractModel
+from framework.orm.pydantic.model import AbstractModel
 
 logger = logging.getLogger(__name__)
 

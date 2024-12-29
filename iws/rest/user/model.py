@@ -5,7 +5,7 @@ import logging
 from datetime import datetime
 from typing import Optional, List
 
-from framework.model import AbstractModel
+from framework.orm.pydantic.model import AbstractModel
 
 logger = logging.getLogger(__name__)
 

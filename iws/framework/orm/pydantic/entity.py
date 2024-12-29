@@ -8,7 +8,8 @@
 Abstract and reusable entities
 """
 import json
-from json import JSONEncoder
+
+from framework.json import AbstractJSONHandler
 
 
 class GetClassAttr(type):
@@ -16,54 +17,6 @@ class GetClassAttr(type):
 
     def __getitem__(cls, item):
         return getattr(cls, item)
-
-
-class AbstractJSONHandler(JSONEncoder):
-    """AbstractJSONHandler extends JSONEncoder"""
-
-    # skip JSONEncoder properties
-    _jsonEncKeys = ('skipkeys', 'ensure_ascii', 'check_circular', 'allow_nan', 'sort_keys', 'indent')
-
-    def _skipDefaultKeys(self, entity):
-        # skip JSONEncoder properties
-        for key in AbstractJSONHandler._jsonEncKeys:
-            if key in entity.__dict__:
-                # print(f"key: {key}")
-                entity.__delattr__(key)
-        # print(f"entity.__dict__: {entity.__dict__}")
-
-    def default(self, entity):
-        """
-        Implement this method in a subclass such that it returns
-                a serializable object for ``o``, or calls the base implementation
-                (to raise a ``TypeError``).
-        """
-
-        # print(f"default -> entity: {type(entity)}")
-        if isinstance(entity, AbstractJSONHandler):
-            # return self.model_dump()
-            # return json.dumps(self)
-            # obj, *, skipkeys=False, ensure_ascii=True, check_circular=True,
-            #         allow_nan=True, cls=None, indent=None, separators=None,
-            #         default=None, sort_keys=False, **kw
-            # return
-            # json.dumps(self, default=lambda entity: entity.__dict__, sort_keys=True, indent=2, separators =(",", ":"))
-            # return json.dumps(self, default=lambda entity: entity.__dict__, indent=2)
-            # return json.dumps(self, default=self.default(), sort_keys=True, indent=4)
-            # return json.dumps(self, sort_keys=True, indent=4)
-
-            # skip JSONEncoder properties
-            self._skipDefaultKeys(entity)
-
-            # tempObject = copy.deepcopy(entity)
-            # for path in skipKeys:
-            #     del reduce(op.getitem, path[:-1], tempObject)[path[-1]]
-            #
-            # return json.dumps(tempObject, default=lambda obj: obj.__dict__, indent=2)
-            return json.dumps(entity, default=lambda obj: obj.__dict__, indent=2)
-
-        # Let the base class default method raise the TypeError
-        return super().default(entity)
 
 
 # @dataclass

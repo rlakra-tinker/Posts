@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from framework.entity.abstract import AbstractEntity
+from framework.orm.pydantic.entity import AbstractEntity
 from tests.base import AbstractTestCase
 from account.entity import User
 

@@ -7,7 +7,7 @@ from flask import render_template, make_response, request, redirect, url_for, cu
 from account.entity import User
 from account.v1 import bp as bp_v1_accounts
 from framework.http import HTTPStatus
-from framework.model import ErrorModel, ResponseModel
+from framework.orm.pydantic.model import ErrorModel, ResponseModel
 from rest.user.model import User
 
 # holds accounts in memory
@@ -32,7 +32,7 @@ def register_view():
     register a new user
     """
     current_app.logger.debug(f"register_view => {request}")
-    return render_template("user/register.html")
+    return render_template("account/register.html")
 
 
 @bp_v1_accounts.post("/register")
@@ -62,7 +62,7 @@ def login_view():
     login to an user
     """
     current_app.logger.debug(f"login_view => {request}")
-    return render_template("user/login.html")
+    return render_template("account/login.html")
 
 
 @bp_v1_accounts.post("/login")
@@ -100,7 +100,7 @@ def profile_view():
     """
     view profile
     """
-    return render_template("user/profile.html")
+    return render_template("account/profile.html")
 
 
 # forgot-password
@@ -109,7 +109,7 @@ def forgot_password():
     """
     forgot-password
     """
-    return render_template("user/forgot-password.html")
+    return render_template("account/forgot-password.html")
 
 
 # Logout Page
@@ -128,4 +128,4 @@ def notifications():
     """
     Services Page
     """
-    return render_template("user/notifications.html")
+    return render_template("account/notifications.html")

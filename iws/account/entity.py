@@ -1,7 +1,7 @@
 #
 # Author: Rohtash Lakra
 #
-from framework.entity.abstract import BaseEntity
+from framework.orm.pydantic.entity import BaseEntity
 
 
 class User(BaseEntity):

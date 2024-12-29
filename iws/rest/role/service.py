@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.model import AbstractModel
+from framework.orm.pydantic.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from rest.role.model import Role
