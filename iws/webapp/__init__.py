@@ -116,8 +116,8 @@ class WebApp:
                 "DB_NAME": "testPosts.db",
             })
 
-        with self.app.app_context():
-            current_app.logger.debug(f"app.config={app.config}")
+        # with self.app.app_context():
+        #     current_app.logger.debug(f"app.config={app.config}")
 
         # Check CORS Enabled
         if Config.CORS_ENABLED:
