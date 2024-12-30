@@ -18,8 +18,6 @@ from rest.company.v1 import bp as bp_company_v1
 
 logger = logging.getLogger(__name__)
 
-companyService = CompanyService()
-
 
 @bp_company_v1.post("/")
 def create():
@@ -32,6 +30,7 @@ def create():
             company = Company(**body)
             logger.debug(f"company={company}")
 
+        companyService = CompanyService()
         companyService.validate(SchemaOperation.CREATE, company)
         company = companyService.create(company)
         logger.debug(f"company={company}")
@@ -67,6 +66,7 @@ def bulkCreate():
                 companies.append(Company(**body))
 
         logger.debug(f"companies={companies}")
+        companyService = CompanyService()
         companyService.validates(SchemaOperation.CREATE, companies)
         companies = companyService.bulkCreate(companies)
         logger.debug(f"companies={companies}")
@@ -88,6 +88,7 @@ def bulkCreate():
 def get():
     logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
+        companyService = CompanyService()
         if len(request.args) == 1:
             return companyService.findById(request.args.get('id'))
         else:
@@ -116,6 +117,7 @@ def update():
             company = Company(**body)
             logger.debug(f"company={company}")
 
+        companyService = CompanyService()
         companyService.validate(SchemaOperation.UPDATE, company)
         company = companyService.update(company)
         logger.debug(f"company={company}")
@@ -141,9 +143,13 @@ def delete(id: int):
             logger.debug(f"body={body}")
             company = Company(**body)
             logger.debug(f"company={company}")
+
+        companyService = CompanyService()
         companyService.delete(id)
         # build success response
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Company is successfully deleted.")
+    except NoRecordFoundException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:

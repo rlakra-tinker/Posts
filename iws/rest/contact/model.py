@@ -3,6 +3,8 @@
 #
 import logging
 
+from pydantic import model_validator
+
 from framework.orm.pydantic.model import AbstractModel
 
 logger = logging.getLogger(__name__)
@@ -15,6 +17,17 @@ class Contact(AbstractModel):
     last_name: str = None
     country: str = None
     subject: str = None
+
+    @classmethod
+    @model_validator(mode="before")
+    def pre_validator(cls, values):
+        logger.debug(f"pre_validator({values})")
+        return values
+
+    @model_validator(mode="after")
+    def post_validator(self, values):
+        logger.debug(f"post_validator({values})")
+        return self
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""

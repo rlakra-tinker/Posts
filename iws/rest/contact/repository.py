@@ -101,11 +101,11 @@ class ContactRepository(SqlAlchemyRepository):
         logger.info(f"-update(), results={results}")
         return results
 
-    def delete(self, id: int) -> None:
-        logger.debug(f"+delete({id})")
+    def delete(self, filters: Dict[str, Any]) -> None:
+        logger.debug(f"+delete({filters})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                contactSchema = session.query(ContactSchema).filter_by({"id": id}).one()
+                contactSchema = session.query(ContactSchema).filter_by(**filters).one()
                 logger.debug(f"contactSchema={contactSchema}")
                 session.delete(contactSchema)
                 logger.debug("Record is successfully deleted.")

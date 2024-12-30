@@ -124,14 +124,14 @@ class RoleRepository(SqlAlchemyRepository):
         logger.info(f"-update(), results={results}")
         return results
 
-    def delete(self, id: int) -> None:
-        logger.debug(f"+delete({id})")
+    def delete(self, filters: Dict[str, Any]) -> None:
+        logger.debug(f"+delete({filters})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                roleSchema = session.query(RoleSchema).filter_by({"id": id}).one()
-                logger.debug(f"roleSchema={roleSchema}")
+                roleSchema = session.query(RoleSchema).filter_by(**filters).one()
+                logger.debug(f"Deleting roleSchema={roleSchema}")
                 session.delete(roleSchema)
-                logger.debug("Record is successfully deleted.")
+                logger.info("Record is successfully deleted.")
                 session.commit()
             except NoResultFound as ex:
                 logger.error(f"NoResultFound while updating records! Error={ex}")

@@ -140,8 +140,9 @@ class RoleService(AbstractService):
         logger.debug(f"+update({role})")
         # self.validate(SchemaOperation.UPDATE, role)
         # check record exists by id
-        # if not self.existsByFilter({"id": role.id}):
-        #     raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Role doesn't exist!")
+        if not self.existsByFilter({"id": role.id}):
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Role doesn't exist!")
+
         roleSchemas = self.repository.findByFilter({"id": role.id})
         roleSchema = roleSchemas[0]
         if role.name and roleSchema.name != role.name:
@@ -164,8 +165,9 @@ class RoleService(AbstractService):
     def delete(self, id: int) -> None:
         logger.debug(f"+delete({id})")
         # check record exists by id
-        if self.existsByFilter({"id": id}):
-            self.repository.delete(id)
+        filter = {"id": id}
+        if self.existsByFilter(filter):
+            self.repository.delete(filter)
         else:
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Role doesn't exist!")
 

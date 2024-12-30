@@ -4,9 +4,9 @@
 import logging
 from abc import ABC, abstractmethod
 from enum import auto
-from typing import Iterable, Union, Any, Dict, List, Optional
+from typing import Iterable, Any, Dict, List, Optional
 
-from sqlalchemy import Engine, URL, create_engine
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
 from framework.enums import AutoUpperCase
@@ -50,18 +50,6 @@ class RepositoryManager(object):
     def execute(self):
         """Executes the repository"""
         pass
-
-
-def createEngine(dbUri: Union[str, URL], debug: bool = False) -> Engine:
-    """Create a new :class:`Engine` instance.
-
-    The debug=True parameter indicates that SQL emitted by connections will be logged to standard out.
-    """
-    logger.debug(f"+createEngine({dbUri}, {debug})")
-    engine = create_engine(dbUri, echo=debug)
-    engine.execution_options(isolation_level="AUTOCOMMIT")
-    logger.debug(f"-createEngine(), engine={engine}")
-    return engine
 
 
 class AbstractRepository(ABC):

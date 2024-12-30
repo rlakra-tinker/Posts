@@ -133,6 +133,9 @@ class ContactService(AbstractService):
     def update(self, contact: Contact) -> Contact:
         """Updates the contact"""
         logger.debug(f"+update({contact})")
+        if not self.existsByFilter({"id": contact.id}):
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Contact doesn't exist!")
+
         contactSchemas = self.repository.findByFilter({"id": contact.id})
         contactSchema = contactSchemas[0]
         if contact.first_name and contactSchema.first_name != contact.first_name:
@@ -156,8 +159,9 @@ class ContactService(AbstractService):
     def delete(self, id: int) -> None:
         logger.debug(f"+delete({id})")
         # check record exists by id
-        if self.existsByFilter({"id": id}):
-            self.repository.delete(id)
+        filter = {"id": id}
+        if self.existsByFilter(filter):
+            self.repository.delete(filter)
         else:
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Contact doesn't exist!")
 

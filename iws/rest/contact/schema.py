@@ -9,7 +9,7 @@ from framework.orm.sqlalchemy.schema import BaseSchema
 
 
 class ContactSchema(BaseSchema):
-    # """ Contact represents [contacts] Table """
+    """ Contact represents [contacts] Table """
 
     __tablename__ = "contacts"
 

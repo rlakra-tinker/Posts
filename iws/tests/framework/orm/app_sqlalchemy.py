@@ -5,10 +5,9 @@ from datetime import datetime
 
 from sqlalchemy.orm import Session
 
-from framework.orm.repository import createEngine
-from framework.orm.sqlalchemy.schema import BaseSchema
-from rest.user.schema import UserSchema, AddressSchema
+from framework.db.connector import createEngine, createDatabase
 from rest.role.schema import RoleSchema
+from rest.user.schema import UserSchema, AddressSchema
 
 
 class SqlAlchemyTableObject:
@@ -16,14 +15,7 @@ class SqlAlchemyTableObject:
     def __init__(self):
         # The echo=True parameter indicates that SQL emitted by connections will be logged to standard out.
         self.engine = createEngine("sqlite:///testPosts.db", True)
-
-    def create_database(self):
-        print(f"create_database\n")
-        # Using our table metadata and our engine, we can generate our schema at once in our target SQLite database,
-        # using a method called 'MetaData.create_all()':
-        # AbstractEntity.metadata.create_all(bind=self.engine)
-        BaseSchema.metadata.create_all(bind=self.engine)
-        print()
+        createDatabase(self.engine)
 
     def populate_database(self):
         print(f"populate_database\n")
@@ -271,7 +263,6 @@ class SqlAlchemyClassicalObject:
 if __name__ == '__main__':
     # sqlalchemy.__version__
     sqlAlchemyTableObject = SqlAlchemyTableObject()
-    sqlAlchemyTableObject.create_database()
     sqlAlchemyTableObject.populate_database()
     sqlAlchemyTableObject.fetch_roles()
     sqlAlchemyTableObject.fetch_users()

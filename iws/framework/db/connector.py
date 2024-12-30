@@ -4,22 +4,46 @@
 import logging
 import sqlite3
 from pathlib import Path
-from typing import Iterable
+from typing import Union, Iterable
 
 import click
 from flask import Flask, g, current_app
-from sqlalchemy import Engine
+from sqlalchemy import Engine, URL, create_engine
 from sqlalchemy.orm import Session
 
 from common.config import Config
 from framework.enums import KeyEnum
-from framework.orm.repository import createEngine
 from framework.orm.sqlalchemy.schema import BaseSchema
 
 logger = logging.getLogger(__name__)
 
 
-# from framework.orm.sqlalchemy.entity import AbstractEntity
+@staticmethod
+def createEngine(dbUri: Union[str, URL], debug: bool = False) -> Engine:
+    """Create a new :class:`Engine` instance.
+
+    The debug=True parameter indicates that SQL emitted by connections will be logged to standard out.
+    """
+    logger.debug(f"+createEngine({dbUri}, {debug})")
+    engine = create_engine(dbUri, pool_recycle=3600, echo=debug)
+    engine.execution_options(isolation_level="AUTOCOMMIT")
+    logger.debug(f"-createEngine(), engine={engine}")
+    return engine
+
+
+@staticmethod
+def createDatabase(engine: Engine) -> None:
+    """ Creates the database. """
+    logger.debug(f"+createDatabase({engine})")
+    # self.session = Session()
+    # Using our table metadata and our engine, we can generate our schema at once in our target SQLite
+    # database, using a method called 'MetaData.create_all()':
+    # self.metadata = MetaData()
+    # MetaData.create_all(BaseSchema, bind=self.engine)
+    # self.metadata.create_all(self.engine)
+    # AbstractEntity.metadata.create_all(bind=self.engine)
+    BaseSchema.metadata.create_all(bind=engine)
+    logger.debug(f"-createDatabase(), engine={engine}")
 
 
 # 'click.command()' defines a command line command called init-db that calls the 'init_db' function and shows a success
@@ -129,14 +153,8 @@ class SQLite3Connector(DatabaseConnector):
                 self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
                 # SQLAlchemy DB Creation
                 self.engine = createEngine(self.db_uri, debug=True)
-                # self.session = Session()
-                # Using our table metadata and our engine, we can generate our schema at once in our target SQLite
-                # database, using a method called 'MetaData.create_all()':
-                # self.metadata = MetaData()
-                # MetaData.create_all(BaseSchema, bind=self.engine)
-                # self.metadata.create_all(self.engine)
-                # AbstractEntity.metadata.create_all(bind=self.engine)
-                BaseSchema.metadata.create_all(bind=self.engine)
+                createDatabase(self.engine)
+
             else:
                 """Initializes the SQLite Database"""
                 #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")

@@ -9,10 +9,10 @@ from framework.http import HTTPStatus
 from framework.orm.pydantic.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
+from rest.role.service import RoleService
 from rest.user.model import User
 from rest.user.repository import UserRepository
 from rest.user.schema import UserSchema
-from rest.role.service import RoleService
 
 logger = logging.getLogger(__name__)
 
@@ -154,18 +154,29 @@ class UserService(AbstractService):
         logger.debug(f"+update({user})")
         # self.validate(SchemaOperation.UPDATE, user)
         # check record exists by id
-        # if not self.existsByFilter({"id": user.id}):
-        #     raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User doesn't exist!")
+        if not self.existsByFilter({"id": user.id}):
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User doesn't exist!")
+
         userSchemas = self.repository.findByFilter({"id": user.id})
         userSchema = userSchemas[0]
-        if user.name and userSchema.name != user.name:
-            userSchema.name = user.name
-
-        if user.active and userSchema.active != user.active:
-            userSchema.active = user.active
-
-        if user.meta_data and userSchema.meta_data != user.meta_data:
-            userSchema.meta_data = user.meta_data
+        #  Person
+        if user.email and userSchema.email != user.email:
+            userSchema.email = user.email
+        if user.first_name and userSchema.first_name != user.first_name:
+            userSchema.first_name = user.first_name
+        if user.last_name and userSchema.last_name != user.last_name:
+            userSchema.last_name = user.last_name
+        if user.birth_date and userSchema.birth_date != user.birth_date:
+            userSchema.birth_date = user.birth_date
+        #  User
+        if user.user_name and userSchema.user_name != user.user_name:
+            userSchema.user_name = user.user_name
+        if user.admin and userSchema.admin != user.admin:
+            userSchema.admin = user.admin
+        if user.last_seen and userSchema.last_seen != user.last_seen:
+            userSchema.last_seen = user.last_seen
+        if user.avatar_url and userSchema.avatar_url != user.avatar_url:
+            userSchema.avatar_url = user.avatar_url
 
         # userSchema = self.fromModel(oldRole)
         self.repository.update(userSchema)
@@ -178,8 +189,9 @@ class UserService(AbstractService):
     def delete(self, id: int) -> None:
         logger.debug(f"+delete({id})")
         # check record exists by id
-        if self.existsByFilter({"id": id}):
-            self.repository.delete(id)
+        filter = {"id": id}
+        if self.existsByFilter(filter):
+            self.repository.delete(filter)
         else:
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "User doesn't exist!")
 

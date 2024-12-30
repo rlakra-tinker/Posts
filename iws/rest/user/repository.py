@@ -125,12 +125,12 @@ class UserRepository(SqlAlchemyRepository):
         logger.info(f"-update(), results={results}")
         return results
 
-    def delete(self, id: int) -> None:
-        logger.debug(f"+delete({id})")
+    def delete(self, filters: Dict[str, Any]) -> None:
+        logger.debug(f"+delete({filters})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                userSchema = session.query(UserSchema).filter_by({"id": id}).one()
-                logger.debug(f"userSchema={userSchema}")
+                userSchema = session.query(UserSchema).filter_by(**filters).one()
+                logger.debug(f"Deleting userSchema={userSchema}")
                 session.delete(userSchema)
                 logger.debug("Record is successfully deleted.")
                 session.commit()

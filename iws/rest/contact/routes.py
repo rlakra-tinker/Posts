@@ -18,8 +18,6 @@ from rest.contact.v1 import bp as bp_contact_v1
 
 logger = logging.getLogger(__name__)
 
-contactService = ContactService()
-
 
 @bp_contact_v1.post("/")
 def create():
@@ -33,6 +31,7 @@ def create():
         logger.debug(f"body={body}")
         contact = Contact(**body)
         logger.debug(f"contact={contact}")
+        contactService = ContactService()
         contactService.validate(SchemaOperation.CREATE, contact)
         contact = contactService.create(contact)
         logger.debug(f"contact={contact}")
@@ -70,6 +69,7 @@ def bulkCreate():
                 roles.append(Contact(**body))
 
         logger.debug(f"roles={roles}")
+        contactService = ContactService()
         contactService.validates(SchemaOperation.CREATE, roles)
         roles = contactService.bulkCreate(roles)
         logger.debug(f"roles={roles}")
@@ -92,6 +92,7 @@ def bulkCreate():
 def get():
     logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
+        contactService = ContactService()
         roles = contactService.findByFilter(request.args)
 
         # build success response
@@ -117,6 +118,7 @@ def update():
             contact = Contact(**body)
             logger.debug(f"contact={contact}")
 
+        contactService = ContactService()
         contactService.validate(SchemaOperation.UPDATE, contact)
         contact = contactService.update(contact)
         logger.debug(f"contact={contact}")
@@ -125,6 +127,8 @@ def update():
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Contact is successfully updated.")
         response.addInstance(contact)
     except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
@@ -143,6 +147,7 @@ def delete(id: int):
             contact = Contact(**body)
             logger.debug(f"contact={contact}")
 
+        contactService = ContactService()
         contactService.delete(id)
         # build success response
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Contact is successfully deleted.")

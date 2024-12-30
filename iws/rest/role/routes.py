@@ -119,13 +119,13 @@ def get():
 @bp_role_v1.put("/")
 def update():
     logger.debug(f"+update() => request={request}, args={request.args}, is_json:{request.is_json}")
-    if request.is_json:
-        body = request.get_json()
-        logger.debug(f"body={body}")
-        role = Role(**body)
-        logger.debug(f"role={role}")
-
     try:
+        if request.is_json:
+            body = request.get_json()
+            logger.debug(f"body={body}")
+            role = Role(**body)
+            logger.debug(f"role={role}")
+
         roleService = RoleService()
         roleService.validate(SchemaOperation.UPDATE, role)
         role = roleService.update(role)
@@ -135,6 +135,8 @@ def update():
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully updated.")
         response.addInstance(role)
     except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)

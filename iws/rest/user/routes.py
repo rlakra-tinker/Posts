@@ -5,7 +5,6 @@
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
 import logging
-from datetime import datetime
 
 from flask import make_response, request
 from flask import session, g, redirect, url_for
@@ -20,8 +19,6 @@ from rest.user.service import UserService
 from rest.user.v1 import bp as bp_account_v1
 
 logger = logging.getLogger(__name__)
-
-userService = UserService()
 
 
 @bp_account_v1.before_app_request
@@ -62,7 +59,7 @@ def register():
         # user = User.model_validate(obj=body)
         user = User(**body)
         logger.debug(f"user={user}")
-        # userService = UserService()
+        userService = UserService()
         userService.validate(SchemaOperation.CREATE, user)
         user = userService.register(user)
 
@@ -226,6 +223,8 @@ def update():
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="User is successfully updated.")
         response.addInstance(user)
     except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)

@@ -132,8 +132,9 @@ class CompanyService(AbstractService):
         logger.debug(f"+update({company})")
         # self.validate(SchemaOperation.UPDATE, company)
         # check record exists by id
-        # if not self.existsByFilter({"id": company.id}):
-        #     raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Company doesn't exist!")
+        if not self.existsByFilter({"id": company.id}):
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Company doesn't exist!")
+
         companySchemas = self.repository.findByFilter({"id": company.id})
         companySchema = companySchemas[0]
         if company.name and companySchema.name != company.name:
@@ -156,8 +157,9 @@ class CompanyService(AbstractService):
     def delete(self, id: int) -> None:
         logger.debug(f"+delete({id})")
         # check record exists by id
-        if self.existsByFilter({"id": id}):
-            self.repository.delete(id)
+        filter = {"id": id}
+        if self.existsByFilter(filter):
+            self.repository.delete(filter)
         else:
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Company doesn't exist!")
 

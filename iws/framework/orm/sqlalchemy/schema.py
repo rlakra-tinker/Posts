@@ -9,9 +9,9 @@ import logging
 from datetime import datetime
 from enum import unique, auto
 from math import ceil
-from typing import Any
+from typing import Any, Union
 
-from sqlalchemy import func, orm, String, event, inspect
+from sqlalchemy import func, orm, String, event, inspect, Engine, URL, create_engine
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.orm.query import attributes
 
@@ -388,9 +388,17 @@ def column_reflect(inspector, table, column_info):
     # column_info["key"] = "attr_%s" % column_info["name"].lower()
 
 
+# @event.listens_for(BaseSchema, "after_insert")
+# def after_insert(inspector, table, column_info):
+#     # set column.key = "attr_<lower_case_name>"
+#     logger.info(f"after_insert({table}, {column_info})")
+#     # column_info["key"] = "attr_%s" % column_info["name"].lower()
+
+
 class NamedSchema(BaseSchema):
     """NamedEntity Schema"""
     __abstract__ = True
 
     # not Optional[], therefore will be NOT NULL
     name: Mapped[str] = mapped_column(String(64))
+
