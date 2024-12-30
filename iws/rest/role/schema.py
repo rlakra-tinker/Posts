@@ -10,9 +10,8 @@ from framework.orm.sqlalchemy.schema import NamedSchema
 
 
 class RoleSchema(NamedSchema):
-    """
-    [roles] Table
-    """
+    """ RoleSchema represents [roles] Table """
+
     __tablename__ = "roles"
 
     # not Optional[], therefore will be NOT NULL
@@ -22,7 +21,6 @@ class RoleSchema(NamedSchema):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        # return f"{type(self).__name__} <id={self.id!r}, name={self.name!r}, active={self.active!r}, meta_data={self.meta_data!r}, {self.auditable()}>"
         return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
                 .format(type(self).__name__,
                         self.id,

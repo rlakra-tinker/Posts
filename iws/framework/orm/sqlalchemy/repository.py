@@ -64,7 +64,7 @@ class SqlAlchemyRepository(AbstractRepository):
 
         logger.debug(f"-save_all()")
 
-    def findById(self, instance: BaseSchema) -> Optional[List[dict]]:
+    def findById(self, baseSchema: BaseSchema, id: int) -> Optional[BaseSchema]:
         """Finds the record by id in the provided table and parses as list of dict.
 
         :param Engine engine: Database engine to handle raw SQL queries.
@@ -72,16 +72,14 @@ class SqlAlchemyRepository(AbstractRepository):
 
         :return: Optional[List[dict]]
         """
-        logger.debug(f"+findById({instance})")
-        results = dict()
+        logger.debug(f"+findById({baseSchema}, {id})")
         with Session(self.get_engine()) as session:
             try:
                 # session.begin()
-                rows = session.query(instance).filter(instance.id == id()).one()
+                result = session.query(baseSchema).filter(baseSchema.id == id).one()
                 # rows = session.execute(text(query)).fetchall()
-                results = [row._asdict() for row in rows]
-                logger.debug(f"Loaded [{rows.rowcount}] rows => results={results}")
-                logger.debug(f"Loaded [{rows.rowcount}] rows => results={json.dumps(results, indent=2)}")
+                # results = [row._asdict() for row in rows]
+                logger.debug(f"Loaded a record => result={result}")
             except NoResultFound as ex:
                 logger.error(f"NoResultFound while loading records! Error={ex}")
                 session.rollback()
@@ -94,7 +92,7 @@ class SqlAlchemyRepository(AbstractRepository):
                 logger.error(f"Exception while loading records! Error={ex}")
                 # session.rollback()
                 raise ex
-        logger.debug(f"-findById(), results={results}")
+        logger.debug(f"-findById(), result={result}")
 
     def findAll(self, table: str, fields=[]) -> Optional[List[dict]]:
         """Finds rows of the provided table from the database and parses as list of dict.

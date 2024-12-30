@@ -3,7 +3,7 @@
 #
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import AbstractPydanticModel, ResponseModel, ErrorModel
-from rest.contact.models import Contact
+from rest.contact.model import Contact
 from tests.base import AbstractTestCase
 
 

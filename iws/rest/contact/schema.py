@@ -8,7 +8,9 @@ from sqlalchemy.orm import Mapped, mapped_column
 from framework.orm.sqlalchemy.schema import BaseSchema
 
 
-class Contact(BaseSchema):
+class ContactSchema(BaseSchema):
+    # """ Contact represents [contacts] Table """
+
     __tablename__ = "contacts"
 
     # not Optional[], therefore will be NOT NULL
@@ -22,8 +24,15 @@ class Contact(BaseSchema):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.get_id()}, first_name={self.first_name}, last_name={self.last_name}, country={self.country}, subject={self.subject}>"
+        return ("{} <id={}, first_name={}, last_name={}, country={}, subject={}, {}>"
+                .format(type(self).__name__,
+                        self.id,
+                        self.first_name,
+                        self.last_name,
+                        self.country,
+                        self.subject,
+                        self.auditable()))
 
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
+    # def __repr__(self) -> str:
+    #     """Returns the string representation of this object"""
+    #     return str(self)

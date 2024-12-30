@@ -3,10 +3,11 @@
 #
 from flask import Blueprint
 
-from rest.user.v2 import bp as account_v2_bp
+from rest.company.v2 import bp as company_v2_bp
 from rest.contact.v2 import bp as contact_v2_bp
 from rest.post.v2 import bp as post_v2_bp
 from rest.role.v2 import bp as role_v2_bp
+from rest.user.v2 import bp as user_v2_bp
 
 bp = Blueprint("v2", __name__, url_prefix="/v2")
 """
@@ -19,6 +20,7 @@ Parameters:
 
 # Register REST APIs (end-points) here
 bp.register_blueprint(role_v2_bp)
-bp.register_blueprint(account_v2_bp)
-bp.register_blueprint(post_v2_bp)
+bp.register_blueprint(user_v2_bp)
+bp.register_blueprint(company_v2_bp)
 bp.register_blueprint(contact_v2_bp)
+bp.register_blueprint(post_v2_bp)

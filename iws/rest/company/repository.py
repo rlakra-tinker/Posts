@@ -10,32 +10,30 @@ from sqlalchemy.orm import Session
 
 from framework.orm.sqlalchemy.repository import SqlAlchemyRepository
 from globals import connector
-from rest.contact.schema import ContactSchema
+from rest.company.schema import CompanySchema
 
 logger = logging.getLogger(__name__)
 
 
-class ContactRepository(SqlAlchemyRepository):
-    """The ContactRepository handles a schema-centric database persistence for contacts."""
+class CompanyRepository(SqlAlchemyRepository):
+    """The RoleRepository handles a schema-centric database persistence for roles."""
 
     def __init__(self):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[ContactSchema]]:
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[CompanySchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
-        contactSchemas = None
         # verbose version of what a context manager will do
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
-            # session.begin()
             try:
                 if filters:
-                    contactSchemas = session.query(ContactSchema).filter_by(**filters).all()
+                    companySchemas = session.query(CompanySchema).filter_by(**filters).all()
                 else:
-                    contactSchemas = session.query(ContactSchema).all()
+                    companySchemas = session.query(CompanySchema).all()
 
-                logger.debug(f"Loaded [{len(contactSchemas)}] rows => contactSchemas={contactSchemas}")
+                logger.debug(f"Loaded [{len(companySchemas)}] rows => companySchemas={companySchemas}")
 
                 # Commit:
                 # The pending changes above are flushed via flush(), the Transaction is committed, the Connection
@@ -69,18 +67,18 @@ class ContactRepository(SqlAlchemyRepository):
                 # is removed.
                 session.close()
 
-        logger.debug(f"-findByFilter(), contactSchemas={contactSchemas}")
-        return contactSchemas
+        logger.debug(f"-findByFilter(), companySchemas={companySchemas}")
+        return companySchemas
 
-    def update(self, contactSchema: ContactSchema) -> ContactSchema:
-        logger.debug(f"+update({contactSchema})")
+    def update(self, companySchema: CompanySchema) -> CompanySchema:
+        logger.debug(f"+update({companySchema})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                contactSchema.updated_at = func.now()
+                companySchema.updated_at = func.now()
                 results = session.execute(
-                    update(ContactSchema)
-                    .values(contactSchema.to_json())
-                    .where(ContactSchema.id == contactSchema.id)
+                    update(CompanySchema)
+                    .values(companySchema.to_json())
+                    .where(CompanySchema.id == companySchema.id)
                 ).rowcount
                 logger.debug(f"Updated [{results}] rows.")
 
@@ -105,9 +103,9 @@ class ContactRepository(SqlAlchemyRepository):
         logger.debug(f"+delete({id})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                contactSchema = session.query(ContactSchema).filter_by({"id": id}).one()
-                logger.debug(f"contactSchema={contactSchema}")
-                session.delete(contactSchema)
+                companySchema = session.query(CompanySchema).filter_by({"id": id}).one()
+                logger.debug(f"companySchema={companySchema}")
+                session.delete(companySchema)
                 logger.debug("Record is successfully deleted.")
                 session.commit()
             except NoResultFound as ex:
@@ -129,12 +127,12 @@ class ContactRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                contactSchemas = self.findByFilter({"id": ids})
-                for contactSchema in contactSchemas:
-                    logger.debug(f"Deleting role with id=[{contactSchema.id}]")
-                    session.delete(contactSchema)
+                companySchemas = self.findByFilter({"id": ids})
+                for companySchema in companySchemas:
+                    logger.debug(f"Deleting role with id=[{companySchema.id}]")
+                    session.delete(companySchema)
 
-                logger.debug(f"Deleted [{len(contactSchemas)}] rows successfully.")
+                logger.debug(f"Deleted [{len(companySchemas)}] rows successfully.")
                 session.commit()
             except NoResultFound as ex:
                 logger.error(f"NoResultFound while updating records! Error={ex}")

@@ -1,50 +1,164 @@
 #
 # Author: Rohtash Lakra
 #
-from typing import Dict
+import logging
+from typing import List, Optional, Dict, Any
 
+from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import ErrorModel
+from framework.orm.pydantic.model import AbstractModel
+from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
-from rest.contact.models import Contact
+from rest.contact.model import Contact
+from rest.contact.repository import ContactRepository
+from rest.contact.schema import ContactSchema
+
+logger = logging.getLogger(__name__)
 
 
 class ContactService(AbstractService):
 
     def __init__(self):
-        self.contacts: Dict[int, Contact] = {}
+        logger.debug("ContactService()")
+        self.repository = ContactRepository()
 
-    def find_by_id(self):
-        """
-        Returns the next ID of the user
-        """
-        last_id = super(ContactService, self).find_by_id()
-        if not self.contacts and len(self.contacts) > 0:
-            last_id = max(contact["id"] for contact in self.contacts)
+    # @override
+    def fromSchema(self, contactSchema: ContactSchema) -> Contact:
+        return Contact(**contactSchema.toJSONObject())
 
-        return last_id + 1
+    # @override
+    def fromModel(self, contact: Contact) -> ContactSchema:
+        return ContactSchema(**contact.toJSONObject())
 
-    def validate(self, contact):
-        errors = []
-        if contact:
-            if not contact.first_name:
-                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'first_name is required!'))
-            if not contact.last_name:
-                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'last_name is required!'))
-            if not contact.country:
-                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'country is required!'))
-            if not contact.subject:
-                errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'subject is required!'))
-        else:
-            errors.append(ErrorModel.buildError(HTTPStatus.INVALID_DATA, 'Contact is required!'))
+    def validate(self, operation: SchemaOperation, contact: Contact) -> None:
+        logger.debug(f"+validate({operation}, {contact})")
+        # super().validate(operation, contact)
+        errorMessages = []
 
-        return errors
+        # validate the object
+        if not contact:
+            errorMessages.append("'Contact' is not fully defined!")
+
+        match operation.name:
+            case SchemaOperation.CREATE.name:
+                # validate the required fields
+                if not contact.first_name:
+                    errorMessages.append("Contact 'first_name' is required!")
+                if not contact.last_name:
+                    errorMessages.append("Contact 'last_name' is required!")
+                if not contact.country:
+                    errorMessages.append("Contact 'country' is required!")
+                if not contact.subject:
+                    errorMessages.append("Contact 'subject' is required!")
+
+            case SchemaOperation.UPDATE.name:
+                if not contact.id:
+                    errorMessages.append("Contact 'id' is required!")
+
+        # throw an error if any validation error
+        if errorMessages and len(errorMessages) > 0:
+            error = ValidationException(httpStatus=HTTPStatus.INVALID_DATA, messages=errorMessages)
+            logger.debug(f"{type(error)} = exception={error}")
+            raise error
+
+        logger.debug(f"-validate()")
+
+    # @override
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
+        logger.debug(f"+findByFilter({filters})")
+        contactSchemas = self.repository.findByFilter(filters)
+        contactModels = []
+        for contactSchema in contactSchemas:
+            contactModel = self.fromSchema(contactSchema)
+            contactModels.append(contactModel)
+
+        logger.debug(f"-findByFilter(), contactModels={contactModels}")
+        return contactModels
+
+    # @override
+    def existsByFilter(self, filters: Dict[str, Any]) -> bool:
+        """Returns True if the records exist by filter otherwise False"""
+        logger.debug(f"+existsByFilter({filters})")
+        contactSchemas = self.repository.findByFilter(filters)
+        result = True if contactSchemas else False
+        logger.debug(f"-existsByFilter(), result={result}")
+        return result
+
+    def validates(self, operation: SchemaOperation, contacts: List[Contact]) -> None:
+        logger.debug(f"+validates({operation}, {contacts})")
+        errorMessages = []
+
+        # validate the object
+        if not contacts:
+            errorMessages.append('Roles is required!')
+
+        for contact in contacts:
+            self.validate(operation, contact)
+
+        # throw an error if any validation error
+        if errorMessages and len(errorMessages) > 0:
+            error = ValidationException(httpStatus=HTTPStatus.INVALID_DATA, messages=errorMessages)
+            logger.debug(f"{type(error)} = exception={error}")
+            raise error
+
+        logger.debug(f"-validates()")
 
     def create(self, contact: Contact) -> Contact:
-        print(f"contact: {contact}")
-        if not contact.id:
-            contact.id = self.find_by_id()
+        """Crates a new contact"""
+        logger.debug(f"+create({contact})")
+        if self.existsByFilter({"subject": contact.subject}):
+            raise DuplicateRecordException(HTTPStatus.CONFLICT, f"[{contact.subject}] contact already exists!")
 
-        print(f"contact.id: {contact.id}")
-        self.contacts[contact.id] = contact
-        return self.contacts[contact.id]
+        # contact = self.repository.create(contact)
+        contactSchema = self.fromModel(contact)
+        contactSchema = self.repository.save(contactSchema)
+        if contactSchema and contactSchema.id is None:
+            contactSchema = self.repository.findByFilter({"subject": contact.subject})
+
+        contact = self.fromSchema(contactSchema)
+        logger.debug(f"-create(), contact={contact}")
+        return contact
+
+    def bulkCreate(self, contacts: List[Contact]) -> List[Contact]:
+        """Crates a new contact"""
+        logger.debug(f"+bulkCreate({contacts})")
+        results = []
+        for contact in contacts:
+            result = self.create(contact)
+            results.append(result)
+
+        logger.debug(f"-bulkCreate(), results={results}")
+        return results
+
+    def update(self, contact: Contact) -> Contact:
+        """Updates the contact"""
+        logger.debug(f"+update({contact})")
+        contactSchemas = self.repository.findByFilter({"id": contact.id})
+        contactSchema = contactSchemas[0]
+        if contact.first_name and contactSchema.first_name != contact.first_name:
+            contactSchema.first_name = contact.first_name
+
+        if contact.last_name and contactSchema.last_name != contact.last_name:
+            contactSchema.last_name = contact.last_name
+
+        if contact.country and contactSchema.country != contact.country:
+            contactSchema.country = contact.country
+
+        if contact.subject and contactSchema.subject != contact.subject:
+            contactSchema.subject = contact.subject
+
+        self.repository.update(contactSchema)
+        contactSchema = self.repository.findByFilter({"id": contact.id})[0]
+        contact = self.fromSchema(contactSchema)
+        logger.debug(f"-update(), contact={contact}")
+        return contact
+
+    def delete(self, id: int) -> None:
+        logger.debug(f"+delete({id})")
+        # check record exists by id
+        if self.existsByFilter({"id": id}):
+            self.repository.delete(id)
+        else:
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Contact doesn't exist!")
+
+        logger.debug(f"-delete()")

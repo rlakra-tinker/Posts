@@ -11,7 +11,7 @@ from tests.base import AbstractTestCase
 logger = logging.getLogger(__name__)
 
 
-class TestAbstract(AbstractTestCase):
+class TestPydanticModel(AbstractTestCase):
 
     def test_abstract_pydantic_model(self):
         """Tests an AbstractEntity object"""
@@ -21,7 +21,7 @@ class TestAbstract(AbstractTestCase):
 
         # valid object and expected results
         self.assertTrue(isinstance(abstract_model, AbstractPydanticModel))
-        self.assertFalse(isinstance(abstract_model, TestAbstract))
+        self.assertFalse(isinstance(abstract_model, TestPydanticModel))
         self.assertTrue(issubclass(AbstractPydanticModel, object))
         self.assertFalse(issubclass(object, AbstractPydanticModel))
 
@@ -36,7 +36,7 @@ class TestAbstract(AbstractTestCase):
 
         # valid object and expected results
         self.assertTrue(isinstance(named_model, NamedModel))
-        self.assertFalse(isinstance(named_model, TestAbstract))
+        self.assertFalse(isinstance(named_model, TestPydanticModel))
         self.assertTrue(issubclass(NamedModel, object))
         self.assertFalse(issubclass(object, NamedModel))
 
@@ -57,7 +57,7 @@ class TestAbstract(AbstractTestCase):
 
         # valid object and expected results
         self.assertTrue(isinstance(named_model, NamedModel))
-        self.assertFalse(isinstance(named_model, TestAbstract))
+        self.assertFalse(isinstance(named_model, TestPydanticModel))
         self.assertTrue(issubclass(NamedModel, object))
         self.assertFalse(issubclass(object, NamedModel))
 
@@ -78,7 +78,7 @@ class TestAbstract(AbstractTestCase):
 
         # valid object and expected results
         self.assertTrue(isinstance(namedModel, NamedModel))
-        self.assertFalse(isinstance(namedModel, TestAbstract))
+        self.assertFalse(isinstance(namedModel, TestPydanticModel))
         self.assertTrue(issubclass(NamedModel, object))
         self.assertFalse(issubclass(object, NamedModel))
 
@@ -113,7 +113,7 @@ class TestAbstract(AbstractTestCase):
 
         # valid object and expected results
         self.assertTrue(isinstance(abstract_model, AbstractModel))
-        self.assertFalse(isinstance(abstract_model, TestAbstract))
+        self.assertFalse(isinstance(abstract_model, TestPydanticModel))
         self.assertTrue(issubclass(AbstractModel, object))
         self.assertFalse(issubclass(object, AbstractModel))
 
@@ -132,7 +132,7 @@ class TestAbstract(AbstractTestCase):
 
         self.assertTrue(isinstance(named_model, AbstractModel))
         self.assertTrue(isinstance(named_model, NamedModel))
-        self.assertFalse(isinstance(named_model, TestAbstract))
+        self.assertFalse(isinstance(named_model, TestPydanticModel))
         self.assertTrue(issubclass(NamedModel, AbstractModel))
         self.assertFalse(issubclass(AbstractModel, NamedModel))
 

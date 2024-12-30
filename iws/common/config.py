@@ -1,8 +1,10 @@
-import os
 import json
+import os
 import secrets
 
 from dotenv import load_dotenv
+
+from framework.enums import EnvType
 
 # loads .env files
 load_dotenv()
@@ -12,7 +14,6 @@ app_config = None
 
 class Config:
     __APP_CONFIG_FILE_PATH = 'tests/data/app-configs.json'
-    __FLASK_ENV = 'FLASK_ENV'
     __CORS_ENABLED = 'CORS_ENABLED'
 
     __HEADERS = 'headers'
@@ -35,7 +36,6 @@ class Config:
     __CLIENT_ID_KEY = 'CLIENT_ID_KEY'
     __CLIENT_ID_SECRET = 'CLIENT_ID_SECRET'
 
-    __TEST = 'test'
     __SECRET_KEY = 'SECRET_KEY'
     __AWS_SECRET_NAME = 'AWS_SECRET_NAME'
 
@@ -48,17 +48,25 @@ class Config:
 
     ENCRYPTION_KEY = None
     ENCRYPTION_NONCE = None
-    FLASK_ENV = os.getenv(__FLASK_ENV)
-    if FLASK_ENV == __TEST:
+
+    # env configs
+    CORS_ENABLED = bool(os.getenv(__CORS_ENABLED))
+
+    if EnvType.is_testing(EnvType.get_env_type()):
         # loads app's config file
         with open(__APP_CONFIG_FILE_PATH) as config_file:
             APP_CONFIGS = json.load(config_file)
 
         SECURITY_CONFIGS = APP_CONFIGS.get(__SECURITY_CONFIGS)
+
+        # Database Configs
+        DB_HOSTNAME = os.getenv(__DB_HOSTNAME)
+        DB_PORT = os.getenv(__DB_PORT)
+        DB_NAME = "".join(["test", os.getenv(__DB_NAME).title()])
+        DB_USERNAME = os.getenv(__DB_USERNAME)
+        DB_PASSWORD = os.getenv(__DB_PASSWORD)
     else:
         SEED = secrets.token_hex(16)
-        # env configs
-        CORS_ENABLED = bool(os.getenv(__CORS_ENABLED))
 
         # security configs
         SECURITY_CONFIGS = os.getenv(__SECURITY_CONFIGS)

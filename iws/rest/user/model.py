@@ -3,7 +3,6 @@
 #
 import logging
 from datetime import datetime
-from typing import Optional, List
 
 from framework.orm.pydantic.model import AbstractModel
 
@@ -16,7 +15,7 @@ class Person(AbstractModel):
     email: str = None
     first_name: str = None
     last_name: str = None
-    birth_date: Optional[datetime] = None
+    birth_date: str | None = None
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
@@ -37,12 +36,12 @@ class User(Person):
 
     user_name: str = None
     password: str = None
-    admin: Optional[bool] = False
-    last_seen: Optional[datetime] = None
-    avatar_url: Optional[str] = None
+    admin: bool | None = False
+    last_seen: datetime | None = None
+    avatar_url: str | None = None
 
-    # roles: Optional[List["Role"]] = None
-    addresses: Optional[List["Address"]] = None
+    # # roles: Optional[List["Role"]] = None
+    # addresses: List["Address"] | None = None
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
@@ -51,9 +50,9 @@ class User(Person):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return "{} <id={}, email={}, first_name={}, last_name={}, birth_date={}, user_name={}, admin={}, last_seen={}, avatar_url={}, addresses={}>".format(
+        return "{} <id={}, email={}, first_name={}, last_name={}, birth_date={}, user_name={}, admin={}, last_seen={}, avatar_url={}>".format(
             type(self).__name__, self.id, self.email, self.first_name, self.last_name, self.birth_date, self.user_name,
-            self.admin, self.last_seen, self.avatar_url, self.addresses)
+            self.admin, self.last_seen, self.avatar_url)
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -63,9 +62,9 @@ class User(Person):
 class Address(AbstractModel):
     """Address contains properties specific to this object."""
 
-    user_id: int = None
+    # user_id: int = None
     street1: str = None
-    street2: Optional[str] = None
+    street2: str | None = None
     city: str = None
     state: str = None
     country: str = None

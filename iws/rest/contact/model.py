@@ -1,10 +1,16 @@
 #
 # Author: Rohtash Lakra
 #
+import logging
+
 from framework.orm.pydantic.model import AbstractModel
+
+logger = logging.getLogger(__name__)
 
 
 class Contact(AbstractModel):
+    """Contact contains properties specific to this object."""
+
     first_name: str = None
     last_name: str = None
     country: str = None
@@ -12,7 +18,14 @@ class Contact(AbstractModel):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.get_id()}, first_name={self.first_name}, last_name={self.last_name}, country={self.country}, subject={self.subject}>"
+        return ("{} <id={}, first_name={}, last_name={}, country={}, subject={}, {}>"
+                .format(type(self).__name__,
+                        self.id,
+                        self.first_name,
+                        self.last_name,
+                        self.country,
+                        self.subject,
+                        self._auditable()))
 
     # def __repr__(self) -> str:
     #     """Returns the string representation of this object"""

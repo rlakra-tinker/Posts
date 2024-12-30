@@ -11,7 +11,8 @@ from framework.orm.sqlalchemy.schema import BaseSchema
 
 
 class PersonSchema(BaseSchema):
-    """[Person]"""
+    """ PersonSchema represents the person object """
+
     __abstract__ = True
 
     # not Optional[], therefore will be NOT NULL
@@ -21,7 +22,7 @@ class PersonSchema(BaseSchema):
     # not Optional[], therefore will be NOT NULL
     last_name: Mapped[str] = mapped_column(String(64))
     # not Optional[], therefore will be NOT NULL
-    birth_date: Mapped[datetime] = mapped_column(nullable=False)
+    birth_date: Mapped[str] = mapped_column(String(10), nullable=False)
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -33,9 +34,8 @@ class PersonSchema(BaseSchema):
 
 
 class UserSchema(PersonSchema):
-    """
-    [users] Table
-    """
+    """ UserSchema represents [users] Table """
+
     __tablename__ = "users"
 
     # not Optional[], therefore will be NOT NULL
@@ -48,7 +48,7 @@ class UserSchema(PersonSchema):
     # not Optional[], therefore will be NOT NULL
     last_seen: Mapped[datetime] = mapped_column(insert_default=func.now())
     # not Optional[], therefore will be NOT NULL
-    avatar_url: Mapped[str] = mapped_column(String(128))
+    avatar_url: Mapped[Optional[str]] = mapped_column(String(128))
 
     # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
@@ -74,9 +74,8 @@ class UserSchema(PersonSchema):
 
 
 class UserRoleSchema(BaseSchema):
-    """
-    [user_roles] Table
-    """
+    """ UserRoleSchema represents [user_roles] Table """
+
     __tablename__ = "user_roles"
 
     # foreign key to "roles.id" and "users.id" are added
@@ -84,6 +83,7 @@ class UserRoleSchema(BaseSchema):
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
     # not Optional[], therefore will be NOT NULL
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
     # not Optional[], therefore will be NOT NULL
     active: Mapped[bool] = True
 
@@ -97,9 +97,8 @@ class UserRoleSchema(BaseSchema):
 
 
 class AddressSchema(BaseSchema):
-    """
-    [addresses] Table
-    """
+    """ AddressSchema represents [addresses] Table """
+
     __tablename__ = "addresses"
 
     # foreign key to "users.id" is added

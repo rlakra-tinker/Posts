@@ -51,7 +51,9 @@ class WebApp:
         logger.debug(f"Running Application [{self.app.name}] on version [{flask_version}] with testMode [{test_mode}]")
         logger.info(f"ENV_TYPE={EnvType.get_env_type()}")
         # Load the environment variables
-        env_file_path = self.path.cwd().joinpath('.env')  # self.path.cwd() / '.env'
+        dotEnvFileName = ".env.test" if test_mode or EnvType.is_testing(EnvType.get_env_type()) else ".env"
+        logger.info(f"dotEnvFileName={dotEnvFileName}")
+        env_file_path = self.path.cwd().joinpath(dotEnvFileName)  # self.path.cwd() / '.env'
         logger.debug(f"env_file_path={env_file_path}")
 
         # loads .env file and updates the local env object
@@ -60,6 +62,9 @@ class WebApp:
         self.set_env(self.__PORT, os.getenv(self.__PORT, '8080'))
         self.set_env(self.__DEBUG, os.getenv(self.__DEBUG, False))
         self.set_env(KeyEnum.ENV_TYPE.name, EnvType.get_env_type())
+        if test_mode or EnvType.is_testing(EnvType.get_env_type()):
+            self.set_env(KeyEnum.ENV_TYPE.name, EnvType.TEST.name)
+
         self.set_env(KeyEnum.LOG_FILE_NAME.name, os.getenv(KeyEnum.LOG_FILE_NAME.name, 'iws.log'))
         logger.debug(f"environment={self.environment}")
 
@@ -104,15 +109,24 @@ class WebApp:
         self.__load_env(test_mode=test_mode)
         # load app's configs
         app.config.from_object(config_class)
+        if test_mode or EnvType.is_testing(EnvType.get_env_type()):
+            app.config.update({
+                KeyEnum.ENV_TYPE.name: EnvType.TEST.name,
+                "TESTING": True,
+                "DB_NAME": "testPosts.db",
+            })
+
+        with self.app.app_context():
+            current_app.logger.debug(f"app.config={app.config}")
 
         # Check CORS Enabled
         if Config.CORS_ENABLED:
             CORS(app)
 
         # Initialize/Register Flask Extensions/Components, if any
-        if not test_mode:
-            connector.init(app)
-            connector.init_db({KeyEnum.DB_TYPE.name: KeyEnum.SQLALCHEMY.name})
+        # if not test_mode:
+        connector.init(app)
+        connector.init_db({KeyEnum.DB_TYPE.name: KeyEnum.SQLALCHEMY.name})
 
         # Initialize/Register Default Error Handlers, if any
 

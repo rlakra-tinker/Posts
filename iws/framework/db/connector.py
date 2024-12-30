@@ -8,7 +8,7 @@ from typing import Iterable
 
 import click
 from flask import Flask, g, current_app
-from sqlalchemy import MetaData, Engine
+from sqlalchemy import Engine
 from sqlalchemy.orm import Session
 
 from common.config import Config
@@ -109,7 +109,7 @@ class SQLite3Connector(DatabaseConnector):
             #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
             # read db-name from app's config
             if not self.db_name:
-                self.db_name = Config.DB_NAME
+                self.db_name = self.app.config.get("DB_NAME")
                 if not self.db_name.endswith(".db"):
                     self.db_name = self.db_name + '.db'
 

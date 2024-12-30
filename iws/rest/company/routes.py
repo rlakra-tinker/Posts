@@ -12,35 +12,32 @@ from framework.exception import DuplicateRecordException, ValidationException, N
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
-from rest.contact.model import Contact
-from rest.contact.service import ContactService
-from rest.contact.v1 import bp as bp_contact_v1
+from rest.company.model import Company
+from rest.company.service import CompanyService
+from rest.company.v1 import bp as bp_company_v1
 
 logger = logging.getLogger(__name__)
 
-contactService = ContactService()
+companyService = CompanyService()
 
 
-@bp_contact_v1.post("/")
+@bp_company_v1.post("/")
 def create():
     logger.debug(f"+create() => request={request}, args={request.args}, is_json:{request.is_json}")
+    # post_data = request.form.to_dict(flat=False)
     try:
         if request.is_json:
             body = request.get_json()
-        elif request.form:
-            body = request.form.to_dict()
+            logger.debug(f"body={body}")
+            company = Company(**body)
+            logger.debug(f"company={company}")
 
-        logger.debug(f"body={body}")
-        contact = Contact(**body)
-        logger.debug(f"contact={contact}")
-        contactService.validate(SchemaOperation.CREATE, contact)
-        contact = contactService.create(contact)
-        logger.debug(f"contact={contact}")
-
+        companyService.validate(SchemaOperation.CREATE, company)
+        company = companyService.create(company)
+        logger.debug(f"company={company}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Contact is successfully created.")
-        response.addInstance(contact)
-        # response = response.to_json()
+        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Company is successfully created.")
+        response.addInstance(company)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except DuplicateRecordException as ex:
@@ -52,31 +49,30 @@ def create():
     return make_response(response.to_json(), response.status)
 
 
-@bp_contact_v1.post("/batch")
+@bp_company_v1.post("/batch")
 def bulkCreate():
     logger.debug(f"+bulkCreate() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
-        roles = []
+        companies = []
         if request.is_json:
             body = request.get_json()
             logger.debug(f"type={type(body)}, body={body}")
             if isinstance(body, list):
-                roles = [Contact(**entry) for entry in body]
+                companies = [Company(**entry) for entry in body]
             elif isinstance(body, dict):
-                roles.append(Contact(**body))
+                companies.append(Company(**body))
             else:
                 # handle form fields here.
                 body = request.form.to_dict()
-                roles.append(Contact(**body))
+                companies.append(Company(**body))
 
-        logger.debug(f"roles={roles}")
-        contactService.validates(SchemaOperation.CREATE, roles)
-        roles = contactService.bulkCreate(roles)
-        logger.debug(f"roles={roles}")
-
+        logger.debug(f"companies={companies}")
+        companyService.validates(SchemaOperation.CREATE, companies)
+        companies = companyService.bulkCreate(companies)
+        logger.debug(f"companies={companies}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Roles are successfully created.")
-        response.addInstances(roles)
+        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Companys are successfully created.")
+        response.addInstances(companies)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except DuplicateRecordException as ex:
@@ -88,16 +84,19 @@ def bulkCreate():
     return make_response(response.to_json(), response.status)
 
 
-@bp_contact_v1.get("/")
+@bp_company_v1.get("/")
 def get():
     logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
-        roles = contactService.findByFilter(request.args)
+        if len(request.args) == 1:
+            return companyService.findById(request.args.get('id'))
+        else:
+            companies = companyService.findByFilter(request.args)
 
         # build success response
         response = ResponseModel.buildResponse(HTTPStatus.OK)
-        if roles:
-            response.addInstances(roles)
+        if companies:
+            response.addInstances(companies)
         else:
             response.message = "No Records Exist!"
     except Exception as ex:
@@ -107,23 +106,23 @@ def get():
     return make_response(response.to_json(), response.status)
 
 
-@bp_contact_v1.put("/")
+@bp_company_v1.put("/")
 def update():
     logger.debug(f"+update() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
         if request.is_json:
             body = request.get_json()
             logger.debug(f"body={body}")
-            contact = Contact(**body)
-            logger.debug(f"contact={contact}")
+            company = Company(**body)
+            logger.debug(f"company={company}")
 
-        contactService.validate(SchemaOperation.UPDATE, contact)
-        contact = contactService.update(contact)
-        logger.debug(f"contact={contact}")
+        companyService.validate(SchemaOperation.UPDATE, company)
+        company = companyService.update(company)
+        logger.debug(f"company={company}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Contact is successfully updated.")
-        response.addInstance(contact)
+        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Company is successfully updated.")
+        response.addInstance(company)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
@@ -133,19 +132,18 @@ def update():
     return make_response(response.to_json(), response.status)
 
 
-@bp_contact_v1.delete("/<id>")
+@bp_company_v1.delete("/<id>")
 def delete(id: int):
     logger.debug(f"+delete({id}) => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
         if request.is_json:
             body = request.get_json()
             logger.debug(f"body={body}")
-            contact = Contact(**body)
-            logger.debug(f"contact={contact}")
-
-        contactService.delete(id)
+            company = Company(**body)
+            logger.debug(f"company={company}")
+        companyService.delete(id)
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Contact is successfully deleted.")
+        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Company is successfully deleted.")
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:

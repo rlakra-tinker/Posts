@@ -3,21 +3,25 @@
 #
 
 import logging
-from typing import Dict, Any
 
 from pydantic import model_validator
 
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import NamedModel
 
 logger = logging.getLogger(__name__)
 
 
-class Role(AbstractModel):
+class Company(NamedModel):
     """Role contains properties specific to this object."""
 
-    name: str = None
+    # not Optional[], therefore will be NOT NULL except for the parent entity
+    parent_id: int = None
+
+    # not Optional[], therefore will be NOT NULL
+    # branches = list[object]
+
+    # not Optional[], therefore will be NOT NULL
     active: bool = False
-    meta_data: Dict[str, Any] | None = None
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
@@ -37,13 +41,8 @@ class Role(AbstractModel):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
-                .format(type(self).__name__,
-                        self.id,
-                        self.name,
-                        self.active,
-                        self.meta_data,
-                        self._auditable()))
+        return ("{} <id={}, parent_id={}, name={}, active={}, {}>"
+                .format(type(self).__name__, self.id, self.parent_id, self.name, self.active, self._auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
