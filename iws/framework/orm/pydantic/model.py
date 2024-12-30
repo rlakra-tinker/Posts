@@ -111,7 +111,7 @@ class AbstractModel(AbstractPydanticModel):
 
     def _auditable(self) -> str:
         """Returns the string representation of this object"""
-        return f"created_at={self.get_created_at()}, updated_at={self.get_updated_at()}>"
+        return f"created_at={self.get_created_at()}, updated_at={self.get_updated_at()}"
 
     def load_and_not_raise(self, data):
         try:

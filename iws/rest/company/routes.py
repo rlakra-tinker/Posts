@@ -56,6 +56,7 @@ def bulkCreate():
         if request.is_json:
             body = request.get_json()
             logger.debug(f"type={type(body)}, body={body}")
+
             if isinstance(body, list):
                 companies = [Company(**entry) for entry in body]
             elif isinstance(body, dict):
@@ -89,10 +90,11 @@ def get():
     logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
         companyService = CompanyService()
-        if len(request.args) == 1:
-            return companyService.findById(request.args.get('id'))
-        else:
-            companies = companyService.findByFilter(request.args)
+        # if len(request.args) == 1:
+        #     return companyService.findById(request.args.get('id'))
+        # else:
+        #     companies = companyService.findByFilter(request.args)
+        companies = companyService.findByFilter(request.args)
 
         # build success response
         response = ResponseModel.buildResponse(HTTPStatus.OK)
@@ -126,6 +128,8 @@ def update():
         response = ResponseModel(status=HTTPStatus.OK.status_code, message="Company is successfully updated.")
         response.addInstance(company)
     except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)

@@ -372,7 +372,7 @@ class BaseSchema(DeclarativeBase):
 
     def auditable(self) -> str:
         """Returns the string representation of this object"""
-        return f"created_at={self.created_at}, updated_at={self.updated_at}>"
+        return f"created_at={self.created_at}, updated_at={self.updated_at}"
 
     def to_json(self) -> Any:
         return {column.name: getattr(self, column.name) for column in self.__table__.columns}

@@ -140,11 +140,14 @@ class CompanyService(AbstractService):
         if company.name and companySchema.name != company.name:
             companySchema.name = company.name
 
+        if company.parent_id and companySchema.parent_id != company.parent_id:
+            companySchema.parent_id = company.parent_id
+
         if company.active and companySchema.active != company.active:
             companySchema.active = company.active
 
-        if company.meta_data and companySchema.meta_data != company.meta_data:
-            companySchema.meta_data = company.meta_data
+        if company.branches and companySchema.branches != company.branches:
+            companySchema.branches = company.branches
 
         # companySchema = self.fromModel(oldRole)
         self.repository.update(companySchema)

@@ -15,11 +15,9 @@ class Company(NamedModel):
     """Role contains properties specific to this object."""
 
     # not Optional[], therefore will be NOT NULL except for the parent entity
-    parent_id: int = None
-
+    parent_id: int | None = None
     # not Optional[], therefore will be NOT NULL
-    # branches = list[object]
-
+    branches: list[object] | None = None
     # not Optional[], therefore will be NOT NULL
     active: bool = False
 
