@@ -3,6 +3,7 @@
 #
 
 import logging
+from typing import Optional
 
 from pydantic import model_validator
 
@@ -17,7 +18,7 @@ class Company(NamedModel):
     # not Optional[], therefore will be NOT NULL except for the parent entity
     parent_id: int | None = None
     # not Optional[], therefore will be NOT NULL
-    branches: list[object] | None = None
+    branches: Optional["Company"] = None
     # not Optional[], therefore will be NOT NULL
     active: bool = False
 

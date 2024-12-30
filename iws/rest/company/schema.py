@@ -3,6 +3,7 @@
 # References:
 # - https://docs.sqlalchemy.org/en/20/orm/self_referential.html
 #
+from typing import Optional
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -17,12 +18,11 @@ class CompanySchema(NamedSchema):
 
     # foreign key to "companies.id" is added
     # not Optional[], therefore will be NOT NULL except for the parent entity
-    # parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("companies.id"))
-    parent_id: Mapped[int | None] = mapped_column(ForeignKey("companies.id"))
+    parent_id: Mapped[Optional[int]] = mapped_column(ForeignKey("companies.id"))
 
     # not Optional[], therefore will be NOT NULL
     # the parent and its immediate child collection or reference can be populated from a single SQL statement
-    branches = relationship("CompanySchema", lazy="joined", join_depth=2)
+    branches: Mapped[Optional["CompanySchema"]] = relationship("CompanySchema", lazy="joined", join_depth=2)
 
     # not Optional[], therefore will be NOT NULL
     active: Mapped[bool] = mapped_column(unique=False, default=False)
