@@ -71,7 +71,7 @@ def register():
         response = ResponseModel.buildResponseWithException(ex)
     except DuplicateRecordException as ex:
         response = ResponseModel.buildResponseWithException(ex)
-        return redirect(url_for("iws.api.login"), response)
+        # return redirect(url_for("iws.api.login"), response)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 

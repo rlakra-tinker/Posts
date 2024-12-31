@@ -44,7 +44,7 @@ class AbstractPydanticModel(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     def getAllFields(self, alias=False) -> list:
@@ -64,12 +64,16 @@ class AbstractPydanticModel(BaseModel):
 
     def toJSONObject(self) -> Any:
         # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump(mode="json")
+
+    def getClassName(self) -> str:
+        """Returns the name of the class."""
+        return type(self).__name__
 
     def __str__(self):
         """Returns the string representation of this object."""
-        return f"{type(self).__name__}"
+        return self.getClassName()
 
     def __repr__(self):
         """Returns the string representation of this object."""
@@ -97,7 +101,7 @@ class AbstractModel(AbstractPydanticModel):
 
     @model_validator(mode="after")
     def post_validator(self, values):
-        logger.debug(f"post_validator({values})")
+        logger.debug(f"post_validator() type={type(self)} => {values}")
         return self
 
     def get_id(self):
@@ -130,7 +134,7 @@ class AbstractModel(AbstractPydanticModel):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.get_id()}, {self._auditable()}>"
+        return f"{self.getClassName()} <id={self.get_id()}, {self._auditable()}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -169,7 +173,7 @@ class NamedModel(AbstractModel):
 
     def __str__(self):
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.get_id()}, name={self.get_name()}>"
+        return f"{self.getClassName()} <id={self.get_id()}, name={self.get_name()}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -184,7 +188,7 @@ class ErrorModel(AbstractPydanticModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     @staticmethod
@@ -225,7 +229,7 @@ class ErrorModel(AbstractPydanticModel):
 
     def __str__(self):
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <status={self.status}, message={self.message}, debug_info={self.debug_info}>"
+        return f"{self.getClassName()} <status={self.status}, message={self.message}, debug_info={self.debug_info}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -241,7 +245,7 @@ class ResponseModel(AbstractPydanticModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         jsonObjects = {field: getattr(self, field) for field in self.getAllFields()}
         # logger.debug(f"jsonObjects type={type(jsonObjects)}, jsonObjects={jsonObjects}")
         # parse list of data to json
@@ -279,7 +283,7 @@ class ResponseModel(AbstractPydanticModel):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <status={self.status}, data={self.data}, errors={self.errors}>"
+        return f"{self.getClassName()} <status={self.status}, data={self.data}, errors={self.errors}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

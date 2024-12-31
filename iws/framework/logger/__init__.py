@@ -30,7 +30,7 @@ DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
 DATE_FORMAT_MSEC = "%Y-%m-%d %H:%M:%S.%f,%03d"
 
 # Configure app default loggers
-logging.basicConfig(level=LOG_LEVEL, format=DEFAULT_LOG_FORMAT, force=True)
+logging.basicConfig(level=LOG_LEVEL, format=DETAILED_LOG_FORMAT, force=True)
 logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
 # datetime.today().strftime("%Y-%m-%d %H:%M:%S.%f %z")[:23]
 # logging.Formatter(fmt=LOG_FORMAT, datefmt=DATE_FORMAT)
@@ -141,7 +141,7 @@ class DefaultLogger(logging.LoggerAdapter):
         # update log handlers with customer json formatter
         for handler in app.logger.handlers:
             # all log formatter and request-id filter
-            handler.setFormatter(LogJSONFormatter(fmt=DEFAULT_LOG_FORMAT))
+            handler.setFormatter(LogJSONFormatter(fmt=DETAILED_LOG_FORMAT))
             handler.addFilter(RequestIDLogFilter())
             handler.addFilter(SensitiveDataFilter())
 
@@ -154,11 +154,11 @@ class DefaultLogger(logging.LoggerAdapter):
             logFileHandler = logging.FileHandler(logFileName)
             logger.debug(f"logFileName={logFileName}, logFileHandler=[{logFileHandler}]")
             # set format and filters
-            logFileHandler.setFormatter(LogJSONFormatter(fmt=DEFAULT_LOG_FORMAT))
+            logFileHandler.setFormatter(LogJSONFormatter(fmt=DETAILED_LOG_FORMAT))
             logFileHandler.addFilter(RequestIDLogFilter())
             logFileHandler.addFilter(SensitiveDataFilter())
             # logging.getLogger().addHandler(logFileHandler)
-            logging.basicConfig(filename=logFileName, encoding=UTF_8, level=LOG_LEVEL, format=DEFAULT_LOG_FORMAT)
+            logging.basicConfig(filename=logFileName, encoding=UTF_8, level=LOG_LEVEL, format=DETAILED_LOG_FORMAT)
             requests.packages.urllib3.add_stderr_logger()
 
     def process(self, msg, kwargs):

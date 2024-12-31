@@ -2,9 +2,9 @@
 # Author: Rohtash Lakra
 #
 from datetime import datetime
-from typing import List, Optional
+from typing import Optional, List
 
-from sqlalchemy import String, ForeignKey, func
+from sqlalchemy import String, ForeignKey, func, PickleType, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from framework.orm.sqlalchemy.schema import BaseSchema
@@ -26,7 +26,34 @@ class PersonSchema(BaseSchema):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.id!r}, email={self.email!r}, first_name={self.first_name!r}, last_name={self.last_name!r}>"
+        return ("{} <id={}, email={}, first_name={}, last_name={}, {}>"
+                .format(self.getClassName(), self.id, self.email, self.first_name, self.last_name,
+                        self.auditable()))
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
+
+
+class UserRoleSchema(BaseSchema):
+    """ UserRoleSchema represents [user_roles] Table """
+
+    __tablename__ = "user_roles"
+
+    # foreign key to "roles.id" and "users.id" are added
+    # not Optional[], therefore will be NOT NULL
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    # not Optional[], therefore will be NOT NULL
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    # not Optional[], therefore will be NOT NULL
+    active: Mapped[bool] = True
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return ("{} <id={}, role_id={}, user_id={}, active={}, {}>"
+                .format(self.getClassName(), self.id, self.role_id, self.user_id, self.active,
+                        self.auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -61,35 +88,21 @@ class UserSchema(PersonSchema):
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
     # addresses: Mapped[List["Address"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     # Optional[], therefore will be NULL
+    # Define the one-to-many relationship
     addresses: Mapped[Optional[List["AddressSchema"]]] = relationship(back_populates="user",
                                                                       cascade="all, delete-orphan")
 
-    def __str__(self) -> str:
-        """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.id!r}, user_name={self.user_name!r}, email={self.email!r}, first_name={self.first_name!r}, last_name={self.last_name!r}, admin={self.admin!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+    # address: Mapped[Optional["AddressSchema"]] = relationship("AddressSchema", uselist=False, lazy="joined")
+    # addresses: Mapped[List["AddressSchema"]] = relationship(back_populates="user")
 
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
-
-
-class UserRoleSchema(BaseSchema):
-    """ UserRoleSchema represents [user_roles] Table """
-
-    __tablename__ = "user_roles"
-
-    # foreign key to "roles.id" and "users.id" are added
-    # not Optional[], therefore will be NOT NULL
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
-    # not Optional[], therefore will be NOT NULL
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-
-    # not Optional[], therefore will be NOT NULL
-    active: Mapped[bool] = True
+    # Define the one-to-many relationship
+    # sessions: Mapped[List["UserSessionSchema"]] = relationship(back_populates="user")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.id!r}, role_id={self.role_id!r}, user_id={self.user_id!r}, active={self.active!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return ("{} <id={}, email={}, user_name={}, first_name={}, last_name={}, admin={}, {}>"
+                .format(self.getClassName(), self.id, self.email, self.user_name, self.first_name,
+                        self.last_name, self.admin, self.auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -104,8 +117,7 @@ class AddressSchema(BaseSchema):
     # foreign key to "users.id" is added
     # not Optional[], therefore will be NOT NULL
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-
-    # not Optional[], therefore will be NOT NULL
+    # Define the many-to-one relationship
     user: Mapped["UserSchema"] = relationship(back_populates="addresses")
 
     # not Optional[], therefore will be NOT NULL
@@ -123,7 +135,40 @@ class AddressSchema(BaseSchema):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.id!r}, user_id={self.user_id!r}, street1={self.street1!r}, street2={self.street2!r}, city={self.city!r}, state={self.state!r}, country={self.country!r}, zip={self.zip!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return ("{} <id={}, user_id={}, street1={}, street2={}, city={}, state={}, country={}, zip={}, {}>"
+                .format(self.getClassName(), self.id, self.user_id, self.street1, self.street2, self.city,
+                        self.state, self.country, self.zip, self.auditable()))
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
+
+
+class UserSessionSchema(BaseSchema):
+    """ UserSessionSchema represents [user_sessions] Table """
+
+    __tablename__ = "user_sessions"
+
+    # foreign key to "users.id" is added
+    # not Optional[], therefore will be NOT NULL
+    # user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    # Define the many-to-one relationship
+    # user: Mapped["UserSchema"] = relationship(back_populates="sessions")
+
+    # not Optional[], therefore will be NOT NULL
+    hashed_auth_token: Mapped[str] = mapped_column(String(128))
+    # Optional[], therefore will be NULL
+    expire_at: Mapped[Optional[str]] = mapped_column(String(64))
+    # not Optional[], therefore will be NOT NULL
+    platform: Mapped[str] = mapped_column(String(64))
+    # Optional[], therefore will be NULL
+    meta_data: Mapped[Optional[PickleType]] = mapped_column(JSON)
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return ("{} <id={}, user_id={}, hashed_auth_token={}, expire_at={}, platform={}, meta_data={}, {}>"
+                .format(self.getClassName(), self.id, self.user_id, self.hashed_auth_token, self.expire_at,
+                        self.platform, self.meta_data, self.auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

@@ -32,6 +32,10 @@ class AbstractEntity(AbstractJSONHandler):
     # def __getitem__(self, item):
     #     return self.__class__[item]
 
+    def getClassName(self) -> str:
+        """Returns the name of the class."""
+        return type(self).__name__
+
     def json(self):
         """Serialize this object as a JSON formatted stream to fp"""
         return self.default(self)
@@ -46,7 +50,7 @@ class AbstractEntity(AbstractJSONHandler):
 
     def __str__(self):
         """Returns the string representation of this object."""
-        return f"{type(self).__name__}"
+        return self.getClassName()
 
     def __repr__(self):
         """Returns the string representation of this object."""
@@ -71,7 +75,7 @@ class BaseEntity(AbstractEntity):
 
     def __str__(self):
         """Returns the string representation of this object."""
-        return f"{type(self).__name__} <id={self.get_id()}>"
+        return f"{self.getClassName()} <id={self.get_id()}>"
 
     def __repr__(self):
         """Returns the string representation of this object."""
@@ -92,7 +96,7 @@ class NamedEntity(BaseEntity):
 
     def __str__(self):
         """Returns the string representation of this object."""
-        return f"{type(self).__name__} <id={self.get_id()}, name={self.name}>"
+        return f"{self.getClassName()} <id={self.get_id()}, name={self.name}>"
 
     def __repr__(self):
         """Returns the string representation of this object."""
@@ -116,7 +120,7 @@ class ErrorEntity(AbstractEntity):
 
     def __str__(self):
         """Returns the string representation of this object."""
-        return f"{type(self).__name__} <status={self.status}, message={self.message}, exception={self.exception}>"
+        return f"{self.getClassName()} <status={self.status}, message={self.message}, exception={self.exception}>"
         # return f"{type(self)} <status={self.status}, message={self.message}>"
 
     def __repr__(self):
@@ -153,7 +157,7 @@ class ErrorResponse(AbstractEntity):
 
     def __str__(self):
         """Returns the string representation of this object."""
-        return f"{type(self).__name__} <error={self.error}>"
+        return f"{self.getClassName()} <error={self.error}>"
 
     def __repr__(self):
         """Returns the string representation of this object."""

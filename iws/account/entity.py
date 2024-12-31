@@ -21,4 +21,4 @@ class User(BaseEntity):
         self.admin = is_admin
 
     def __repr__(self) -> str:
-        return f"{type(self).__name__} <id={self.id}, user_name={self.user_name}, first_name={self.first_name}, last_name={self.last_name}, email={self.email}, admin={self.admin}>"
+        return f"{self.getClassName()} <id={self.id}, user_name={self.user_name}, first_name={self.first_name}, last_name={self.last_name}, email={self.email}, admin={self.admin}>"

@@ -21,7 +21,7 @@ class Role(AbstractModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     @classmethod
@@ -38,7 +38,7 @@ class Role(AbstractModel):
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
-                .format(type(self).__name__,
+                .format(self.getClassName(),
                         self.id,
                         self.name,
                         self.active,

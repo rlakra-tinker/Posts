@@ -19,7 +19,7 @@ class Person(AbstractModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     def __str__(self) -> str:
@@ -40,19 +40,19 @@ class User(Person):
     last_seen: datetime | None = None
     avatar_url: str | None = None
 
-    # # roles: Optional[List["Role"]] = None
-    # addresses: List["Address"] | None = None
+    # roles: Optional[List["Role"]] = None
+    # addresses: Optional[List["Address"]] = None
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return "{} <id={}, email={}, first_name={}, last_name={}, birth_date={}, user_name={}, admin={}, last_seen={}, avatar_url={}>".format(
-            type(self).__name__, self.id, self.email, self.first_name, self.last_name, self.birth_date, self.user_name,
-            self.admin, self.last_seen, self.avatar_url)
+        return ("{} <id={}, email={}, user_name={}, first_name={}, last_name={}, admin={}, {}>"
+                .format(self.getClassName(), self.id, self.email, self.user_name, self.first_name,
+                        self.last_name, self.admin, self._auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -62,7 +62,8 @@ class User(Person):
 class Address(AbstractModel):
     """Address contains properties specific to this object."""
 
-    # user_id: int = None
+    user_id: int = None
+    user: User = None
     street1: str = None
     street2: str | None = None
     city: str = None
@@ -72,12 +73,12 @@ class Address(AbstractModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.id!r}, user_id={self.user_id!r}, street1={self.street1!r}, street2={self.street2!r}, city={self.city!r}, state={self.state!r}, country={self.country!r}, zip={self.zip!r}, {super()._auditable()}>"
+        return f"{self.getClassName()} <id={self.id!r}, user_id={self.user_id!r}, street1={self.street1!r}, street2={self.street2!r}, city={self.city!r}, state={self.state!r}, country={self.country!r}, zip={self.zip!r}, {super()._auditable()}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

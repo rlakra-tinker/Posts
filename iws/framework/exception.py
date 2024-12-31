@@ -40,7 +40,7 @@ class AbstractException(Exception):
 
     # def __str__(self) -> str:
     #     """Returns the string representation of this object"""
-    #     return f"{type(self).__name__} <http_status={self.http_status!r}, messages={self.messages!r}>"
+    #     return f"{self.getClassName()} <http_status={self.http_status!r}, messages={self.messages!r}>"
     #
     # def __repr__(self) -> str:
     #     """Returns the string representation of this object"""

@@ -1,7 +1,7 @@
 import logging
 import unittest
 
-from framework.orm.repository import createEngine
+from framework.db.connector import createEngine, createDatabase
 from framework.orm.sqlalchemy.repository import AbstractRepository, SqlAlchemyRepository
 
 logger = logging.getLogger(__name__)
@@ -36,6 +36,7 @@ class RepositoryTest(unittest.TestCase):
 
         # repository object
         engine = createEngine("sqlite:///testPosts.db", True)
+        createDatabase(engine)
         repository = SqlAlchemyRepository(engine=engine)
         self.assertIsNotNone(repository)
         logger.debug(repository)

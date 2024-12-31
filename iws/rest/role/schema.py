@@ -22,7 +22,7 @@ class RoleSchema(NamedSchema):
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
-                .format(type(self).__name__,
+                .format(self.getClassName(),
                         self.id,
                         self.name,
                         self.active,

@@ -24,7 +24,7 @@ class Company(NamedModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
-        logger.debug(f"{type(self).__name__} => type={type(self)}, object={str(self)}")
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
     @classmethod
@@ -41,7 +41,7 @@ class Company(NamedModel):
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return ("{} <id={}, parent_id={}, name={}, active={}, {}>"
-                .format(type(self).__name__, self.id, self.parent_id, self.name, self.active, self._auditable()))
+                .format(self.getClassName(), self.id, self.parent_id, self.name, self.active, self._auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

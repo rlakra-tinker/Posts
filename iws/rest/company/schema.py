@@ -30,7 +30,7 @@ class CompanySchema(NamedSchema):
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return ("{} <id={}, parent_id={}, name={}, active={}, {}>"
-                .format(type(self).__name__, self.id, self.parent_id, self.name, self.active, self.auditable()))
+                .format(self.getClassName(), self.id, self.parent_id, self.name, self.active, self.auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

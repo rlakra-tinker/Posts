@@ -9,9 +9,9 @@ import logging
 from datetime import datetime
 from enum import unique, auto
 from math import ceil
-from typing import Any, Union
+from typing import Any
 
-from sqlalchemy import func, orm, String, event, inspect, Engine, URL, create_engine
+from sqlalchemy import func, orm, String, event, inspect
 from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.orm.query import attributes
 
@@ -40,6 +40,8 @@ class Pagination(object):
     """
 
     def __init__(self, query, page: int, page_size: int, total: int, items):
+        logger.debug(f"+Pagination({query}, {page}, {page_size}, {total})")
+
         #: The query object that was used to create this pagination object.
         self.query = query
         #: The current page number (1 indexed).
@@ -63,6 +65,7 @@ class Pagination(object):
         self.next_page = self.page + 1
         #: True if a next page exists.
         self.has_next = self.page < self.pages
+        logger.debug(f"-Pagination()")
 
     def prev(self, throw_error: bool = False):
         """Returns a `Pagination` object for the previous page."""
@@ -92,6 +95,7 @@ class BaseQuery(orm.Query):
     def paginate(self, page: int, page_size: int = 20, throw_error: bool = True):
         """Return `Pagination` instance using already defined query parameters.
         """
+        logger.debug(f"+paginate({page}, {page_size}, {throw_error})")
         if throw_error and page < 1:
             raise IndexError
 
@@ -108,7 +112,9 @@ class BaseQuery(orm.Query):
         else:
             total = self.order_by(None).count()
 
-        return Pagination(self, page, page_size, total, items)
+        pagination = Pagination(self, page, page_size, total, items)
+        logger.debug(f"-paginate(), pagination={pagination}")
+        return pagination
 
 
 class QueryProperty(object):
@@ -256,7 +262,9 @@ class AbstractSchema(Auditable):
         Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
         A constructor similar to that supplied by Declarative is illustrated:
         """
+        logger.debug(f"+{self.getClassName()}({kwargs})")
         for key in kwargs:
+            logger.debug(f"{key}={kwargs[key]}")
             setattr(self, key, kwargs[key])
 
     def set_attrs(self, **kwargs):
@@ -264,7 +272,9 @@ class AbstractSchema(Auditable):
         Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
         A constructor similar to that supplied by Declarative is illustrated:
         """
+        logger.debug(f"set_attrs({kwargs})")
         for key in kwargs:
+            logger.debug(f"{key}={kwargs[key]}")
             setattr(self, key, kwargs[key])
 
     # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
@@ -273,9 +283,13 @@ class AbstractSchema(Auditable):
     # an instance of `query_class`. Can be used to query the database for instances of this model.
     query = None
 
+    def getClassName(self) -> str:
+        """Returns the name of the class."""
+        return type(self).__name__
+
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return f"{self.getClassName()} <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -362,9 +376,13 @@ class BaseSchema(DeclarativeBase):
     # an instance of `query_class`. Can be used to query the database for instances of this model.
     query = None
 
+    def getClassName(self) -> str:
+        """Returns the name of the class."""
+        return type(self).__name__
+
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{type(self).__name__} <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return "{} <id={}, {}>".format(self.getClassName(), self.id, self.auditable())
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -401,4 +419,3 @@ class NamedSchema(BaseSchema):
 
     # not Optional[], therefore will be NOT NULL
     name: Mapped[str] = mapped_column(String(64))
-

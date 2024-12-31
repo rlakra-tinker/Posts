@@ -32,7 +32,7 @@ class Contact(AbstractModel):
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return ("{} <id={}, first_name={}, last_name={}, country={}, subject={}, {}>"
-                .format(type(self).__name__,
+                .format(self.getClassName(),
                         self.id,
                         self.first_name,
                         self.last_name,

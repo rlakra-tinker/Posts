@@ -9,7 +9,7 @@ from framework.orm.sqlalchemy.schema import BaseSchema
 
 
 class ContactSchema(BaseSchema):
-    """ Contact represents [contacts] Table """
+    """ ContactSchema represents [contacts] Table """
 
     __tablename__ = "contacts"
 
@@ -25,7 +25,7 @@ class ContactSchema(BaseSchema):
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return ("{} <id={}, first_name={}, last_name={}, country={}, subject={}, {}>"
-                .format(type(self).__name__,
+                .format(self.getClassName(),
                         self.id,
                         self.first_name,
                         self.last_name,
