@@ -16,8 +16,6 @@ from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.orm.query import attributes
 
 from framework.enums import AutoUpperCase
-from framework.orm.pydantic.model import AbstractModel
-from framework.orm.repository import isPydantic
 
 logger = logging.getLogger(__name__)
 
@@ -392,20 +390,6 @@ class BaseSchema(DeclarativeBase):
         """Returns the name of the class."""
         return type(self).__name__
 
-    @classmethod
-    def fromPydanticModel(cls, modelInstance: AbstractModel) -> DeclarativeBase:
-        classObject = cls()
-        properties = dict(modelInstance)
-        for key, value in properties.items():
-            try:
-                if isPydantic(value):
-                    value = getattr(cls, key).property.mapper.class_.fromPydanticModel(value)
-                setattr(classObject, key, value)
-            except AttributeError as e:
-                raise AttributeError(e)
-
-        return classObject
-
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return "{} <id={}, {}>".format(self.getClassName(), self.id, self.auditable())
@@ -444,4 +428,4 @@ class NamedSchema(BaseSchema):
     __abstract__ = True
 
     # not Optional[], therefore will be NOT NULL
-    name: Mapped[str] = mapped_column(String(64))
+    name: Mapped[str] = mapped_column(String(64), unique=True)

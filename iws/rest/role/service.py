@@ -9,9 +9,9 @@ from framework.http import HTTPStatus
 from framework.orm.pydantic.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
+from rest.role.mapper import RoleMapper
 from rest.role.model import Role
 from rest.role.repository import RoleRepository
-from rest.role.schema import RoleSchema
 
 logger = logging.getLogger(__name__)
 
@@ -21,18 +21,6 @@ class RoleService(AbstractService):
     def __init__(self):
         logger.debug("RoleService()")
         self.repository = RoleRepository()
-
-    # @override
-    def fromSchema(self, roleSchema: RoleSchema) -> Role:
-        # return Role(id=roleSchema.id, name=roleSchema.name, active=roleSchema.active, created_at=roleSchema.created_at,
-        #             updated_at=roleSchema.updated_at)
-        return Role(**roleSchema.toJSONObject())
-
-    # @override
-    def fromModel(self, role: Role) -> RoleSchema:
-        # return RoleSchema(id=role.id, name=role.name, active=role.active, created_at=role.created_at,
-        #                   updated_at=role.updated_at)
-        return RoleSchema(**role.toJSONObject())
 
     def validate(self, operation: SchemaOperation, role: Role) -> None:
         logger.debug(f"+validate({operation}, {role})")
@@ -69,7 +57,7 @@ class RoleService(AbstractService):
         roleModels = []
         for roleSchema in roleSchemas:
             # logger.debug(f"roleSchema type={type(roleSchema)}, value={roleSchema}")
-            roleModel = self.fromSchema(roleSchema)
+            roleModel = RoleMapper.fromSchema(roleSchema)
             # logger.debug(f"type={type(roleModel)}, roleModel={roleModel}")
             roleModels.append(roleModel)
             # roleModelValidate = Role.model_validate(roleSchema)
@@ -113,12 +101,12 @@ class RoleService(AbstractService):
             raise DuplicateRecordException(HTTPStatus.CONFLICT, f"[{role.name}] role already exists!")
 
         # role = self.repository.create(role)
-        roleSchema = self.fromModel(role)
+        roleSchema = RoleMapper.fromModel(role)
         roleSchema = self.repository.save(roleSchema)
         if roleSchema and roleSchema.id is None:
             roleSchema = self.repository.findByFilter({"name": role.name})
 
-        role = self.fromSchema(roleSchema)
+        role = RoleMapper.fromSchema(roleSchema)
         # role = Role.model_validate(roleSchema)
 
         logger.debug(f"-create(), role={role}")
@@ -154,11 +142,11 @@ class RoleService(AbstractService):
         if role.meta_data and roleSchema.meta_data != role.meta_data:
             roleSchema.meta_data = role.meta_data
 
-        # roleSchema = self.fromModel(oldRole)
+        # roleSchema = CompanyMapper.fromModel(oldRole)
         self.repository.update(roleSchema)
         # roleSchema = self.repository.update(mapper=RoleSchema, mappings=[roleSchema])
         roleSchema = self.repository.findByFilter({"id": role.id})[0]
-        role = self.fromSchema(roleSchema)
+        role = RoleMapper.fromSchema(roleSchema)
         logger.debug(f"-update(), role={role}")
         return role
 

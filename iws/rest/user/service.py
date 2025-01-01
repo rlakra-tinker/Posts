@@ -7,13 +7,12 @@ from typing import List, Optional, Dict, Any
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import AbstractModel
-from framework.orm.repository import isPydantic
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from rest.role.service import RoleService
-from rest.user.model import User, Address
+from rest.user.mapper import UserMapper
+from rest.user.model import User
 from rest.user.repository import UserRepository
-from rest.user.schema import UserSchema, AddressSchema
 
 logger = logging.getLogger(__name__)
 
@@ -21,65 +20,8 @@ logger = logging.getLogger(__name__)
 class UserService(AbstractService):
 
     def __init__(self):
-        logger.debug("UserService()")
+        logger.debug(f"UserService()")
         self.repository = UserRepository()
-
-    # @override
-    def fromSchema(self, userSchema: UserSchema) -> User:
-        # return User(**userSchema.toJSONObject())
-        logger.debug(f"+fromSchema({userSchema})")
-        user = User(**userSchema.toJSONObject())
-        if userSchema.addresses:
-            addresses = []
-            for entry in userSchema.addresses:
-                address = Address(**entry.toJSONObject())
-                logger.debug(f"address={address}")
-                addresses.append(address)
-
-            logger.debug(f"addresses={addresses}")
-            user.addresses = addresses
-            logger.debug(f"userSchema.addresses={user.addresses}")
-
-        logger.debug(f"-fromSchema(), user={user}")
-        return user
-
-    # @override
-    def fromModel(self, user: User) -> UserSchema:
-        logger.debug(f"+fromModel({user})")
-        # return UserSchema(**user.toJSONObject())
-        userSchema = UserSchema(**user.toJSONObject())
-        if user.addresses:
-            addresses = []
-            for entry in user.addresses:
-                address = AddressSchema(**entry.toJSONObject())
-                logger.debug(f"address={address}")
-                addresses.append(address)
-
-            logger.debug(f"addresses={addresses}")
-            userSchema.addresses = addresses
-            logger.debug(f"userSchema.addresses={userSchema.addresses}")
-
-        logger.debug(f"-fromModel(), userSchema={userSchema}")
-        return userSchema
-
-    def parsePydanticModel(self, modelInstance: AbstractModel) -> UserSchema:
-        if isPydantic(modelInstance):
-            try:
-                converted_model = self.parsePydanticModel(dict(modelInstance))
-                return modelInstance.Meta.orm_model(**converted_model)
-
-            except AttributeError:
-                model_name = modelInstance.__class__.__name__
-                raise AttributeError(f"Error converting pydantic model: {model_name}.Meta.orm_model not specified!")
-
-        elif isinstance(modelInstance, list):
-            return [self.parsePydanticModel(model) for model in modelInstance]
-
-        elif isinstance(modelInstance, dict):
-            for key, model in modelInstance.items():
-                modelInstance[key] = self.parsePydanticModel(model)
-
-        return modelInstance
 
     def validate(self, operation: SchemaOperation, user: User) -> None:
         logger.debug(f"+validate({operation}, {user})")
@@ -131,7 +73,7 @@ class UserService(AbstractService):
         roleModels = []
         for userSchema in userSchemas:
             # logger.debug(f"userSchema type={type(userSchema)}, value={userSchema}")
-            userModel = self.fromSchema(userSchema)
+            userModel = UserMapper.fromSchema(userSchema)
             # logger.debug(f"type={type(userModel)}, userModel={userModel}")
             roleModels.append(userModel)
 
@@ -176,14 +118,12 @@ class UserService(AbstractService):
         roleService = RoleService()
         roleModel = roleService.findByFilter({"name": "Manager"})
         logger.debug(f"roleModel={roleModel}")
-        userSchema = self.fromModel(user)
-        # userSchema = self.parsePydanticModel(user)
-        # userSchema = UserSchema.fromPydanticModel(user)
+        userSchema = UserMapper.fromModel(user)
         userSchema = self.repository.save(userSchema)
         if userSchema and userSchema.id is None:
             userSchema = self.repository.findByFilter({"name": user.name})
 
-        user = self.fromSchema(userSchema)
+        user = UserMapper.fromSchema(userSchema)
         # user = User.model_validate(userSchema)
 
         logger.debug(f"-register(), user={user}")
@@ -229,11 +169,11 @@ class UserService(AbstractService):
         if user.avatar_url and userSchema.avatar_url != user.avatar_url:
             userSchema.avatar_url = user.avatar_url
 
-        # userSchema = self.fromModel(oldRole)
+        # userSchema = CompanyMapper.fromModel(oldRole)
         self.repository.update(userSchema)
         # userSchema = self.repository.update(mapper=UserSchema, mappings=[userSchema])
         userSchema = self.repository.findByFilter({"id": user.id})[0]
-        user = self.fromSchema(userSchema)
+        user = UserMapper.fromSchema(userSchema)
         logger.debug(f"-update(), user={user}")
         return user
 

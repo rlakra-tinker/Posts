@@ -9,6 +9,7 @@ from framework.http import HTTPStatus
 from framework.orm.pydantic.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
+from rest.company.mapper import CompanyMapper
 from rest.company.model import Company
 from rest.company.repository import CompanyRepository
 from rest.company.schema import CompanySchema
@@ -20,15 +21,8 @@ class CompanyService(AbstractService):
 
     def __init__(self):
         logger.debug("CompanyService()")
+        super().__init__()
         self.repository = CompanyRepository()
-
-    # @override
-    def fromSchema(self, companySchema: CompanySchema) -> Company:
-        return Company(**companySchema.toJSONObject())
-
-    # @override
-    def fromModel(self, company: Company) -> CompanySchema:
-        return CompanySchema(**company.toJSONObject())
 
     def validate(self, operation: SchemaOperation, company: Company) -> None:
         logger.debug(f"+validate({operation}, {company})")
@@ -58,7 +52,7 @@ class CompanyService(AbstractService):
         logger.debug(f"-validate()")
 
     def findById(self, id: int) -> Company:
-        return self.fromSchema(self.repository.findById(CompanySchema, id))
+        return CompanyMapper.fromSchema(self.repository.findById(CompanySchema, id))
 
     # @override
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
@@ -66,7 +60,7 @@ class CompanyService(AbstractService):
         companySchemas = self.repository.findByFilter(filters)
         companyModels = []
         for companySchema in companySchemas:
-            roleModel = self.fromSchema(companySchema)
+            roleModel = CompanyMapper.fromSchema(companySchema)
             companyModels.append(roleModel)
 
         logger.debug(f"-findByFilter(), companyModels={companyModels}")
@@ -107,12 +101,12 @@ class CompanyService(AbstractService):
             raise DuplicateRecordException(HTTPStatus.CONFLICT, f"[{company.name}] company already exists!")
 
         # company = self.repository.create(company)
-        companySchema = self.fromModel(company)
+        companySchema = CompanyMapper.fromModel(company)
         companySchema = self.repository.save(companySchema)
         if companySchema and companySchema.id is None:
             companySchema = self.repository.findByFilter({"name": company.name})
 
-        company = self.fromSchema(companySchema)
+        company = CompanyMapper.fromSchema(companySchema)
         logger.debug(f"-create(), company={company}")
         return company
 
@@ -149,11 +143,11 @@ class CompanyService(AbstractService):
         if company.branches and companySchema.branches != company.branches:
             companySchema.branches = company.branches
 
-        # companySchema = self.fromModel(oldRole)
+        # companySchema = CompanyMapper.fromModel(oldRole)
         self.repository.update(companySchema)
         # companySchema = self.repository.update(mapper=CompanySchema, mappings=[companySchema])
         companySchema = self.repository.findByFilter({"id": company.id})[0]
-        company = self.fromSchema(companySchema)
+        company = CompanyMapper.fromSchema(companySchema)
         logger.debug(f"-update(), company={company}")
         return company
 

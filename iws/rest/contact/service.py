@@ -9,9 +9,9 @@ from framework.http import HTTPStatus
 from framework.orm.pydantic.model import AbstractModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
+from rest.contact.mapper import ContactMapper
 from rest.contact.model import Contact
 from rest.contact.repository import ContactRepository
-from rest.contact.schema import ContactSchema
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +20,8 @@ class ContactService(AbstractService):
 
     def __init__(self):
         logger.debug("ContactService()")
+        super().__init__()
         self.repository = ContactRepository()
-
-    # @override
-    def fromSchema(self, contactSchema: ContactSchema) -> Contact:
-        return Contact(**contactSchema.toJSONObject())
-
-    # @override
-    def fromModel(self, contact: Contact) -> ContactSchema:
-        return ContactSchema(**contact.toJSONObject())
 
     def validate(self, operation: SchemaOperation, contact: Contact) -> None:
         logger.debug(f"+validate({operation}, {contact})")
@@ -69,7 +62,7 @@ class ContactService(AbstractService):
         contactSchemas = self.repository.findByFilter(filters)
         contactModels = []
         for contactSchema in contactSchemas:
-            contactModel = self.fromSchema(contactSchema)
+            contactModel = ContactMapper.fromSchema(contactSchema)
             contactModels.append(contactModel)
 
         logger.debug(f"-findByFilter(), contactModels={contactModels}")
@@ -110,12 +103,12 @@ class ContactService(AbstractService):
             raise DuplicateRecordException(HTTPStatus.CONFLICT, f"[{contact.subject}] contact already exists!")
 
         # contact = self.repository.create(contact)
-        contactSchema = self.fromModel(contact)
+        contactSchema = ContactMapper.fromModel(contact)
         contactSchema = self.repository.save(contactSchema)
         if contactSchema and contactSchema.id is None:
             contactSchema = self.repository.findByFilter({"subject": contact.subject})
 
-        contact = self.fromSchema(contactSchema)
+        contact = ContactMapper.fromSchema(contactSchema)
         logger.debug(f"-create(), contact={contact}")
         return contact
 
@@ -152,7 +145,7 @@ class ContactService(AbstractService):
 
         self.repository.update(contactSchema)
         contactSchema = self.repository.findByFilter({"id": contact.id})[0]
-        contact = self.fromSchema(contactSchema)
+        contact = ContactMapper.fromSchema(contactSchema)
         logger.debug(f"-update(), contact={contact}")
         return contact
 

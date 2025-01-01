@@ -92,14 +92,14 @@ class UserRoleSchema(BaseSchema):
     # not Optional[], therefore will be NOT NULL
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
 
-    # not Optional[], therefore will be NOT NULL
-    active: Mapped[bool] = True
+    # Define the many-to-one relationship
+    role: Mapped["RoleSchema"] = relationship("RoleSchema")
+    user: Mapped["UserSchema"] = relationship("UserSchema")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, role_id={}, user_id={}, active={}, {}>"
-                .format(self.getClassName(), self.id, self.role_id, self.user_id, self.active,
-                        self.auditable()))
+        return ("{} <id={}, role_id={}, user_id={}, {}>"
+                .format(self.getClassName(), self.id, self.role_id, self.user_id, self.auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
