@@ -3,6 +3,7 @@
 #
 import logging
 from datetime import datetime
+from typing import Optional, List
 
 from framework.orm.pydantic.model import AbstractModel
 
@@ -41,7 +42,7 @@ class User(Person):
     avatar_url: str | None = None
 
     # roles: Optional[List["Role"]] = None
-    # addresses: Optional[List["Address"]] = None
+    addresses: Optional[List["Address"]] = None
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
@@ -50,9 +51,9 @@ class User(Person):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, email={}, user_name={}, first_name={}, last_name={}, admin={}, {}>"
+        return ("{} <id={}, email={}, user_name={}, first_name={}, last_name={}, admin={}, {}, addresses={}>"
                 .format(self.getClassName(), self.id, self.email, self.user_name, self.first_name,
-                        self.last_name, self.admin, self._auditable()))
+                        self.last_name, self.admin, self._auditable(), self.addresses))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""

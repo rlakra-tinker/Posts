@@ -16,6 +16,8 @@ from sqlalchemy.orm import Mapped, mapped_column, DeclarativeBase
 from sqlalchemy.orm.query import attributes
 
 from framework.enums import AutoUpperCase
+from framework.orm.pydantic.model import AbstractModel
+from framework.orm.repository import isPydantic
 
 logger = logging.getLogger(__name__)
 
@@ -359,16 +361,26 @@ class BaseSchema(DeclarativeBase):
         Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
         A constructor similar to that supplied by Declarative is illustrated:
         """
-        for key in kwargs:
-            setattr(self, key, kwargs[key])
+        logger.debug(f"+{self.getClassName()}({kwargs})")
+        self.setAttributes(**kwargs)
+        logger.debug(f"-{self.getClassName()}()")
 
-    def set_attrs(self, **kwargs):
+    def setAttributes(self, **kwargs):
         """
         Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
         A constructor similar to that supplied by Declarative is illustrated:
         """
+        logger.debug(f"+setAttributes({kwargs})")
         for key in kwargs:
-            setattr(self, key, kwargs[key])
+            logger.debug(f"{key}={kwargs[key]}")
+            if isinstance(kwargs[key], list):
+                # TODO: handle recursively copy objects of ORM objects.
+                # self.setAttributes(**kwargs[key])
+                pass
+            else:
+                setattr(self, key, kwargs[key])
+
+        logger.debug(f"-setAttributes({kwargs})")
 
     # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
     query_class = BaseQuery
@@ -379,6 +391,20 @@ class BaseSchema(DeclarativeBase):
     def getClassName(self) -> str:
         """Returns the name of the class."""
         return type(self).__name__
+
+    @classmethod
+    def fromPydanticModel(cls, modelInstance: AbstractModel) -> DeclarativeBase:
+        classObject = cls()
+        properties = dict(modelInstance)
+        for key, value in properties.items():
+            try:
+                if isPydantic(value):
+                    value = getattr(cls, key).property.mapper.class_.fromPydanticModel(value)
+                setattr(classObject, key, value)
+            except AttributeError as e:
+                raise AttributeError(e)
+
+        return classObject
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""

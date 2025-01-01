@@ -14,6 +14,12 @@ from framework.enums import AutoUpperCase
 logger = logging.getLogger(__name__)
 
 
+@staticmethod
+def isPydantic(instance: object) -> bool:
+    """ Checks whether an object is pydantic. """
+    return type(instance).__class__.__name__ == "ModelMetaclass"
+
+
 class EngineType(AutoUpperCase):
     """EngineType class contains various engine types"""
 

@@ -7,7 +7,7 @@
 import logging
 
 from flask import make_response, request
-from flask import session, g, redirect, url_for
+from flask import session, g
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
@@ -66,7 +66,6 @@ def register():
         # build success response
         response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="User is successfully created.")
         response.addInstance(user)
-        # response = response.to_json()
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except DuplicateRecordException as ex:
@@ -111,39 +110,6 @@ def forgot_password():
     """Forgot User's Password"""
     logger.debug(f"+forgot_password() => request={request}, args={request.args}, is_json:{request.is_json}")
     pass
-
-
-@bp_account_v1.post("/")
-def create():
-    """Create/Register User"""
-    logger.debug(f"+create() => request={request}, args={request.args}, is_json:{request.is_json}")
-    # post_data = request.form.to_dict(flat=False)
-    if request.is_json:
-        body = request.get_json()
-        logger.debug(f"body={body}")
-        user = User(**body)
-        logger.debug(f"user={user}")
-        # user = RoleSchema(name=name, active=active)
-        # user = User.create(name=name, active=active)
-
-    try:
-        userService = UserService()
-        userService.validate(SchemaOperation.CREATE, user)
-        user = userService.register(user)
-        logger.debug(f"user={user}")
-        # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="User is successfully created.")
-        response.addInstance(user)
-        # response = response.to_json()
-    except ValidationException as ex:
-        response = ResponseModel.buildResponseWithException(ex)
-    except DuplicateRecordException as ex:
-        response = ResponseModel.buildResponseWithException(ex)
-    except Exception as ex:
-        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
-
-    logger.debug(f"-create() <= response={response}")
-    return make_response(response.to_json(), response.status)
 
 
 @bp_account_v1.post("/batch")

@@ -2,9 +2,9 @@
 # Author: Rohtash Lakra
 #
 from datetime import datetime
-from typing import Optional, List
+from typing import Optional
 
-from sqlalchemy import String, ForeignKey, func, PickleType, JSON
+from sqlalchemy import String, ForeignKey, func, PickleType, JSON, Integer
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from framework.orm.sqlalchemy.schema import BaseSchema
@@ -28,31 +28,6 @@ class PersonSchema(BaseSchema):
         """Returns the string representation of this object"""
         return ("{} <id={}, email={}, first_name={}, last_name={}, {}>"
                 .format(self.getClassName(), self.id, self.email, self.first_name, self.last_name,
-                        self.auditable()))
-
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
-
-
-class UserRoleSchema(BaseSchema):
-    """ UserRoleSchema represents [user_roles] Table """
-
-    __tablename__ = "user_roles"
-
-    # foreign key to "roles.id" and "users.id" are added
-    # not Optional[], therefore will be NOT NULL
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
-    # not Optional[], therefore will be NOT NULL
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-
-    # not Optional[], therefore will be NOT NULL
-    active: Mapped[bool] = True
-
-    def __str__(self) -> str:
-        """Returns the string representation of this object"""
-        return ("{} <id={}, role_id={}, user_id={}, active={}, {}>"
-                .format(self.getClassName(), self.id, self.role_id, self.user_id, self.active,
                         self.auditable()))
 
     def __repr__(self) -> str:
@@ -89,20 +64,41 @@ class UserSchema(PersonSchema):
     # addresses: Mapped[List["Address"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     # Optional[], therefore will be NULL
     # Define the one-to-many relationship
-    addresses: Mapped[Optional[List["AddressSchema"]]] = relationship(back_populates="user",
-                                                                      cascade="all, delete-orphan")
-
-    # address: Mapped[Optional["AddressSchema"]] = relationship("AddressSchema", uselist=False, lazy="joined")
-    # addresses: Mapped[List["AddressSchema"]] = relationship(back_populates="user")
+    addresses = relationship("AddressSchema", back_populates="user", lazy="joined")
 
     # Define the one-to-many relationship
     # sessions: Mapped[List["UserSessionSchema"]] = relationship(back_populates="user")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, email={}, user_name={}, first_name={}, last_name={}, admin={}, {}>"
+        return ("{} <id={}, email={}, user_name={}, first_name={}, last_name={}, admin={}, {}, addresses={}>"
                 .format(self.getClassName(), self.id, self.email, self.user_name, self.first_name,
-                        self.last_name, self.admin, self.auditable()))
+                        self.last_name, self.admin, self.auditable(), self.addresses))
+
+    def __repr__(self) -> str:
+        """Returns the string representation of this object"""
+        return str(self)
+
+
+class UserRoleSchema(BaseSchema):
+    """ UserRoleSchema represents [user_roles] Table """
+
+    __tablename__ = "user_roles"
+
+    # foreign key to "roles.id" and "users.id" are added
+    # not Optional[], therefore will be NOT NULL
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    # not Optional[], therefore will be NOT NULL
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+
+    # not Optional[], therefore will be NOT NULL
+    active: Mapped[bool] = True
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return ("{} <id={}, role_id={}, user_id={}, active={}, {}>"
+                .format(self.getClassName(), self.id, self.role_id, self.user_id, self.active,
+                        self.auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -116,9 +112,10 @@ class AddressSchema(BaseSchema):
 
     # foreign key to "users.id" is added
     # not Optional[], therefore will be NOT NULL
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
     # Define the many-to-one relationship
-    user: Mapped["UserSchema"] = relationship(back_populates="addresses")
+    # user: Mapped["UserSchema"] = relationship(back_populates="addresses")
+    user = relationship("UserSchema", back_populates="addresses")
 
     # not Optional[], therefore will be NOT NULL
     street1: Mapped[str] = mapped_column(String(64))

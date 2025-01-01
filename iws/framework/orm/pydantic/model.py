@@ -64,7 +64,8 @@ class AbstractPydanticModel(BaseModel):
 
     def toJSONObject(self) -> Any:
         # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
-        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
+        logger.debug(
+            f"{self.getClassName()} => type={type(self)}, object={str(self)}, json={self.model_dump(mode='json')}")
         return self.model_dump(mode="json")
 
     def getClassName(self) -> str:
