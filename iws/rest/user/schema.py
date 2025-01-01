@@ -2,9 +2,9 @@
 # Author: Rohtash Lakra
 #
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
-from sqlalchemy import String, ForeignKey, func, PickleType, JSON, Integer
+from sqlalchemy import String, ForeignKey, func, PickleType, JSON
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from framework.orm.sqlalchemy.schema import BaseSchema
@@ -64,7 +64,8 @@ class UserSchema(PersonSchema):
     # addresses: Mapped[List["Address"]] = relationship(back_populates="user", cascade="all, delete-orphan")
     # Optional[], therefore will be NULL
     # Define the one-to-many relationship
-    addresses = relationship("AddressSchema", back_populates="user", lazy="joined")
+    addresses: Mapped[Optional[List["AddressSchema"]]] = relationship(back_populates="user", lazy="joined",
+                                                                      cascade="all, delete-orphan")
 
     # Define the one-to-many relationship
     # sessions: Mapped[List["UserSessionSchema"]] = relationship(back_populates="user")
@@ -112,10 +113,9 @@ class AddressSchema(BaseSchema):
 
     # foreign key to "users.id" is added
     # not Optional[], therefore will be NOT NULL
-    user_id = mapped_column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
     # Define the many-to-one relationship
-    # user: Mapped["UserSchema"] = relationship(back_populates="addresses")
-    user = relationship("UserSchema", back_populates="addresses")
+    user: Mapped["UserSchema"] = relationship(back_populates="addresses")
 
     # not Optional[], therefore will be NOT NULL
     street1: Mapped[str] = mapped_column(String(64))
