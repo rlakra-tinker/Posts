@@ -3,7 +3,7 @@
 # References:
 # - https://docs.sqlalchemy.org/en/20/orm/self_referential.html
 #
-from typing import Optional
+from typing import Optional, List
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -22,7 +22,7 @@ class CompanySchema(NamedSchema):
 
     # not Optional[], therefore will be NOT NULL
     # the parent and its immediate child collection or reference can be populated from a single SQL statement
-    branches: Mapped[Optional["CompanySchema"]] = relationship("CompanySchema", lazy="joined", join_depth=2)
+    branches: Mapped[List[Optional["CompanySchema"]]] = relationship("CompanySchema", lazy="joined", join_depth=2)
 
     # not Optional[], therefore will be NOT NULL
     active: Mapped[bool] = mapped_column(unique=False, default=False)

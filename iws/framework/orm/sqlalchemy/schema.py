@@ -378,7 +378,7 @@ class BaseSchema(DeclarativeBase):
             else:
                 setattr(self, key, kwargs[key])
 
-        logger.debug(f"-setAttributes({kwargs})")
+        logger.debug(f"-setAttributes()")
 
     # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
     query_class = BaseQuery

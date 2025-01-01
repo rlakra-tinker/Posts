@@ -10,28 +10,53 @@ logger = logging.getLogger(__name__)
 class ContactRepositoryTest(unittest.TestCase):
     """Unit-tests for Repository classes"""
 
-    def test_contact_repository(self):
-        logger.debug("+test_contact_repository()")
+    def setUp(self):
+        """The setUp() method of the TestCase class is automatically invoked before each test, so it's an ideal place
+        to insert common logic that applies to all the tests in the class"""
+        logger.debug("+setUp()")
+        super().setUp()
+
+        # toString() test
         expected = "<class 'rest.contact.repository.ContactRepository'>"
         self.assertEqual(expected, str(ContactRepository))
 
-        # repository object
-
-        repository = ContactRepository()
-        logger.debug(f"repository={repository}")
-        self.assertIsNotNone(repository)
+        # init object
+        self.contactRepository = ContactRepository()
+        logger.debug(f"contactRepository={self.contactRepository}")
+        self.assertIsNotNone(self.contactRepository)
         expected = 'ContactRepository <engine=Engine(sqlite:///testPosts.db)>'
-        self.assertEqual(expected, str(repository))
-        self.assertIsNotNone(repository.get_engine())
+        self.assertEqual(expected, str(self.contactRepository))
+        self.assertIsNotNone(self.contactRepository.get_engine())
 
-        #
-        contactSchema = ContactSchema(first_name="Roh", last_name="Lak", country="India",
-                                      subject="Testing Contact's Schema")
+        logger.debug("-setUp()")
+        print()
+
+    def tearDown(self):
+        """The tearDown() method of the TestCase class is automatically invoked after each test, so it's an ideal place
+        to insert common logic that applies to all the tests in the class"""
+        logger.debug("+tearDown()")
+        self.contactRepository = None
+        self.assertIsNone(self.contactRepository)
+        super().tearDown()
+        logger.debug("-tearDown()")
+        print()
+
+    def test_create_contact(self):
+        logger.debug("+test_create_contact()")
+        # contact
+        contact_json = {
+            "first_name": "Roh",
+            "last_name": "Lak",
+            "country": "India",
+            "subject": "Testing Contact's Repository"
+        }
+        contactSchema = ContactSchema(**contact_json)
         logger.debug(f"contactSchema={contactSchema}")
-        contactSchema = repository.save(contactSchema)
+        contactSchema = self.contactRepository.save(contactSchema)
         logger.debug(f"contactSchema={contactSchema}")
         self.assertIsNotNone(contactSchema.id)
-        logger.debug("-test_contact_repository()")
+        self.assertEqual("India", contactSchema.country)
+        logger.debug("-test_create_contact()")
         print()
 
 

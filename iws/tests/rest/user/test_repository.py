@@ -2,7 +2,7 @@ import logging
 import unittest
 
 from rest.user.repository import UserRepository
-from rest.user.schema import UserSchema, AddressSchema
+from rest.user.schema import UserSchema
 from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)
@@ -11,79 +11,74 @@ logger = logging.getLogger(__name__)
 class UserRepositoryTest(AbstractTestCase):
     """Unit-tests for Repository classes"""
 
-    def test_user_repository(self):
-        logger.debug("+test_user_repository()")
+    def setUp(self):
+        """The setUp() method of the TestCase class is automatically invoked before each test, so it's an ideal place
+        to insert common logic that applies to all the tests in the class"""
+        logger.debug("+setUp()")
+        super().setUp()
+
+        # toString() test
         expected = "<class 'rest.user.repository.UserRepository'>"
         self.assertEqual(expected, str(UserRepository))
 
-        # repository object
-
-        repository = UserRepository()
-        logger.debug(f"repository={repository}")
-        self.assertIsNotNone(repository)
+        # init object
+        self.userRepository = UserRepository()
+        logger.debug(f"userRepository={self.userRepository}")
+        self.assertIsNotNone(self.userRepository)
         expected = 'UserRepository <engine=Engine(sqlite:///testPosts.db)>'
-        self.assertEqual(expected, str(repository))
-        self.assertIsNotNone(repository.get_engine())
+        self.assertEqual(expected, str(self.userRepository))
+        self.assertIsNotNone(self.userRepository.get_engine())
 
-        # user
-        userSchema = UserSchema(email="lakra@lakra.com", first_name="Roh", last_name="Lak", birth_date="2024-01-01",
-                                user_name="lakra", password="password")
-
-        logger.debug(f"userSchema={userSchema}")
-        userSchema = repository.save(userSchema)
-        logger.debug(f"userSchema={userSchema}")
-        self.assertIsNotNone(userSchema.id)
-        logger.debug("-test_user_repository()")
+        logger.debug("-setUp()")
         print()
 
-    def test_user_repository_with_address(self):
-        logger.debug("+test_user_repository_with_address()")
-        expected = "<class 'rest.user.repository.UserRepository'>"
-        self.assertEqual(expected, str(UserRepository))
-
-        # repository object
-
-        repository = UserRepository()
-        logger.debug(f"repository={repository}")
-        self.assertIsNotNone(repository)
-        expected = 'UserRepository <engine=Engine(sqlite:///testPosts.db)>'
-        self.assertEqual(expected, str(repository))
-        self.assertIsNotNone(repository.get_engine())
-
-        # user
-        userSchema = UserSchema(email="lakra1@lakra.com", first_name="Roh", last_name="Lak", birth_date="2024-01-01",
-                                user_name="lakra", password="password")
-        # address
-        address = AddressSchema(street1="123 Great St.", city="Hayward", state="California", country="United States",
-                                zip="94544")
-        userSchema.addresses = [address]
-
-        logger.debug(f"userSchema={userSchema}")
-        userSchema = repository.save(userSchema)
-        logger.debug(f"userSchema={userSchema}")
-        self.assertIsNotNone(userSchema.id)
-        logger.debug("-test_user_repository_with_address()")
+    def tearDown(self):
+        """The tearDown() method of the TestCase class is automatically invoked after each test, so it's an ideal place
+        to insert common logic that applies to all the tests in the class"""
+        logger.debug("+tearDown()")
+        self.userRepository = None
+        self.assertIsNone(self.userRepository)
+        super().tearDown()
+        logger.debug("-tearDown()")
         print()
 
-    def test_user_repository_save(self):
-        logger.debug("+test_user_repository_save()")
-        repository = UserRepository()
-        self.assertIsNotNone(repository)
-        expected = 'UserRepository <engine=Engine(sqlite:///testPosts.db)>'
-        self.assertEqual(expected, str(repository))
-        self.assertIsNotNone(repository.get_engine())
+    def test_create_user(self):
+        logger.debug("+test_create_user()")
 
+        # user
         user_json = {
-            "email": "test1@lakra.com",
+            "email": "user1@lakra.com",
             "first_name": "Roh",
             "last_name": "Lak",
             "birth_date": "2024-12-27",
-            "user_name": "test1",
+            "user_name": "user1",
             "password": "password",
-            "admin": "false",
+            "admin": False
+        }
+        userSchema = UserSchema(**user_json)
+        logger.debug(f"userSchema={userSchema}")
+        userSchema = self.userRepository.save(userSchema)
+        logger.debug(f"userSchema={userSchema}")
+        self.assertIsNotNone(userSchema.id)
+        self.assertEqual(False, userSchema.admin)
+        logger.debug("-test_create_user()")
+        print()
+
+    def test_create_user_with_address(self):
+        logger.debug("+test_create_user_with_address()")
+
+        # user
+        user_json = {
+            "email": "user2@lakra.com",
+            "first_name": "Roh",
+            "last_name": "Lak",
+            "birth_date": "2024-12-27",
+            "user_name": "user2",
+            "password": "password",
+            "admin": True,
             "addresses": [
                 {
-                    "street1": "123 Great St.",
+                    "street1": "123 Test Dr.",
                     "city": "Hayward",
                     "state": "California",
                     "country": "United States",
@@ -91,15 +86,13 @@ class UserRepositoryTest(AbstractTestCase):
                 }
             ]
         }
-
-        # user
         userSchema = UserSchema(**user_json)
         logger.debug(f"userSchema={userSchema}")
-        userSchema = repository.save(userSchema)
+        userSchema = self.userRepository.save(userSchema)
         logger.debug(f"userSchema={userSchema}")
         self.assertIsNotNone(userSchema.id)
-        self.assertIsNotNone(userSchema.addresses)
-        logger.debug("-test_user_repository_save()")
+        self.assertEqual(True, userSchema.admin)
+        logger.debug("-test_create_user_with_address()")
         print()
 
 
