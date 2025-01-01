@@ -15,7 +15,7 @@ Note that in the below code, some arguments are specified when creating the Blue
 
 Create an instance of Blueprint prefixed with '/bp' as named bp.
 Parameters:
-    name: "rest", is the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
+    name: represents the name of the blueprint, which Flask’s routing mechanism uses and identifies it in the project.
     __name__: The Blueprint’s import name, which Flask uses to locate the Blueprint’s resources.
     url_prefix: the path to prepend to all of the Blueprint’s URLs.
 
