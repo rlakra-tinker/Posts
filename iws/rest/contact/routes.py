@@ -37,7 +37,7 @@ def create():
         logger.debug(f"contact={contact}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Contact is successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Contact is successfully created.")
         response.addInstance(contact)
         # response = response.to_json()
     except ValidationException as ex:
@@ -75,7 +75,7 @@ def bulkCreate():
         logger.debug(f"roles={roles}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Roles are successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Roles are successfully created.")
         response.addInstances(roles)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -124,7 +124,7 @@ def update():
         logger.debug(f"contact={contact}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Contact is successfully updated.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Contact is successfully updated.")
         response.addInstance(contact)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -150,7 +150,7 @@ def delete(id: int):
         contactService = ContactService()
         contactService.delete(id)
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Contact is successfully deleted.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Contact is successfully deleted.")
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:

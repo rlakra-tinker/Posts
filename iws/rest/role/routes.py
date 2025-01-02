@@ -46,7 +46,7 @@ def create():
         role = roleService.create(role)
         logger.debug(f"role={role}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Role is successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Role is successfully created.")
         response.addInstance(role)
         # response = response.to_json()
     except ValidationException as ex:
@@ -83,7 +83,7 @@ def bulkCreate():
         roles = roleService.bulkCreate(roles)
         logger.debug(f"roles={roles}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Roles are successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Roles are successfully created.")
         response.addInstances(roles)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -132,7 +132,7 @@ def update():
         logger.debug(f"role={role}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully updated.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Role is successfully updated.")
         response.addInstance(role)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -159,7 +159,7 @@ def delete(id: int):
         roleService.delete(id)
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Role is successfully deleted.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Role is successfully deleted.")
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:

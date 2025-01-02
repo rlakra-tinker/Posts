@@ -71,7 +71,7 @@ class TestPydanticModel(AbstractTestCase):
         print()
 
     def test_model_json_schema(self):
-        """Tests an model_json_schema() method"""
+        """Tests the model_json_schema() method"""
         logger.debug("+test_model_json_schema()")
         namedModel = NamedModel(id=16, name="Roh")
         logger.debug(f"namedModel={namedModel}")
@@ -82,13 +82,13 @@ class TestPydanticModel(AbstractTestCase):
         self.assertTrue(issubclass(NamedModel, object))
         self.assertFalse(issubclass(object, NamedModel))
 
-        expected = {'description': "NamedModel used an entity with a property called 'name' in it",
-                    'properties': {'id': {'default': None, 'title': 'Id', 'type': 'integer'},
-                                   'created_at': {'default': None, 'format': 'date-time', 'title': 'Created At',
-                                                  'type': 'string'},
-                                   'updated_at': {'default': None, 'format': 'date-time', 'title': 'Updated At',
-                                                  'type': 'string'}, 'name': {'title': 'Name', 'type': 'string'}},
-                    'required': ['name'], 'title': 'NamedModel', 'type': 'object'}
+        expected = {"description": "NamedModel used an entity with a property called 'name' in it",
+                    "properties": {"id": {"default": None, "title": "Id", "type": "integer"}, "created_at": {
+                        "anyOf": [{"format": "date-time", "type": "string"}, {"type": "null"}], "default": None,
+                        "title": "Created At"}, "updated_at": {
+                        "anyOf": [{"format": "date-time", "type": "string"}, {"type": "null"}], "default": None,
+                        "title": "Updated At"}, "name": {"title": "Name", "type": "string"}}, "required": ["name"],
+                    "title": "NamedModel", "type": "object"}
         modelJsonSchema = NamedModel.model_json_schema()
         logger.debug(f"modelJsonSchema={modelJsonSchema}")
         logger.debug(f"json -> modelJsonSchema={json.dumps(modelJsonSchema)}")
@@ -142,13 +142,13 @@ class TestPydanticModel(AbstractTestCase):
     def test_error_model(self):
         """Tests an ErrorEntity object"""
         logger.debug("+test_error_model()")
-        error_model = ErrorModel.buildError(http_status=HTTPStatus.INTERNAL_SERVER_ERROR,
+        error_model = ErrorModel.buildError(httpStatus=HTTPStatus.INTERNAL_SERVER_ERROR,
                                             message="Internal Server Error!")
         logger.debug(f"error_model={error_model}")
 
         # valid object and expected results
         self.assertIsNotNone(error_model)
-        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR.status_code, error_model.status)
+        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR.statusCode, error_model.status)
         self.assertEqual("Internal Server Error!", error_model.message)
         self.assertNotEqual(HTTPStatus.INTERNAL_SERVER_ERROR.message, error_model.message)
         self.assertNotEqual(HTTPStatus.BAD_REQUEST, error_model.status)
@@ -189,12 +189,12 @@ class TestPydanticModel(AbstractTestCase):
         self.assertFalse(isinstance(entity_object, ErrorModel))
         self.assertFalse(issubclass(object, AbstractModel))
 
-        errorModel = ErrorModel.buildError(http_status=HTTPStatus.BAD_REQUEST, message="Error")
+        errorModel = ErrorModel.buildError(httpStatus=HTTPStatus.BAD_REQUEST, message="Error")
         logger.debug(f"errorModel={errorModel}")
 
         # valid object and expected results
         self.assertIsNotNone(errorModel)
-        self.assertEqual(HTTPStatus.BAD_REQUEST.status_code, errorModel.status)
+        self.assertEqual(HTTPStatus.BAD_REQUEST.statusCode, errorModel.status)
         self.assertEqual("Error", errorModel.message)
         self.assertNotEqual(HTTPStatus.BAD_REQUEST.message, errorModel.message)
         self.assertNotEqual(HTTPStatus.OK, errorModel.status)
@@ -211,7 +211,7 @@ class TestPydanticModel(AbstractTestCase):
         response_entity = ResponseModel.buildResponse(HTTPStatus.CREATED, named_entity)
         logger.debug(f"response_entity={response_entity}")
         self.assertIsNotNone(response_entity)
-        self.assertEqual(HTTPStatus.CREATED.status_code, response_entity.status)
+        self.assertEqual(HTTPStatus.CREATED.statusCode, response_entity.status)
         self.assertIsNotNone(response_entity.data)
         self.assertIsNone(response_entity.errors)
         self.assertFalse(response_entity.hasError())
@@ -226,11 +226,11 @@ class TestPydanticModel(AbstractTestCase):
     def test_response_entity_error(self):
         """Tests an ResponseEntity object"""
         logger.debug("\n+test_response_entity_error()")
-        error_entity = ErrorModel.buildError(http_status=HTTPStatus.BAD_REQUEST, message="Error")
+        error_entity = ErrorModel.buildError(httpStatus=HTTPStatus.BAD_REQUEST, message="Error")
         response = ResponseModel.buildResponse(HTTPStatus.BAD_REQUEST, error_entity)
         logger.debug(f"response: {response}")
         self.assertIsNotNone(response)
-        self.assertEqual(HTTPStatus.BAD_REQUEST.status_code, response.status)
+        self.assertEqual(HTTPStatus.BAD_REQUEST.statusCode, response.status)
         self.assertIsNone(response.data)
         self.assertTrue(response.hasError())
         self.assertIsNotNone(response.errors)
@@ -255,7 +255,7 @@ class TestPydanticModel(AbstractTestCase):
 
         logger.debug(f"response: {response}")
         self.assertIsNotNone(response)
-        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR.status_code, response.status)
+        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR.statusCode, response.status)
         self.assertIsNone(response.data)
         self.assertTrue(response.hasError())
         self.assertIsNotNone(response.errors)

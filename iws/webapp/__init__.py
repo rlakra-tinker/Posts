@@ -135,7 +135,7 @@ class WebApp:
             """404 - NotFound Error Handler"""
             current_app.logger.error(f'request={request}, errorClass={type(error)}, error={error}')
             return make_response(ResponseModel.jsonResponse(HTTPStatus.NOT_FOUND, message=error.description),
-                                 HTTPStatus.NOT_FOUND.status_code)
+                                 HTTPStatus.NOT_FOUND.statusCode)
             # if isinstance(error, NotFound):
             #     return make_response(ResponseModel.jsonResponse(HTTPStatus.NOT_FOUND, message=error.description), 404)
             # else:
@@ -146,7 +146,7 @@ class WebApp:
             """400 - BadRequest Error Handler"""
             current_app.logger.error(f'request={request}, errorClass={type(error)}, error={error}')
             return make_response(ResponseModel.jsonResponse(HTTPStatus.BAD_REQUEST, message=error.description),
-                                 HTTPStatus.BAD_REQUEST.status_code)
+                                 HTTPStatus.BAD_REQUEST.statusCode)
 
         @app.errorhandler(500)
         def app_error(error):
@@ -154,7 +154,7 @@ class WebApp:
             current_app.logger.error(f'request={request}, errorClass={type(error)}, error={error}')
             return make_response(
                 ResponseModel.jsonResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=error.description),
-                HTTPStatus.INTERNAL_SERVER_ERROR.status_code)
+                HTTPStatus.INTERNAL_SERVER_ERROR.statusCode)
 
         # Register Date & Time Formatter for Jinja Template
         @app.template_filter('strftime')

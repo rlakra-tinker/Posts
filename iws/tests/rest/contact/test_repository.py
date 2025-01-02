@@ -3,11 +3,12 @@ import unittest
 
 from rest.contact.repository import ContactRepository
 from rest.contact.schema import ContactSchema
+from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)
 
 
-class ContactRepositoryTest(unittest.TestCase):
+class ContactRepositoryTest(AbstractTestCase):
     """Unit-tests for Repository classes"""
 
     def setUp(self):

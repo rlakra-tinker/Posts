@@ -64,7 +64,7 @@ def register():
         user = userService.register(user)
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="User is successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="User is successfully created.")
         response.addInstance(user)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -135,7 +135,7 @@ def bulkCreate():
         roles = userService.bulkCreate(roles)
         logger.debug(f"roles={roles}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Roles are successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Roles are successfully created.")
         response.addInstances(roles)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -186,7 +186,7 @@ def update():
         logger.debug(f"user={user}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="User is successfully updated.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="User is successfully updated.")
         response.addInstance(user)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -214,7 +214,7 @@ def delete(id: int):
         userService.delete(id)
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="User is successfully deleted.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="User is successfully deleted.")
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:

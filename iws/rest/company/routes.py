@@ -35,7 +35,7 @@ def create():
         company = companyService.create(company)
         logger.debug(f"company={company}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Company is successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Company is successfully created.")
         response.addInstance(company)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -72,7 +72,7 @@ def bulkCreate():
         companies = companyService.bulkCreate(companies)
         logger.debug(f"companies={companies}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.status_code, message="Companys are successfully created.")
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Companys are successfully created.")
         response.addInstances(companies)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -125,7 +125,7 @@ def update():
         logger.debug(f"company={company}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Company is successfully updated.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Company is successfully updated.")
         response.addInstance(company)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -151,7 +151,7 @@ def delete(id: int):
         companyService = CompanyService()
         companyService.delete(id)
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.status_code, message="Company is successfully deleted.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Company is successfully deleted.")
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except NoRecordFoundException as ex:

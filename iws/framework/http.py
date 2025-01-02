@@ -125,36 +125,36 @@ class HTTPStatus(AutoUpperCase):
     INTERNAL_SERVER_ERROR = (500, 'Internal Server Error')  # Retrieve an existing resource.
 
     def __new__(cls, status_code: int, message: str, description: str = None):
-        http_status = object.__new__(cls)
-        http_status.status_code = status_code
-        http_status.message = message
-        http_status.description = description
+        httpStatus = object.__new__(cls)
+        httpStatus.statusCode = status_code
+        httpStatus.message = message
+        httpStatus.description = description
 
-        return http_status
+        return httpStatus
 
     def __init__(self, status_code: int, message: str, description: str = None):
-        self.status_code = status_code
+        self.statusCode = status_code
         self.message = message
         self.description = description
 
     def __repr__(self):
-        return f"{self.name} <{self.status_code}, {self.message}, {self.description}>"
+        return f"{self.name} <{self.statusCode}, {self.message}, {self.description}>"
 
     @staticmethod
-    def by_status(status: int):
+    def fromStatus(status: int):
         for httpStatus in HTTPStatus:
-            if httpStatus.status_code == status:
+            if httpStatus.statusCode == status:
                 return httpStatus
 
         return None
 
     @staticmethod
-    def get_success_statuses() -> tuple:
+    def getSuccessStatuses() -> tuple:
         return list([HTTPStatus.OK, HTTPStatus.CREATED, HTTPStatus.ACCEPTED, HTTPStatus.NO_CONTENT])
 
     @staticmethod
-    def is_success_status(http_status) -> bool:
-        return isinstance(http_status, HTTPStatus) and HTTPStatus.get_success_statuses().__contains__(http_status)
+    def isStatusSuccess(httpStatus) -> bool:
+        return isinstance(httpStatus, HTTPStatus) and HTTPStatus.getSuccessStatuses().__contains__(httpStatus)
 
 
 class HTTPUtils:

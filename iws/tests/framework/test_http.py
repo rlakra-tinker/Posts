@@ -43,13 +43,13 @@ class HttpTest(AbstractTestCase):
 
     def test_http_status(self):
         logger.debug("test_http_status()")
-        http_status = HTTPStatus.CREATED
-        logger.debug(f"http_status={http_status}")
-        self.assertEqual(HTTPStatus.CREATED, http_status)
-        self.assertNotEqual(HTTPStatus.OK, http_status)
+        httpStatus = HTTPStatus.CREATED
+        logger.debug(f"httpStatus={httpStatus}")
+        self.assertEqual(HTTPStatus.CREATED, httpStatus)
+        self.assertNotEqual(HTTPStatus.OK, httpStatus)
 
         expected = "HTTPStatus <CREATED=(201, 'Created')>"
-        self.assertEqual(expected, str(http_status))
+        self.assertEqual(expected, str(httpStatus))
         self.assertEqual("<enum 'HTTPStatus'>", str(HTTPStatus))
 
         logger.debug(f"HTTPStatus names={HTTPStatus.names()}")
@@ -71,31 +71,33 @@ class HttpTest(AbstractTestCase):
         self.assertEqual(expected, str(HTTPStatus.of_name(text)))
         self.assertTrue(HTTPStatus.equals(HTTPStatus.OK, text))
 
-    def test_by_status(self):
-        logger.debug("test_by_status()")
-        self.assertEqual(HTTPStatus.OK, HTTPStatus.by_status(200))
-        self.assertEqual(HTTPStatus.CREATED, HTTPStatus.by_status(201))
-        self.assertEqual(HTTPStatus.BAD_REQUEST, HTTPStatus.by_status(400))
-        self.assertEqual(HTTPStatus.UNAUTHORIZED, HTTPStatus.by_status(401))
-        self.assertEqual(HTTPStatus.NOT_FOUND, HTTPStatus.by_status(404))
-        self.assertEqual(HTTPStatus.TOO_MANY_REQUESTS, HTTPStatus.by_status(429))
-        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR, HTTPStatus.by_status(500))
+    def test_fromStatus(self):
+        logger.debug("test_fromStatus()")
+        self.assertEqual(HTTPStatus.OK, HTTPStatus.fromStatus(200))
+        self.assertEqual(HTTPStatus.CREATED, HTTPStatus.fromStatus(201))
+        self.assertEqual(HTTPStatus.BAD_REQUEST, HTTPStatus.fromStatus(400))
+        self.assertEqual(HTTPStatus.UNAUTHORIZED, HTTPStatus.fromStatus(401))
+        self.assertEqual(HTTPStatus.NOT_FOUND, HTTPStatus.fromStatus(404))
+        self.assertEqual(HTTPStatus.TOO_MANY_REQUESTS, HTTPStatus.fromStatus(429))
+        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR, HTTPStatus.fromStatus(500))
 
-    def test_get_success_statuses(self):
-        logger.debug("test_get_success_statuses()")
+    def test_getSuccessStatuses(self):
+        logger.debug("+test_getSuccessStatuses()")
         expected = '[OK <200, OK, None>, CREATED <201, Created, None>, ACCEPTED <202, Accepted, None>, NO_CONTENT <204, No Content, None>]'
-        success_statuses = HTTPStatus.get_success_statuses()
+        success_statuses = HTTPStatus.getSuccessStatuses()
         logger.debug(f"success_statuses={success_statuses}")
         self.assertEqual(expected, str(success_statuses))
         self.assertNotEqual(['UNAUTHORIZED <401, Unauthorized>'], str(success_statuses))
+        logger.debug("-test_getSuccessStatuses()")
+        print()
 
     def test_is_success_status(self):
         logger.debug("test_is_success_status()")
-        self.assertTrue(HTTPStatus.is_success_status(HTTPStatus.OK))
-        self.assertTrue(HTTPStatus.is_success_status(HTTPStatus.CREATED))
-        self.assertTrue(HTTPStatus.is_success_status(HTTPStatus.ACCEPTED))
-        self.assertTrue(HTTPStatus.is_success_status(HTTPStatus.NO_CONTENT))
-        self.assertFalse(HTTPStatus.is_success_status(HTTPStatus.BAD_REQUEST))
+        self.assertTrue(HTTPStatus.isStatusSuccess(HTTPStatus.OK))
+        self.assertTrue(HTTPStatus.isStatusSuccess(HTTPStatus.CREATED))
+        self.assertTrue(HTTPStatus.isStatusSuccess(HTTPStatus.ACCEPTED))
+        self.assertTrue(HTTPStatus.isStatusSuccess(HTTPStatus.NO_CONTENT))
+        self.assertFalse(HTTPStatus.isStatusSuccess(HTTPStatus.BAD_REQUEST))
 
     def test_get_uuid(self):
         logger.debug("test_get_uuid()")

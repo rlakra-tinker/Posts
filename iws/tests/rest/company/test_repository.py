@@ -3,11 +3,12 @@ import unittest
 
 from rest.company.repository import CompanyRepository
 from rest.company.schema import CompanySchema
+from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)
 
 
-class CompanyRepositoryTest(unittest.TestCase):
+class CompanyRepositoryTest(AbstractTestCase):
     """Unit-tests for Repository classes"""
 
     def setUp(self):

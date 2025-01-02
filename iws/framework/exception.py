@@ -13,7 +13,7 @@ class AbstractException(Exception):
     """ AbstractException class is the base for all non-exit exceptions. """
 
     def __init__(self, httpStatus: HTTPStatus, messages: List[Optional[str]] = None, **kwargs):
-        # def __init__(self, http_status: HTTPStatus, messages: List[Optional[str]] = None):
+        # def __init__(self, httpStatus: HTTPStatus, messages: List[Optional[str]] = None):
         # logger.debug(f"+__init__ => type={type(self)},  httpStatus={httpStatus}, messages={messages}, kwargs={kwargs}")
         self.httpStatus = httpStatus
         self.messages = messages
@@ -31,8 +31,8 @@ class AbstractException(Exception):
         return instance
 
     # @property
-    # def http_status(self):
-    #     return self.http_status
+    # def httpStatus(self):
+    #     return self.httpStatus
     #
     # @property
     # def messages(self):
@@ -40,7 +40,7 @@ class AbstractException(Exception):
 
     # def __str__(self) -> str:
     #     """Returns the string representation of this object"""
-    #     return f"{self.getClassName()} <http_status={self.http_status!r}, messages={self.messages!r}>"
+    #     return f"{self.getClassName()} <httpStatus={self.httpStatus!r}, messages={self.messages!r}>"
     #
     # def __repr__(self) -> str:
     #     """Returns the string representation of this object"""
@@ -82,9 +82,9 @@ class NoRecordFoundException(AbstractException):
 class ValidationException(AbstractException):
     """ Record Validation Exception """
 
-    # def __init__(self, http_status: HTTPStatus, errors: List[Optional[str]] = None):
+    # def __init__(self, httpStatus: HTTPStatus, errors: List[Optional[str]] = None):
     #     super().__init__()
-    #     self.http_status = http_status
+    #     self.httpStatus = httpStatus
     #     self.errors = errors
     #
     # @classmethod

@@ -42,10 +42,9 @@ class AbstractPydanticModel(BaseModel):
     """AbstractPydanticModel is a base model for all models inherit and provides basic configuration parameters."""
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
-    def to_json(self) -> str:
-        """Returns the JSON representation of this object."""
-        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
-        return self.model_dump_json()
+    def getClassName(self) -> str:
+        """Returns the name of the class."""
+        return type(self).__name__
 
     def getAllFields(self, alias=False) -> list:
         # return list(self.schema(by_alias=alias).get("properties").keys())
@@ -62,15 +61,16 @@ class AbstractPydanticModel(BaseModel):
 
         return field_names
 
+    def to_json(self) -> str:
+        """Returns the JSON representation of this object."""
+        logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
+        return self.model_dump_json()
+
     def toJSONObject(self) -> Any:
         # return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
         logger.debug(
             f"{self.getClassName()} => type={type(self)}, object={str(self)}, json={self.model_dump(mode='json')}")
         return self.model_dump(mode="json")
-
-    def getClassName(self) -> str:
-        """Returns the name of the class."""
-        return type(self).__name__
 
     def __str__(self):
         """Returns the string representation of this object."""
@@ -85,8 +85,8 @@ class AbstractModel(AbstractPydanticModel):
     """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
 
     id: int = None
-    created_at: datetime = None
-    updated_at: datetime = None
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     # @root_validator()
     # def on_create(cls, values):
@@ -193,40 +193,40 @@ class ErrorModel(AbstractPydanticModel):
         return self.model_dump_json()
 
     @staticmethod
-    def buildError(http_status: HTTPStatus, message: str = None, exception: Exception = None,
+    def buildError(httpStatus: HTTPStatus, message: str = None, exception: Exception = None,
                    is_critical: bool = False):
         """
         Builds the error object for the provided arguments
         Parameters:
-            http_status: status of the request
+            httpStatus: status of the request
             message: message of the error
             exception: exception for the error message
             is_critical: is error a critical error
         """
-        logger.debug(f"buildError({http_status}, {message}, {exception}, {is_critical})")
+        logger.debug(f"buildError({httpStatus}, {message}, {exception}, {is_critical})")
 
         # set message, if missing
         if message is None:
             if exception is not None:
                 message = str(exception)
-            elif http_status:
-                message = http_status.message
+            elif httpStatus:
+                message = httpStatus.message
 
         # debug details
         debug_info = {}
         if is_critical and exception is not None:
             debug_info['exception'] = Utils.stack_trace(exception)
-            return ErrorModel(status=http_status.status_code, message=message, debug_info=debug_info)
+            return ErrorModel(status=httpStatus.statusCode, message=message, debug_info=debug_info)
         elif exception is not None:
             debug_info['exception'] = Utils.stack_trace(exception)
-            return ErrorModel(status=http_status.status_code, message=message, debug_info=debug_info)
+            return ErrorModel(status=httpStatus.statusCode, message=message, debug_info=debug_info)
         else:
-            return ErrorModel(status=http_status.status_code, message=message)
+            return ErrorModel(status=httpStatus.statusCode, message=message)
 
     @classmethod
-    def jsonResponse(cls, http_status: HTTPStatus, message: str = None, exception: Exception = None,
+    def jsonResponse(cls, httpStatus: HTTPStatus, message: str = None, exception: Exception = None,
                      is_critical: bool = False):
-        return ErrorModel.buildError(http_status, message, exception, is_critical).to_json()
+        return ErrorModel.buildError(httpStatus, message, exception, is_critical).to_json()
 
     def __str__(self):
         """Returns the string representation of this object"""
@@ -292,7 +292,8 @@ class ResponseModel(AbstractPydanticModel):
 
     def addInstance(self, instance: AbstractPydanticModel = None):
         """Adds an object into the list of data or errors"""
-        logger.debug(f"+addInstance({instance})")
+        logger.debug(
+            f"+addInstance({instance}) => type={type(instance)}, object={str(instance)}, json={instance.to_json()}")
         if isinstance(instance, ErrorModel):
             if self.errors is None and instance:
                 self.errors = []
@@ -307,7 +308,7 @@ class ResponseModel(AbstractPydanticModel):
         else:
             logger.debug(f"Invalid instance:{instance}!")
 
-        logger.debug(f"-addInstance(), data={self.data}, errors={self.errors}")
+        logger.debug(f"-addInstance(), data={self.data}, errors={self.errors}, json={self.to_json()}")
 
     def addInstances(self, instances: List[AbstractPydanticModel] = None):
         logger.debug(f"+addInstances(), instances={instances}")
@@ -321,41 +322,41 @@ class ResponseModel(AbstractPydanticModel):
         return self.errors is not None
 
     @classmethod
-    def buildResponse(cls, http_status: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
+    def buildResponse(cls, httpStatus: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
                       exception: Exception = None, is_critical: bool = False):
-        logger.debug(f"+buildResponse({http_status}, {instance}, {message}, {exception}, {is_critical})")
+        logger.debug(f"+buildResponse({httpStatus}, {instance}, {message}, {exception}, {is_critical})")
         if isinstance(instance, ErrorModel):  # check if an ErrorModel entity
             logger.debug(f"isinstance(entity, ErrorModel) => {isinstance(instance, ErrorModel)}")
-            errorModel = ErrorModel.buildError(http_status, message, exception, is_critical)
+            errorModel = ErrorModel.buildError(httpStatus, message, exception, is_critical)
             # update entity's message and exception if missing
             if not errorModel.message:
                 errorModel.message = instance.message if instance.message else errorModel.message
 
             # build response and add errorModel in the list
-            response = ResponseModel(status=http_status.status_code)
+            response = ResponseModel(status=httpStatus.statusCode)
             response.addInstance(errorModel)
         elif isinstance(instance, AbstractModel):
             logger.debug(f"isinstance(entity, AbstractModel) => {isinstance(instance, AbstractModel)}")
-            response = ResponseModel(status=http_status.status_code)
+            response = ResponseModel(status=httpStatus.statusCode)
             # build errorModel response, if exception is provided
-            if HTTPStatus.is_success_status(http_status):
+            if HTTPStatus.isStatusSuccess(httpStatus):
                 # if not exception or not message:
                 response.addInstance(instance)
             else:
-                response.addInstance(ErrorModel.buildError(http_status, message, exception, is_critical))
+                response.addInstance(ErrorModel.buildError(httpStatus, message, exception, is_critical))
         elif exception:
             logger.debug(f"elif exception => type={type(exception)}, exception={exception}")
-            response = ResponseModel(status=http_status.status_code)
+            response = ResponseModel(status=httpStatus.statusCode)
             # build errorModel response, if exception is provided
-            response.addInstance(ErrorModel.buildError(http_status, message, exception, is_critical))
-        elif not HTTPStatus.is_success_status(http_status):
-            logger.debug(f"not HTTPStatus.is_success_status() => {HTTPStatus.is_success_status(http_status)}")
-            response = ResponseModel(status=http_status.status_code)
+            response.addInstance(ErrorModel.buildError(httpStatus, message, exception, is_critical))
+        elif not HTTPStatus.isStatusSuccess(httpStatus):
+            logger.debug(f"not HTTPStatus.isStatusSuccess() => {HTTPStatus.isStatusSuccess(httpStatus)}")
+            response = ResponseModel(status=httpStatus.statusCode)
             # build errorModel response, if exception is provided
-            response.addInstance(ErrorModel.buildError(http_status, message, exception, is_critical))
+            response.addInstance(ErrorModel.buildError(httpStatus, message, exception, is_critical))
         else:
             logger.debug(f"else => ")
-            response = ResponseModel(status=http_status.status_code)
+            response = ResponseModel(status=httpStatus.statusCode)
 
         logger.debug(f"-buildResponse(), response={response}")
         return response
@@ -366,26 +367,26 @@ class ResponseModel(AbstractPydanticModel):
         # build response and add errorModel in the list
         if isinstance(exception, ValidationException):  # check if an AbstractException entity
             logger.debug(f"ValidationException => {isinstance(exception, ValidationException)}")
-            response = ResponseModel(status=exception.httpStatus.status_code)
+            response = ResponseModel(status=exception.httpStatus.statusCode)
             for message in exception.messages:
-                response.addInstance(ErrorModel.buildError(http_status=exception.httpStatus, message=message))
+                response.addInstance(ErrorModel.buildError(httpStatus=exception.httpStatus, message=message))
         elif isinstance(exception, DuplicateRecordException):
             logger.debug(f"DuplicateRecordException => {isinstance(exception, DuplicateRecordException)}")
-            response = ResponseModel(status=exception.httpStatus.status_code)
+            response = ResponseModel(status=exception.httpStatus.statusCode)
             response.addInstance(
-                ErrorModel.buildError(http_status=exception.httpStatus, message=exception.messages[:-1]))
+                ErrorModel.buildError(httpStatus=exception.httpStatus, message=exception.messages[:-1]))
         elif isinstance(exception, NoRecordFoundException):
             logger.debug(f"NoRecordFoundException => {isinstance(exception, NoRecordFoundException)}")
-            response = ResponseModel(status=exception.httpStatus.status_code)
+            response = ResponseModel(status=exception.httpStatus.statusCode)
             response.addInstance(
-                ErrorModel.buildError(http_status=exception.httpStatus, message=exception.messages[:-1])
+                ErrorModel.buildError(httpStatus=exception.httpStatus, message=exception.messages[:-1])
             )
             # response = ResponseModel.buildResponse(HTTPStatus.CONFLICT, message=str(exception))
         elif isinstance(exception, AbstractException):
             logger.debug(f"isinstance(exception, AbstractException) => {isinstance(exception, AbstractException)}")
-            response = ResponseModel(status=exception.httpStatus.status_code)
+            response = ResponseModel(status=exception.httpStatus.statusCode)
             for message in exception.messages:
-                response.addInstance(ErrorModel.buildError(http_status=exception.httpStatus, message=message))
+                response.addInstance(ErrorModel.buildError(httpStatus=exception.httpStatus, message=message))
 
             response = ResponseModel.buildResponse(HTTPStatus.CONFLICT, message=str(exception))
         elif isinstance(exception, Exception):
@@ -405,15 +406,15 @@ class ResponseModel(AbstractPydanticModel):
         return response
 
     @classmethod
-    def jsonResponse(cls, http_status: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
+    def jsonResponse(cls, httpStatus: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
                      exception: Exception = None, is_critical: bool = False):
-        return ResponseModel.buildResponse(http_status, [instance], message, exception, is_critical).to_json()
+        return ResponseModel.buildResponse(httpStatus, instance, message, exception, is_critical).to_json()
 
     @classmethod
-    def jsonResponses(cls, instances: List[Optional[AbstractPydanticModel]] = []):
-        responses = []
-        for entity in instances:
-            logger.debug(f"jsonResponses() => type={type(entity)}, object={str(entity)}, json={entity.to_json()}")
-            responses.append(entity.to_json())
+    def jsonResponses(cls, httpStatus: HTTPStatus, instances: Optional[List[AbstractPydanticModel]] = []):
+        logger.debug(f"jsonResponses() => httpStatus={httpStatus}")
+        response = ResponseModel.buildResponse(httpStatus=httpStatus)
+        for instance in instances:
+            response.addInstance(instance)
 
-        return responses
+        return response.to_json()
