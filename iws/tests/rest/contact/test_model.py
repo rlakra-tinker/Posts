@@ -58,7 +58,7 @@ class ContactModelTest(AbstractTestCase):
 
     def test_contact_isinstance_and_issubclass(self):
         """Tests the Model object"""
-        logger.debug("+test_contact_isinstance()")
+        logger.debug("+test_contact_isinstance_and_issubclass()")
         logger.debug(f"contact={self.contact}")
         self.assertIsNotNone(self.contact)
         # valid object and expected results
@@ -66,7 +66,7 @@ class ContactModelTest(AbstractTestCase):
         self.assertFalse(isinstance(self.contact, AbstractTestCase))
         self.assertTrue(issubclass(Contact, object))
         self.assertFalse(issubclass(object, Contact))
-        logger.debug("-test_contact_isinstance()")
+        logger.debug("-test_contact_isinstance_and_issubclass()")
         print()
 
     def test_create_contact(self):

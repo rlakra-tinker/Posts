@@ -7,7 +7,7 @@
 
 from flask import request, current_app
 
-from rest.post.schema import Post
+from rest.post.schema import PostSchema
 from rest.post.v1 import bp as bp_post_v1
 
 
@@ -23,7 +23,7 @@ def create():
         current_app.logger.debug(f"body: {body}")
         name = body.get('name', None)
         active = body.get('active', False)
-        role = Post.create(name=name, active=active)
+        role = PostSchema.create(name=name, active=active)
 
     # # errors = roleService.validate(role)
     # # current_app.logger.debug(f"errors: {json.dumps(errors)}")

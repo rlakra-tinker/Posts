@@ -12,14 +12,16 @@ from sqlalchemy.types import LargeBinary
 from framework.orm.sqlalchemy.schema import BaseSchema
 
 
-class Post(BaseSchema):
+class PostSchema(BaseSchema):
     """ PostSchema represents [posts] Table """
 
     __tablename__ = "posts"
 
     # foreign key to "users.id" is added
     # not Optional[], therefore will be NOT NULL
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    # Define the many-to-one relationship
+    # user: Mapped["UserSchema"] = relationship(back_populates="posts")
 
     # not Optional[], therefore will be NOT NULL
     title: Mapped[str] = mapped_column(String(64))
@@ -34,7 +36,14 @@ class Post(BaseSchema):
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
     # attachments: Mapped[List["Attachment"]] = relationship(back_populates="post", cascade="all, delete-orphan")
     # Optional[], therefore will be NULL
-    attachments: Mapped[Optional[List["Attachment"]]] = relationship(back_populates="post",
+    attachments: Mapped[Optional[List["AttachmentSchema"]]] = relationship(back_populates="post", lazy="joined",
+                                                                           cascade="all, delete-orphan")
+
+    # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
+    # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
+    # attachments: Mapped[List["Attachment"]] = relationship(back_populates="post", cascade="all, delete-orphan")
+    # Optional[], therefore will be NULL
+    comments: Mapped[Optional[List["CommentSchema"]]] = relationship(back_populates="post", lazy="joined",
                                                                      cascade="all, delete-orphan")
 
     def addAttachment(self, attachment):
@@ -51,16 +60,17 @@ class Post(BaseSchema):
         return str(self)
 
 
-class Attachment(BaseSchema):
+class AttachmentSchema(BaseSchema):
     """ AttachmentSchema represents [attachments] Table """
 
     __tablename__ = "attachments"
 
     # foreign key to "posts.id" is added
     # not Optional[], therefore will be NOT NULL
-    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), nullable=False)
     # not Optional[], therefore will be NOT NULL
-    post: Mapped["Post"] = relationship(back_populates="attachments")
+    # Define the many-to-one relationship
+    post: Mapped["PostSchema"] = relationship(back_populates="attachments")
 
     # not Optional[], therefore will be NOT NULL
     filename: Mapped[str] = mapped_column(String(64))
@@ -78,18 +88,23 @@ class Attachment(BaseSchema):
         return str(self)
 
 
-class Comment(BaseSchema):
+class CommentSchema(BaseSchema):
     """ CommentSchema represents [comments] Table """
 
     __tablename__ = "comments"
 
     # foreign key to "posts.id" is added
     # not Optional[], therefore will be NOT NULL
-    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"))
+    post_id: Mapped[int] = mapped_column(ForeignKey("posts.id"), nullable=False)
+    # not Optional[], therefore will be NOT NULL
+    # Define the many-to-one relationship
+    post: Mapped["PostSchema"] = relationship(back_populates="comments")
 
     # foreign key to "users.id" is added
     # not Optional[], therefore will be NOT NULL
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
+    # Define the many-to-one relationship
+    # user: Mapped["UserSchema"] = relationship(back_populates="comments")
 
     # Optional[], therefore will be NULL
     content: Mapped[Optional[str]] = mapped_column(String(255))
