@@ -1,6 +1,7 @@
 import logging
 import unittest
 
+from framework.time import timeMillis
 from rest.company.repository import CompanyRepository
 from rest.company.schema import CompanySchema
 from tests.base import AbstractTestCase
@@ -45,9 +46,10 @@ class CompanyRepositoryTest(AbstractTestCase):
     def test_create_company(self):
         logger.debug("+test_create_company()")
 
+        companyName = f"Lakra Inc-{timeMillis()}"
         # company's json
         company_json = {
-            "name": "Lakra Inc"
+            "name": companyName
         }
 
         companySchema = CompanySchema(**company_json)
@@ -60,7 +62,7 @@ class CompanyRepositoryTest(AbstractTestCase):
         self.assertIsNotNone(companySchema)
         # self.assertIsNone(companySchema.branches)
         self.assertIsNotNone(companySchema.id)
-        self.assertEqual("Lakra Inc", companySchema.name)
+        self.assertEqual(companyName, companySchema.name)
 
         logger.debug("-test_create_company()")
         print()
@@ -68,12 +70,13 @@ class CompanyRepositoryTest(AbstractTestCase):
     def test_create_company_with_branches(self):
         logger.debug("+test_create_company_with_branches()")
 
+        companyName = f"Parent Inc-{timeMillis()}"
         # company's json
         company_json = {
-            "name": "Parent Inc",
+            "name": companyName,
             "branches": [
                 {
-                    "name": "Child-1 Inc"
+                    "name": f"Child Inc-{timeMillis()}"
                 }
             ]
         }
@@ -87,7 +90,7 @@ class CompanyRepositoryTest(AbstractTestCase):
         self.assertIsNotNone(companySchema)
         self.assertIsNotNone(companySchema.branches)
         self.assertIsNotNone(companySchema.id)
-        self.assertEqual("Parent Inc", companySchema.name)
+        self.assertEqual(companyName, companySchema.name)
         logger.debug("-test_create_company_with_branches()")
         print()
 

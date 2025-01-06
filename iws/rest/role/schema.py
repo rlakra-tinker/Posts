@@ -1,9 +1,9 @@
 #
 # Author: Rohtash Lakra
 #
-from typing import Optional
+from typing import Optional, List
 
-from sqlalchemy import PickleType, JSON, ForeignKey
+from sqlalchemy import PickleType, JSON, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from framework.orm.sqlalchemy.schema import BaseSchema, NamedSchema
@@ -19,6 +19,10 @@ A role can have many permissions.
 A permission can be assigned to many roles.
 An operation can be assigned to many permissions.
 A permission can be assigned to many operations.
+
+Setting uselist=False for non-annotated configurations
+When using 'relationship()' without the benefit of Mapped annotations, the 'one-to-one' pattern can be enabled using the 
+'relationship.uselist' parameter set to False on what would normally be the “many” side
 """
 
 
@@ -34,17 +38,25 @@ class RoleSchema(NamedSchema):
 
     # not Optional[], therefore will be NOT NULL
     active: Mapped[bool] = mapped_column(unique=False, default=False)
+
     # Optional[], therefore will be NULL
     meta_data: Mapped[Optional[PickleType]] = mapped_column(JSON)
 
+    # Define the many-to-many relationship
+    # permissions: Mapped[List["PermissionSchema"]] = relationship(secondary="role_permissions")
+    permissions: Mapped[List["PermissionSchema"]] = relationship('PermissionSchema',
+                                                                 secondary="role_permissions",
+                                                                 lazy="joined")
+
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
+        return ("{} <id={}, name={}, active={}, meta_data={}, permissions={}, {}>"
                 .format(self.getClassName(),
                         self.id,
                         self.name,
                         self.active,
                         self.meta_data,
+                        self.permissions,
                         self.auditable()))
 
     def __repr__(self) -> str:
@@ -62,10 +74,14 @@ class PermissionSchema(NamedSchema):
 
     __tablename__ = "permissions"
 
+    # Optional[], therefore will be NULL
+    description: Mapped[Optional[str]] = mapped_column(String(128))
+
     # not Optional[], therefore will be NOT NULL
     active: Mapped[bool] = mapped_column(unique=False, default=False)
-    # Optional[], therefore will be NULL
-    meta_data: Mapped[Optional[PickleType]] = mapped_column(JSON)
+
+    # Define the many-to-many relationship
+    # roles: Mapped[List["RoleSchema"]] = relationship('RoleSchema', secondary="role_permissions", lazy="joined")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -73,8 +89,8 @@ class PermissionSchema(NamedSchema):
                 .format(self.getClassName(),
                         self.id,
                         self.name,
+                        self.description,
                         self.active,
-                        self.meta_data,
                         self.auditable()))
 
     def __repr__(self) -> str:
@@ -90,11 +106,14 @@ class RolePermissionSchema(BaseSchema):
     # foreign key to "roles.id" and "users.id" are added
     # not Optional[], therefore will be NOT NULL
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+
     # not Optional[], therefore will be NOT NULL
     permission_id: Mapped[int] = mapped_column(ForeignKey("permissions.id"))
 
     # Define the many-to-one relationship
+    # association between Association -> Role
     role: Mapped["RoleSchema"] = relationship("RoleSchema")
+    # association between Association -> Permission
     permission: Mapped["PermissionSchema"] = relationship("PermissionSchema")
 
     def __str__(self) -> str:
