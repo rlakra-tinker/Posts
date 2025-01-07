@@ -29,33 +29,33 @@ class UserService(AbstractService):
         error_messages = []
 
         # validate the object
-        if not user:
+        if user:
+            match operation.name:
+                case SchemaOperation.CREATE.name:
+                    # validate the required fields
+                    if not user.email:
+                        error_messages.append("User 'email' is required!")
+
+                    if not user.first_name:
+                        error_messages.append("User 'first_name' is required!")
+
+                    if not user.last_name:
+                        error_messages.append("User 'last_name' is required!")
+
+                    if not user.birth_date:
+                        error_messages.append("User 'birth_date' is required!")
+
+                    if not user.user_name:
+                        error_messages.append("User 'user_name' is required!")
+
+                    if not user.password:
+                        error_messages.append("User 'password' is required!")
+
+                case SchemaOperation.UPDATE.name:
+                    if not user.id:
+                        error_messages.append("User 'id' is required!")
+        else:
             error_messages.append("'User' is not fully defined!")
-
-        match operation.name:
-            case SchemaOperation.CREATE.name:
-                # validate the required fields
-                if not user.email:
-                    error_messages.append("User 'email' is required!")
-
-                if not user.first_name:
-                    error_messages.append("User 'first_name' is required!")
-
-                if not user.last_name:
-                    error_messages.append("User 'last_name' is required!")
-
-                if not user.birth_date:
-                    error_messages.append("User 'birth_date' is required!")
-
-                if not user.user_name:
-                    error_messages.append("User 'user_name' is required!")
-
-                if not user.password:
-                    error_messages.append("User 'password' is required!")
-
-            case SchemaOperation.UPDATE.name:
-                if not user.id:
-                    error_messages.append("User 'id' is required!")
 
         # throw an error if any validation error
         if error_messages and len(error_messages) > 0:

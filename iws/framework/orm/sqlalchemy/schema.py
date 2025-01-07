@@ -5,6 +5,8 @@
 # - https://docs.sqlalchemy.org/en/20/orm/quickstart.html
 # - https://docs.sqlalchemy.org/en/20/orm/inheritance.html
 #
+from __future__ import annotations
+
 import logging
 from datetime import datetime
 from enum import unique, auto
@@ -219,12 +221,7 @@ def set_query_property(model_class, session):
     model_class.query = QueryProperty(session)
 
 
-class Auditable(DeclarativeBase):
-    """Auditable Entity"""
-    __abstract__ = True
-
-
-class AbstractSchema(Auditable):
+class AbstractSchema(DeclarativeBase):
     """
     AbstractSchema define module-level constructs that will form the structures which we will be querying from the
     database. This structure, known as a Declarative Mapping, defines at once both a Python object model, and database
@@ -243,14 +240,11 @@ class AbstractSchema(Auditable):
     """
     __abstract__ = True
 
-    """
-    ID - Primary Key
-    
-    All ORM mapped classes require at least one column be declared as part of the primary key, typically by using
-    the 'Column.primary_key' parameter on those 'mapped_column()' objects that should be part of the key.
-    """
-    # primary_key=True, therefore will be NOT NULL
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
+    # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
+    query_class = BaseQuery
+
+    # an instance of `query_class`. Can be used to query the database for instances of this model.
+    query = None
 
     # not Optional[], therefore will be NOT NULL
     created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
@@ -263,25 +257,27 @@ class AbstractSchema(Auditable):
         A constructor similar to that supplied by Declarative is illustrated:
         """
         logger.debug(f"+{self.getClassName()}({kwargs})")
-        for key in kwargs:
-            logger.debug(f"{key}={kwargs[key]}")
-            setattr(self, key, kwargs[key])
+        self.setAttributes(**kwargs)
+        logger.debug(f"-{self.getClassName()}()")
 
-    def set_attrs(self, **kwargs):
+    def setAttributes(self, **kwargs):
         """
         Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
         A constructor similar to that supplied by Declarative is illustrated:
         """
-        logger.debug(f"set_attrs({kwargs})")
+        logger.debug(f"+setAttributes({kwargs})")
         for key in kwargs:
-            logger.debug(f"{key}={kwargs[key]}")
-            setattr(self, key, kwargs[key])
+            logger.debug(f"{key}={kwargs[key]}, ({type(kwargs[key])})")
+            # handle error - AttributeError: 'dict' object has no attribute '_sa_instance_state'
+            # setattr(self, key, kwargs[key])
+            if isinstance(kwargs[key], list):
+                # TODO: handle recursively copy objects of ORM objects.
+                # self.setAttributes(**kwargs[key])
+                pass
+            else:
+                setattr(self, key, kwargs[key])
 
-    # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
-    query_class = BaseQuery
-
-    # an instance of `query_class`. Can be used to query the database for instances of this model.
-    query = None
+        logger.debug(f"-setAttributes()")
 
     def getClassName(self) -> str:
         """Returns the name of the class."""
@@ -289,7 +285,7 @@ class AbstractSchema(Auditable):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return f"{self.getClassName()} <id={self.id!r}, created_at={self.created_at}, updated_at={self.updated_at}>"
+        return f"{self.getClassName()} <{self.auditable()}>"
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
@@ -321,7 +317,7 @@ class User(Model):
 # BaseSchema = declarative_base(cls=AbstractSchema)
 
 
-class BaseSchema(DeclarativeBase):
+class BaseSchema(AbstractSchema):
     """
     AbstractSchema define module-level constructs that will form the structures which we will be querying from the
     database. This structure, known as a Declarative Mapping, defines at once both a Python object model, and database
@@ -349,64 +345,9 @@ class BaseSchema(DeclarativeBase):
     # primary_key=True, therefore will be NOT NULL
     id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 
-    # not Optional[], therefore will be NOT NULL
-    created_at: Mapped[datetime] = mapped_column(insert_default=func.now())
-    # not Optional[], therefore will be NOT NULL
-    updated_at: Mapped[datetime] = mapped_column(insert_default=func.now(), onupdate=func.now())
-
-    def __init__(self, **kwargs):
-        """
-        Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
-        A constructor similar to that supplied by Declarative is illustrated:
-        """
-        logger.debug(f"+{self.getClassName()}({kwargs})")
-        self.setAttributes(**kwargs)
-        logger.debug(f"-{self.getClassName()}()")
-
-    def setAttributes(self, **kwargs):
-        """
-        Alternatively, the same Table objects can be used in fully “classical” style, without using Declarative at all.
-        A constructor similar to that supplied by Declarative is illustrated:
-        """
-        logger.debug(f"+setAttributes({kwargs})")
-        for key in kwargs:
-            logger.debug(f"{key}={kwargs[key]}")
-            if isinstance(kwargs[key], list):
-                # TODO: handle recursively copy objects of ORM objects.
-                # self.setAttributes(**kwargs[key])
-                pass
-            else:
-                setattr(self, key, kwargs[key])
-
-        logger.debug(f"-setAttributes()")
-
-    # the query class used. The `query` attribute is an instance of this class. By default, a `BaseQuery` is used.
-    query_class = BaseQuery
-
-    # an instance of `query_class`. Can be used to query the database for instances of this model.
-    query = None
-
-    def getClassName(self) -> str:
-        """Returns the name of the class."""
-        return type(self).__name__
-
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return "{} <id={}, {}>".format(self.getClassName(), self.id, self.auditable())
-
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
-
-    def auditable(self) -> str:
-        """Returns the string representation of this object"""
-        return f"created_at={self.created_at}, updated_at={self.updated_at}"
-
-    def to_json(self) -> Any:
-        return {column.name: getattr(self, column.name) for column in self.__table__.columns}
-
-    def toJSONObject(self) -> Any:
-        return {column.key: getattr(self, column.key) for column in inspect(self).mapper.column_attrs}
 
 
 @event.listens_for(BaseSchema.metadata, "column_reflect")

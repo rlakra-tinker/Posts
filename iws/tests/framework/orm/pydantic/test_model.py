@@ -82,12 +82,12 @@ class TestPydanticModel(AbstractTestCase):
         self.assertTrue(issubclass(NamedModel, object))
         self.assertFalse(issubclass(object, NamedModel))
 
-        expected = {"description": "NamedModel used an entity with a property called 'name' in it",
-                    "properties": {"id": {"default": None, "title": "Id", "type": "integer"}, "created_at": {
-                        "anyOf": [{"format": "date-time", "type": "string"}, {"type": "null"}], "default": None,
-                        "title": "Created At"}, "updated_at": {
-                        "anyOf": [{"format": "date-time", "type": "string"}, {"type": "null"}], "default": None,
-                        "title": "Updated At"}, "name": {"title": "Name", "type": "string"}}, "required": ["name"],
+        expected = {"description": "NamedModel used an entity with a property called 'name' in it", "properties": {
+            "id": {"anyOf": [{"type": "integer"}, {"type": "null"}], "default": None, "title": "Id"},
+            "created_at": {"anyOf": [{"format": "date-time", "type": "string"}, {"type": "null"}], "default": None,
+                           "title": "Created At"},
+            "updated_at": {"anyOf": [{"format": "date-time", "type": "string"}, {"type": "null"}], "default": None,
+                           "title": "Updated At"}, "name": {"title": "Name", "type": "string"}}, "required": ["name"],
                     "title": "NamedModel", "type": "object"}
         modelJsonSchema = NamedModel.model_json_schema()
         logger.debug(f"modelJsonSchema={modelJsonSchema}")

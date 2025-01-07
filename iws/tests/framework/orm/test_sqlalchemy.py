@@ -5,8 +5,8 @@
 import logging
 import unittest
 
-from rest.user.schema import UserSchema, AddressSchema
 from rest.role.schema import RoleSchema
+from rest.user.schema import UserSchema, AddressSchema
 from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)
@@ -44,9 +44,10 @@ class SqlAlchemyTest(AbstractTestCase):
 
         self.assertIsNotNone(user)
 
-        expected = {'user_name': 'roh@lakra.com', 'password': 'Roh', 'last_seen': None, 'avatar_url': None,
-                    'email': 'roh@lakra.com', 'first_name': 'Rohtash', 'last_name': 'Lakra', 'birth_date': None,
-                    'id': None, 'created_at': None, 'updated_at': None}
+        expected = {'user_name': 'roh@lakra.com', 'password': 'Roh', 'admin': True, 'last_seen': None,
+                    'avatar_url': None, 'email': 'roh@lakra.com', 'first_name': 'Rohtash', 'last_name': 'Lakra',
+                    'birth_date': None, 'id': None, 'created_at': None, 'updated_at': None}
+
         user_json = user.to_json()
         self.assertIsNotNone(user_json)
         logger.debug(f"user={user}, user_json={user_json}")
@@ -62,7 +63,7 @@ class SqlAlchemyTest(AbstractTestCase):
         print()
 
     def test_recursive_encoder(self):
-        logger.debug(f"test_recursive_encoder()")
+        logger.debug(f"+test_recursive_encoder()")
         address = AddressSchema(
             street1="123 Great Rd",
             city="Hayward",
@@ -100,13 +101,15 @@ class SqlAlchemyTest(AbstractTestCase):
         # logger.debug(f"user={user}, user_json={user_json}")
         # self.assertIsNotNone(user_json)
 
-        expected = {'user_name': 'roh@lakra.com', 'password': 'Roh', 'last_seen': None, 'avatar_url': None,
-                    'email': 'roh@lakra.com', 'first_name': 'Rohtash', 'last_name': 'Lakra', 'birth_date': None,
-                    'id': None, 'created_at': None, 'updated_at': None}
+        expected = {'user_name': 'roh@lakra.com', 'password': 'Roh', 'admin': True, 'last_seen': None,
+                    'avatar_url': None, 'email': 'roh@lakra.com', 'first_name': 'Rohtash', 'last_name': 'Lakra',
+                    'birth_date': None, 'id': None, 'created_at': None, 'updated_at': None}
+
         userJSONObject = user.toJSONObject()
         self.assertIsNotNone(userJSONObject)
         logger.debug(f"user={user}, userJSONObject={userJSONObject}")
         self.assertEqual(expected, userJSONObject)
+        logger.debug(f"-test_recursive_encoder()")
         print()
 
 

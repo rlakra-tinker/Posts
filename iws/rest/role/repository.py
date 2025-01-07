@@ -35,24 +35,24 @@ class RoleRepository(SqlAlchemyRepository):
                 else:
                     roleSchemas = session.query(RoleSchema).all()
 
-                logger.debug(f"Loaded [{len(roleSchemas)}] rows => roleSchemas={roleSchemas}")
+                logger.debug(f"Loaded [{len(roleSchemas)}] roles => roleSchemas={roleSchemas}")
 
                 # Commit:
                 # The pending changes above are flushed via flush(), the Transaction is committed, the Connection
                 # object closed and discarded, the underlying DBAPI connection returned to the connection pool.
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while loading roles records! Error={ex}")
+                logger.error(f"NoResultFound while loading roles! Error={ex}")
                 # on rollback, the same closure of state as that of commit proceeds.
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while loading roles records! Error={ex}")
+                logger.error(f"MultipleResultsFound while loading roles! Error={ex}")
                 # on rollback, the same closure of state as that of commit proceeds.
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while loading roles records! Error={ex}")
+                logger.error(f"Exception while loading roles! Error={ex}")
                 # on rollback, the same closure of state as that of commit proceeds.
                 session.rollback()
                 raise ex
@@ -79,17 +79,17 @@ class RoleRepository(SqlAlchemyRepository):
         with Session(self.get_engine()) as session:
             try:
                 results = session.query(RoleSchema).filter(RoleSchema.name == name).all()
-                logger.debug(f"Loaded [{len(results)}] rows => results={results}")
+                logger.debug(f"Loaded [{len(results)}] roles => results={results}")
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while loading roles! Error={ex}")
+                logger.error(f"NoResultFound while loading role by name! Error={ex}")
                 # session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while loading roles! Error={ex}")
+                logger.error(f"MultipleResultsFound while loading role by name! Error={ex}")
                 # session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while loading roles! Error={ex}")
+                logger.error(f"Exception while loading role by name! Error={ex}")
                 # session.rollback()
                 raise ex
 
@@ -106,19 +106,19 @@ class RoleRepository(SqlAlchemyRepository):
                     .values(roleSchema.to_json())
                     .where(RoleSchema.id == roleSchema.id)
                 ).rowcount
-                logger.debug(f"Updated [{results}] roles.")
+                logger.debug(f"Updated [{results}] role.")
 
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while updating roles! Error={ex}")
+                logger.error(f"NoResultFound while updating role! Error={ex}")
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while updating roles! Error={ex}")
+                logger.error(f"MultipleResultsFound while updating role! Error={ex}")
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while updating roles! Error={ex}")
+                logger.error(f"Exception while updating role! Error={ex}")
                 session.rollback()
                 raise ex
 
@@ -135,15 +135,15 @@ class RoleRepository(SqlAlchemyRepository):
                 logger.info("Role is successfully deleted.")
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while deleting role! Error={ex}")
+                logger.error(f"NoResultFound while deleting roles! Error={ex}")
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while deleting role! Error={ex}")
+                logger.error(f"MultipleResultsFound while deleting roles! Error={ex}")
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while deleting role! Error={ex}")
+                logger.error(f"Exception while deleting roles! Error={ex}")
                 session.rollback()
                 raise ex
 
@@ -161,15 +161,15 @@ class RoleRepository(SqlAlchemyRepository):
                 logger.debug(f"Deleted [{len(roleSchemas)}] roles successfully.")
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while deleting roles! Error={ex}")
+                logger.error(f"NoResultFound while bulk deleting roles! Error={ex}")
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while deleting roles! Error={ex}")
+                logger.error(f"MultipleResultsFound while bulk deleting roles! Error={ex}")
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while deleting roles! Error={ex}")
+                logger.error(f"Exception while bulk deleting roles! Error={ex}")
                 session.rollback()
                 raise ex
 
@@ -195,24 +195,24 @@ class PermissionRepository(SqlAlchemyRepository):
                 else:
                     permissionSchemas = session.query(PermissionSchema).all()
 
-                logger.debug(f"Loaded [{len(permissionSchemas)}] rows => permissionSchemas={permissionSchemas}")
+                logger.debug(f"Loaded [{len(permissionSchemas)}] permissions => permissionSchemas={permissionSchemas}")
 
                 # Commit:
                 # The pending changes above are flushed via flush(), the Transaction is committed, the Connection
                 # object closed and discarded, the underlying DBAPI connection returned to the connection pool.
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while loading permissions records! Error={ex}")
+                logger.error(f"NoResultFound while loading permissions! Error={ex}")
                 # on rollback, the same closure of state as that of commit proceeds.
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while loading permissions records! Error={ex}")
+                logger.error(f"MultipleResultsFound while loading permissions! Error={ex}")
                 # on rollback, the same closure of state as that of commit proceeds.
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while loading permissions records! Error={ex}")
+                logger.error(f"Exception while loading permissions! Error={ex}")
                 # on rollback, the same closure of state as that of commit proceeds.
                 session.rollback()
                 raise ex
@@ -247,15 +247,15 @@ class PermissionRepository(SqlAlchemyRepository):
 
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while updating permission record! Error={ex}")
+                logger.error(f"NoResultFound while updating permission! Error={ex}")
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while updating permission record! Error={ex}")
+                logger.error(f"MultipleResultsFound while updating permission! Error={ex}")
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while updating permission record! Error={ex}")
+                logger.error(f"Exception while updating permission! Error={ex}")
                 session.rollback()
                 raise ex
 
@@ -272,15 +272,15 @@ class PermissionRepository(SqlAlchemyRepository):
                 logger.info("Permission is successfully deleted.")
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while updating permission records! Error={ex}")
+                logger.error(f"NoResultFound while deleting permissions! Error={ex}")
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while updating permission records! Error={ex}")
+                logger.error(f"MultipleResultsFound while deleting permissions! Error={ex}")
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while updating permission records! Error={ex}")
+                logger.error(f"Exception while updating deleting permissions! Error={ex}")
                 session.rollback()
                 raise ex
 
@@ -298,15 +298,15 @@ class PermissionRepository(SqlAlchemyRepository):
                 logger.debug(f"Deleted [{len(permissionSchemas)}] permissions successfully.")
                 session.commit()
             except NoResultFound as ex:
-                logger.error(f"NoResultFound while deleting permissions records! Error={ex}")
+                logger.error(f"NoResultFound while bulk deleting permissions! Error={ex}")
                 session.rollback()
                 raise ex
             except MultipleResultsFound as ex:
-                logger.error(f"MultipleResultsFound while deleting permissions records! Error={ex}")
+                logger.error(f"MultipleResultsFound while bulk deleting permissions! Error={ex}")
                 session.rollback()
                 raise ex
             except Exception as ex:
-                logger.error(f"Exception while deleting permissions records! Error={ex}")
+                logger.error(f"Exception while deleting bulk permissions! Error={ex}")
                 session.rollback()
                 raise ex
 

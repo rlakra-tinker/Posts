@@ -24,14 +24,15 @@ class RoleRepositoryTest(AbstractTestCase):
 
         # init object
         self.roleRepository = RoleRepository()
-        self.permissionRepository = PermissionRepository()
         logger.debug(f"roleRepository={self.roleRepository}")
-        logger.debug(f"permissionRepository={self.permissionRepository}")
         self.assertIsNotNone(self.roleRepository)
-        self.assertIsNotNone(self.permissionRepository)
         expected = 'RoleRepository <engine=Engine(sqlite:///testPosts.db)>'
         self.assertEqual(expected, str(self.roleRepository))
         self.assertIsNotNone(self.roleRepository.get_engine())
+
+        self.permissionRepository = PermissionRepository()
+        logger.debug(f"permissionRepository={self.permissionRepository}")
+        self.assertIsNotNone(self.permissionRepository)
         expected = 'PermissionRepository <engine=Engine(sqlite:///testPosts.db)>'
         self.assertEqual(expected, str(self.permissionRepository))
         self.assertIsNotNone(self.permissionRepository.get_engine())
@@ -42,6 +43,8 @@ class RoleRepositoryTest(AbstractTestCase):
         """The tearDown() method of the TestCase class is automatically invoked after each test, so it's an ideal place
         to insert common logic that applies to all the tests in the class"""
         logger.debug("+tearDown()")
+        self.permissionRepository = None
+        self.assertIsNone(self.permissionRepository)
         self.roleRepository = None
         self.assertIsNone(self.roleRepository)
         super().tearDown()

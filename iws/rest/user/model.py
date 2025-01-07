@@ -2,6 +2,7 @@
 # Author: Rohtash Lakra
 #
 import logging
+from dataclasses import field
 from datetime import datetime
 from typing import Optional, List
 
@@ -42,7 +43,7 @@ class User(Person):
     avatar_url: str | None = None
 
     # roles: Optional[List["Role"]] = None
-    addresses: Optional[List["Address"]] = None
+    addresses: Optional[List["Address"]] = field(default_factory=list)
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
@@ -63,7 +64,7 @@ class User(Person):
 class Address(AbstractModel):
     """Address contains properties specific to this object."""
 
-    user_id: int = None
+    user_id: int | None = None
     user: User = None
     street1: str = None
     street2: str | None = None

@@ -1,8 +1,10 @@
 #
 # Author: Rohtash Lakra
 #
-import unittest
 import json
+import unittest
+
+from framework.time import timeMillis
 from tests import app
 
 
@@ -84,3 +86,6 @@ class AbstractTestCase(unittest.TestCase):
     #     assert current_app == self.app
     #     # valid object and expected results
     #     print("-test_webapp()")
+
+    def getTestEmail(self, isAdmin: bool = False):
+        return f"{'admin' if isAdmin else 'user'}{timeMillis()}@lakra.com"

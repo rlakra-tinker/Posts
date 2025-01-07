@@ -20,7 +20,7 @@ class RoleService(AbstractService):
 
     def __init__(self):
         logger.debug("RoleService()")
-        self.repository = RoleRepository()
+        self.roleRepository = RoleRepository()
 
     def validate(self, operation: SchemaOperation, role: Role) -> None:
         logger.debug(f"+validate({operation}, {role})")
@@ -28,20 +28,21 @@ class RoleService(AbstractService):
         error_messages = []
 
         # validate the object
-        if not role:
+        if role:
+            match operation.name:
+                case SchemaOperation.CREATE.name:
+                    # validate the required fields
+                    if not role.name:
+                        error_messages.append("Role 'name' is required!")
+
+                case SchemaOperation.UPDATE.name:
+                    if not role.id:
+                        error_messages.append("Role 'id' is required!")
+        else:
             error_messages.append("'Role' is not fully defined!")
 
-        match operation.name:
-            case SchemaOperation.CREATE.name:
-                # validate the required fields
-                if not role.name:
-                    error_messages.append("Role 'name' is required!")
-
-            case SchemaOperation.UPDATE.name:
-                if not role.id:
-                    error_messages.append("Role 'id' is required!")
-
         # throw an error if any validation error
+        logger.debug(f"{type(error_messages)} => error_messages={error_messages}")
         if error_messages and len(error_messages) > 0:
             error = ValidationException(httpStatus=HTTPStatus.INVALID_DATA, messages=error_messages)
             logger.debug(f"{type(error)} = exception={error}")
@@ -52,7 +53,7 @@ class RoleService(AbstractService):
     # @override
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
         logger.debug(f"+findByFilter({filters})")
-        roleSchemas = self.repository.findByFilter(filters)
+        roleSchemas = self.roleRepository.findByFilter(filters)
         # logger.debug(f"roleSchemas => type={type(roleSchemas)}, values={roleSchemas}")
         roleModels = []
         for roleSchema in roleSchemas:
@@ -70,7 +71,7 @@ class RoleService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        roleSchemas = self.repository.findByFilter(filters)
+        roleSchemas = self.roleRepository.findByFilter(filters)
         result = True if roleSchemas else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
@@ -102,9 +103,9 @@ class RoleService(AbstractService):
 
         # role = self.repository.create(role)
         roleSchema = RoleMapper.fromModel(role)
-        roleSchema = self.repository.save(roleSchema)
+        roleSchema = self.roleRepository.save(roleSchema)
         if roleSchema and roleSchema.id is None:
-            roleSchema = self.repository.findByFilter({"name": role.name})
+            roleSchema = self.roleRepository.findByFilter({"name": role.name})
 
         role = RoleMapper.fromSchema(roleSchema)
         # role = Role.model_validate(roleSchema)
@@ -131,7 +132,7 @@ class RoleService(AbstractService):
         if not self.existsByFilter({"id": role.id}):
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Role doesn't exist!")
 
-        roleSchemas = self.repository.findByFilter({"id": role.id})
+        roleSchemas = self.roleRepository.findByFilter({"id": role.id})
         roleSchema = roleSchemas[0]
         if role.name and roleSchema.name != role.name:
             roleSchema.name = role.name
@@ -143,9 +144,9 @@ class RoleService(AbstractService):
             roleSchema.meta_data = role.meta_data
 
         # roleSchema = CompanyMapper.fromModel(oldRole)
-        self.repository.update(roleSchema)
+        self.roleRepository.update(roleSchema)
         # roleSchema = self.repository.update(mapper=RoleSchema, mappings=[roleSchema])
-        roleSchema = self.repository.findByFilter({"id": role.id})[0]
+        roleSchema = self.roleRepository.findByFilter({"id": role.id})[0]
         role = RoleMapper.fromSchema(roleSchema)
         logger.debug(f"-update(), role={role}")
         return role
@@ -155,7 +156,7 @@ class RoleService(AbstractService):
         # check record exists by id
         filter = {"id": id}
         if self.existsByFilter(filter):
-            self.repository.delete(filter)
+            self.roleRepository.delete(filter)
         else:
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Role doesn't exist!")
 

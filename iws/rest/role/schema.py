@@ -6,7 +6,7 @@ from typing import Optional, List
 from sqlalchemy import PickleType, JSON, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from framework.orm.sqlalchemy.schema import BaseSchema, NamedSchema
+from framework.orm.sqlalchemy.schema import AbstractSchema, NamedSchema
 
 """
 S = Subject = A person or automated agent
@@ -44,9 +44,9 @@ class RoleSchema(NamedSchema):
 
     # Define the many-to-many relationship
     # permissions: Mapped[List["PermissionSchema"]] = relationship(secondary="role_permissions")
-    permissions: Mapped[List["PermissionSchema"]] = relationship('PermissionSchema',
-                                                                 secondary="role_permissions",
-                                                                 lazy="joined")
+    permissions: Mapped[Optional[List["PermissionSchema"]]] = relationship('PermissionSchema',
+                                                                           secondary="role_permissions",
+                                                                           lazy="joined")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -98,17 +98,17 @@ class PermissionSchema(NamedSchema):
         return str(self)
 
 
-class RolePermissionSchema(BaseSchema):
+class RolePermissionSchema(AbstractSchema):
     """ RolePermissionSchema represents [user_roles] Table """
 
     __tablename__ = "role_permissions"
 
     # foreign key to "roles.id" and "users.id" are added
     # not Optional[], therefore will be NOT NULL
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
 
     # not Optional[], therefore will be NOT NULL
-    permission_id: Mapped[int] = mapped_column(ForeignKey("permissions.id"))
+    permission_id: Mapped[int] = mapped_column(ForeignKey("permissions.id"), primary_key=True)
 
     # Define the many-to-one relationship
     # association between Association -> Role

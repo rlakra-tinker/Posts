@@ -4,10 +4,10 @@
 from datetime import datetime
 from typing import Optional, List
 
-from sqlalchemy import String, ForeignKey, func, PickleType, JSON
+from sqlalchemy import String, ForeignKey, func, PickleType, JSON, Boolean
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from framework.orm.sqlalchemy.schema import BaseSchema
+from framework.orm.sqlalchemy.schema import AbstractSchema, BaseSchema
 
 
 class PersonSchema(BaseSchema):
@@ -16,7 +16,7 @@ class PersonSchema(BaseSchema):
     __abstract__ = True
 
     # not Optional[], therefore will be NOT NULL
-    email: Mapped[str] = mapped_column(String(128))
+    email: Mapped[str] = mapped_column(String(128), unique=True)
     # not Optional[], therefore will be NOT NULL
     first_name: Mapped[str] = mapped_column(String(64))
     # not Optional[], therefore will be NOT NULL
@@ -41,14 +41,14 @@ class UserSchema(PersonSchema):
     __tablename__ = "users"
 
     # not Optional[], therefore will be NOT NULL
-    user_name: Mapped[str] = mapped_column(String(64))
+    user_name: Mapped[str] = mapped_column(String(64), unique=True)
     # not Optional[], therefore will be NOT NULL
     password: Mapped[str] = mapped_column(String(128))
     # not Optional[], therefore will be NOT NULL
-    admin: Mapped[bool] = False
+    admin: Mapped[Optional[bool]] = mapped_column(Boolean, default=False)
 
-    # not Optional[], therefore will be NOT NULL
-    last_seen: Mapped[datetime] = mapped_column(insert_default=func.now())
+    # Optional[], therefore will be NULL
+    last_seen: Mapped[Optional[datetime]] = mapped_column(insert_default=func.now())
     # not Optional[], therefore will be NOT NULL
     avatar_url: Mapped[Optional[str]] = mapped_column(String(128))
 
@@ -81,16 +81,16 @@ class UserSchema(PersonSchema):
         return str(self)
 
 
-class UserRoleSchema(BaseSchema):
+class UserRoleSchema(AbstractSchema):
     """ UserRoleSchema represents [user_roles] Table """
 
     __tablename__ = "user_roles"
 
     # foreign key to "roles.id" and "users.id" are added
     # not Optional[], therefore will be NOT NULL
-    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"))
+    role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
     # not Optional[], therefore will be NOT NULL
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
 
     # Define the many-to-one relationship
     role: Mapped["RoleSchema"] = relationship("RoleSchema")
@@ -128,7 +128,7 @@ class AddressSchema(BaseSchema):
     # not Optional[], therefore will be NOT NULL
     country: Mapped[str] = mapped_column(String(64))
     # not Optional[], therefore will be NOT NULL
-    zip: Mapped[str] = mapped_column(String(64))
+    zip: Mapped[str] = mapped_column(String(16))
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -141,10 +141,10 @@ class AddressSchema(BaseSchema):
         return str(self)
 
 
-class UserSessionSchema(BaseSchema):
+class UserSecuritySchema(BaseSchema):
     """ UserSessionSchema represents [user_sessions] Table """
 
-    __tablename__ = "user_sessions"
+    __tablename__ = "user_securities"
 
     # foreign key to "users.id" is added
     # not Optional[], therefore will be NOT NULL

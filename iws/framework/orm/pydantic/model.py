@@ -3,6 +3,8 @@
 # Reference(s):
 #  - https://docs.pydantic.dev/latest/
 #
+from __future__ import annotations
+
 import json
 import logging
 from datetime import datetime
@@ -84,7 +86,7 @@ class AbstractPydanticModel(BaseModel):
 class AbstractModel(AbstractPydanticModel):
     """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
 
-    id: int = None
+    id: int | None = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
 

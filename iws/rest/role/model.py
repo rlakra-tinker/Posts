@@ -3,7 +3,8 @@
 #
 
 import logging
-from typing import Dict, Any
+from dataclasses import field
+from typing import Dict, Any, List, Optional
 
 from pydantic import model_validator
 
@@ -18,6 +19,7 @@ class Role(AbstractModel):
     name: str = None
     active: bool = False
     meta_data: Dict[str, Any] | None = None
+    permissions: Optional[List["Permission"]] = field(default_factory=list)
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
@@ -37,12 +39,13 @@ class Role(AbstractModel):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
+        return ("{} <id={}, name={}, active={}, meta_data={}, permissions={}, {}>"
                 .format(self.getClassName(),
                         self.id,
                         self.name,
                         self.active,
                         self.meta_data,
+                        self.permissions,
                         self._auditable()))
 
     def __repr__(self) -> str:
@@ -54,8 +57,8 @@ class Permission(AbstractModel):
     """Permission contains properties specific to this object."""
 
     name: str = None
+    description: Optional[str] = None
     active: bool = False
-    meta_data: Dict[str, Any] | None = None
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
@@ -79,8 +82,8 @@ class Permission(AbstractModel):
                 .format(self.getClassName(),
                         self.id,
                         self.name,
+                        self.description,
                         self.active,
-                        self.meta_data,
                         self._auditable()))
 
     def __repr__(self) -> str:
