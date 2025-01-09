@@ -99,12 +99,6 @@ class HttpTest(AbstractTestCase):
         self.assertTrue(HTTPStatus.isStatusSuccess(HTTPStatus.NO_CONTENT))
         self.assertFalse(HTTPStatus.isStatusSuccess(HTTPStatus.BAD_REQUEST))
 
-    def test_get_uuid(self):
-        logger.debug("test_get_uuid()")
-        uuid = HTTPUtils.get_uuid()
-        logger.debug(f"uuid={uuid}")
-        self.assertIsNotNone(uuid)
-
     def test_get(self):
         logger.debug("test_get()")
         http = HTTPUtils()

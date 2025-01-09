@@ -11,7 +11,7 @@ from datetime import datetime
 from enum import unique, auto
 from typing import Optional, Dict, List, Any
 
-from pydantic import BaseModel, ValidationError, ConfigDict, model_validator, field_validator
+from pydantic import BaseModel as PydanticBaseModel, ValidationError, ConfigDict, model_validator, field_validator
 
 from framework.enums import BaseEnum
 from framework.exception import AbstractException, ValidationException, DuplicateRecordException, NoRecordFoundException
@@ -39,9 +39,8 @@ class SyncStatus(BaseEnum):
     SCHEDULED = auto()
 
 
-# AbstractModel
-class AbstractPydanticModel(BaseModel):
-    """AbstractPydanticModel is a base model for all models inherit and provides basic configuration parameters."""
+class AbstractModel(PydanticBaseModel):
+    """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
     def getClassName(self) -> str:
@@ -83,8 +82,8 @@ class AbstractPydanticModel(BaseModel):
         return str(self)
 
 
-class AbstractModel(AbstractPydanticModel):
-    """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
+class BaseModel(AbstractModel):
+    """BaseModel is a base model for all models inherit and provides basic configuration parameters."""
 
     id: int | None = None
     created_at: Optional[datetime] = None
@@ -144,7 +143,7 @@ class AbstractModel(AbstractPydanticModel):
         return str(self)
 
 
-class NamedModel(AbstractModel):
+class NamedModel(BaseModel):
     """NamedModel used an entity with a property called 'name' in it"""
     name: str
 
@@ -183,7 +182,7 @@ class NamedModel(AbstractModel):
         return str(self)
 
 
-class ErrorModel(AbstractPydanticModel):
+class ErrorModel(AbstractModel):
     """ErrorModel represents the error object"""
     status: int = None
     message: str = None
@@ -217,10 +216,10 @@ class ErrorModel(AbstractPydanticModel):
         # debug details
         debug_info = {}
         if is_critical and exception is not None:
-            debug_info['exception'] = Utils.stack_trace(exception)
+            debug_info['exception'] = Utils.stackTrace(exception)
             return ErrorModel(status=httpStatus.statusCode, message=message, debug_info=debug_info)
         elif exception is not None:
-            debug_info['exception'] = Utils.stack_trace(exception)
+            debug_info['exception'] = Utils.stackTrace(exception)
             return ErrorModel(status=httpStatus.statusCode, message=message, debug_info=debug_info)
         else:
             return ErrorModel(status=httpStatus.statusCode, message=message)
@@ -239,11 +238,11 @@ class ErrorModel(AbstractPydanticModel):
         return str(self)
 
 
-class ResponseModel(AbstractPydanticModel):
+class ResponseModel(AbstractModel):
     """ResponseModel represents the response object"""
     status: int
     message: Optional[str] = None
-    data: Optional[List[AbstractModel]] = None
+    data: Optional[List[BaseModel]] = None
     errors: Optional[List[ErrorModel]] = None
 
     def to_json(self) -> str:
@@ -292,7 +291,7 @@ class ResponseModel(AbstractPydanticModel):
         """Returns the string representation of this object"""
         return str(self)
 
-    def addInstance(self, instance: AbstractPydanticModel = None):
+    def addInstance(self, instance: AbstractModel = None):
         """Adds an object into the list of data or errors"""
         logger.debug(
             f"+addInstance({instance}) => type={type(instance)}, object={str(instance)}, json={instance.to_json()}")
@@ -302,7 +301,7 @@ class ResponseModel(AbstractPydanticModel):
 
             self.errors.append(instance)
 
-        elif isinstance(instance, AbstractModel):
+        elif isinstance(instance, BaseModel):
             if self.data is None and instance:
                 self.data = []
 
@@ -312,7 +311,7 @@ class ResponseModel(AbstractPydanticModel):
 
         logger.debug(f"-addInstance(), data={self.data}, errors={self.errors}, json={self.to_json()}")
 
-    def addInstances(self, instances: List[AbstractPydanticModel] = None):
+    def addInstances(self, instances: List[AbstractModel] = None):
         logger.debug(f"+addInstances(), instances={instances}")
         for instance in instances:
             self.addInstance(instance)
@@ -324,7 +323,7 @@ class ResponseModel(AbstractPydanticModel):
         return self.errors is not None
 
     @classmethod
-    def buildResponse(cls, httpStatus: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
+    def buildResponse(cls, httpStatus: HTTPStatus, instance: AbstractModel = None, message: str = None,
                       exception: Exception = None, is_critical: bool = False):
         logger.debug(f"+buildResponse({httpStatus}, {instance}, {message}, {exception}, {is_critical})")
         if isinstance(instance, ErrorModel):  # check if an ErrorModel entity
@@ -337,8 +336,8 @@ class ResponseModel(AbstractPydanticModel):
             # build response and add errorModel in the list
             response = ResponseModel(status=httpStatus.statusCode)
             response.addInstance(errorModel)
-        elif isinstance(instance, AbstractModel):
-            logger.debug(f"isinstance(entity, AbstractModel) => {isinstance(instance, AbstractModel)}")
+        elif isinstance(instance, BaseModel):
+            logger.debug(f"isinstance(entity, AbstractModel) => {isinstance(instance, BaseModel)}")
             response = ResponseModel(status=httpStatus.statusCode)
             # build errorModel response, if exception is provided
             if HTTPStatus.isStatusSuccess(httpStatus):
@@ -408,12 +407,12 @@ class ResponseModel(AbstractPydanticModel):
         return response
 
     @classmethod
-    def jsonResponse(cls, httpStatus: HTTPStatus, instance: AbstractPydanticModel = None, message: str = None,
+    def jsonResponse(cls, httpStatus: HTTPStatus, instance: AbstractModel = None, message: str = None,
                      exception: Exception = None, is_critical: bool = False):
         return ResponseModel.buildResponse(httpStatus, instance, message, exception, is_critical).to_json()
 
     @classmethod
-    def jsonResponses(cls, httpStatus: HTTPStatus, instances: Optional[List[AbstractPydanticModel]] = []):
+    def jsonResponses(cls, httpStatus: HTTPStatus, instances: Optional[List[AbstractModel]] = []):
         logger.debug(f"jsonResponses() => httpStatus={httpStatus}")
         response = ResponseModel.buildResponse(httpStatus=httpStatus)
         for instance in instances:

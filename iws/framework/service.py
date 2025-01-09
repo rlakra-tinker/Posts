@@ -5,7 +5,7 @@ import logging
 from abc import abstractmethod
 from typing import List, Optional, Dict, Any
 
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 
 logger = logging.getLogger(__name__)
@@ -25,12 +25,12 @@ class AbstractService(object):
         return type(self).__name__
 
     @abstractmethod
-    def validate(self, operation: SchemaOperation, baseModel: AbstractModel) -> None:
+    def validate(self, operation: SchemaOperation, baseModel: BaseModel) -> None:
         logger.debug(f"validate({operation}, {baseModel})")
         pass
 
     @abstractmethod
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"findByFilter({filters})")
         pass
 

@@ -5,12 +5,12 @@ import logging
 
 from pydantic import model_validator
 
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class Contact(AbstractModel):
+class Contact(BaseModel):
     """Contact contains properties specific to this object."""
 
     first_name: str = None

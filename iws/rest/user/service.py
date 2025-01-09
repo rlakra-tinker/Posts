@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from rest.role.service import RoleService
@@ -21,7 +21,7 @@ class UserService(AbstractService):
 
     def __init__(self):
         logger.debug(f"UserService()")
-        self.repository = UserRepository()
+        self.userRepository = UserRepository()
 
     def validate(self, operation: SchemaOperation, user: User) -> None:
         logger.debug(f"+validate({operation}, {user})")
@@ -66,9 +66,9 @@ class UserService(AbstractService):
         logger.debug(f"-validate()")
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"+findByFilter({filters})")
-        userSchemas = self.repository.findByFilter(filters)
+        userSchemas = self.userRepository.findByFilter(filters)
         # logger.debug(f"userSchemas => type={type(userSchemas)}, values={userSchemas}")
         roleModels = []
         for userSchema in userSchemas:
@@ -84,7 +84,7 @@ class UserService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        userSchemas = self.repository.findByFilter(filters)
+        userSchemas = self.userRepository.findByFilter(filters)
         result = True if userSchemas else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
@@ -119,9 +119,9 @@ class UserService(AbstractService):
         roleModel = roleService.findByFilter({"name": "Manager"})
         logger.debug(f"roleModel={roleModel}")
         userSchema = UserMapper.fromModel(user)
-        userSchema = self.repository.save(userSchema)
+        userSchema = self.userRepository.save(userSchema)
         if userSchema and userSchema.id is None:
-            userSchema = self.repository.findByFilter({"name": user.name})
+            userSchema = self.userRepository.findByFilter({"name": user.name})
 
         user = UserMapper.fromSchema(userSchema)
         # user = User.model_validate(userSchema)
@@ -148,7 +148,7 @@ class UserService(AbstractService):
         if not self.existsByFilter({"id": user.id}):
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User doesn't exist!")
 
-        userSchemas = self.repository.findByFilter({"id": user.id})
+        userSchemas = self.userRepository.findByFilter({"id": user.id})
         userSchema = userSchemas[0]
         #  Person
         if user.email and userSchema.email != user.email:
@@ -170,9 +170,9 @@ class UserService(AbstractService):
             userSchema.avatar_url = user.avatar_url
 
         # userSchema = CompanyMapper.fromModel(oldRole)
-        self.repository.update(userSchema)
-        # userSchema = self.repository.update(mapper=UserSchema, mappings=[userSchema])
-        userSchema = self.repository.findByFilter({"id": user.id})[0]
+        self.userRepository.update(userSchema)
+        # userSchema = self.userRepository.update(mapper=UserSchema, mappings=[userSchema])
+        userSchema = self.userRepository.findByFilter({"id": user.id})[0]
         user = UserMapper.fromSchema(userSchema)
         logger.debug(f"-update(), user={user}")
         return user
@@ -182,7 +182,7 @@ class UserService(AbstractService):
         # check record exists by id
         filter = {"id": id}
         if self.existsByFilter(filter):
-            self.repository.delete(filter)
+            self.userRepository.delete(filter)
         else:
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "User doesn't exist!")
 

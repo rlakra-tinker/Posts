@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from rest.role.mapper import RoleMapper
@@ -51,7 +51,7 @@ class RoleService(AbstractService):
         logger.debug(f"-validate()")
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"+findByFilter({filters})")
         roleSchemas = self.roleRepository.findByFilter(filters)
         # logger.debug(f"roleSchemas => type={type(roleSchemas)}, values={roleSchemas}")

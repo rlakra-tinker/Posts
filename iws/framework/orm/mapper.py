@@ -4,7 +4,7 @@
 import logging
 from abc import abstractmethod
 
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import BaseSchema
 
 logger = logging.getLogger(__name__)
@@ -12,25 +12,26 @@ logger = logging.getLogger(__name__)
 
 class Mapper:
 
-    @staticmethod
-    def isPydantic(instance: object) -> bool:
+    @classmethod
+    def isPydantic(cls, instance: object) -> bool:
         """ Checks whether an object is pydantic. """
+        logger.debug(f"isPydantic({instance}), type={type(instance)}, name={type(instance).__class__.__name__}")
         return type(instance).__class__.__name__ == "ModelMetaclass"
 
     @classmethod
     @abstractmethod
-    def fromSchema(cls, baseSchema: BaseSchema) -> AbstractModel:
-        logger.debug(f"fromSchema({baseSchema})")
-        return None
+    def fromSchema(cls, schemaObject: BaseSchema) -> BaseModel:
+        logger.debug(f"fromSchema({schemaObject})")
+        pass
 
     @classmethod
     @abstractmethod
-    def fromModel(cls, baseModel: AbstractModel) -> BaseSchema:
-        logger.debug(f"fromModel({baseModel})")
-        return None
+    def fromModel(cls, modelObject: BaseModel) -> BaseSchema:
+        logger.debug(f"fromModel({modelObject})")
+        pass
 
     @classmethod
-    def fromPydanticModel(cls, modelInstance: AbstractModel) -> BaseSchema:
+    def fromPydanticModel(cls, modelInstance: BaseModel) -> BaseSchema:
         logger.debug(f"+fromPydanticModel({modelInstance})")
         classObject = cls()
         properties = dict(modelInstance)
@@ -46,7 +47,7 @@ class Mapper:
         return classObject
 
     @classmethod
-    def parsePydanticModel(self, modelInstance: AbstractModel) -> BaseSchema:
+    def parsePydanticModel(cls, modelInstance: BaseModel) -> BaseSchema:
         logger.debug(f"+parsePydanticModel({modelInstance})")
         if Mapper.isPydantic(modelInstance):
             try:
@@ -58,7 +59,7 @@ class Mapper:
                 raise AttributeError(f"Error converting pydantic model: {model_name}.Meta.orm_model not specified!")
 
         elif isinstance(modelInstance, list):
-            return [self.parsePydanticModel(model) for model in modelInstance]
+            return [cls.parsePydanticModel(model) for model in modelInstance]
 
         elif isinstance(modelInstance, dict):
             for key, model in modelInstance.items():
@@ -69,12 +70,12 @@ class Mapper:
 
     @classmethod
     # @abstractmethod
-    def fromSQLAlchemySchema(cls, baseSchema: BaseSchema) -> AbstractModel:
+    def fromSQLAlchemySchema(cls, baseSchema: BaseSchema) -> BaseModel:
         logger.debug(f"fromSQLAlchemySchema({baseSchema})")
         return None
 
     @classmethod
     # @abstractmethod
-    def parseSQLAlchemySchema(cls, baseSchema: BaseSchema) -> AbstractModel:
+    def parseSQLAlchemySchema(cls, baseSchema: BaseSchema) -> BaseModel:
         logger.debug(f"parseSQLAlchemySchema({baseSchema})")
         return None

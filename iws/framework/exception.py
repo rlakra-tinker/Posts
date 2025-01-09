@@ -47,6 +47,16 @@ class AbstractException(Exception):
     #     return str(self)
 
 
+class AuthenticationException(AbstractException):
+    """ Authentication Exception """
+    pass
+
+
+class AuthorizationException(AbstractException):
+    """ Authorization Exception """
+    pass
+
+
 class DuplicateRecordException(AbstractException):
     """ Duplicate Record Exception """
 

@@ -5,7 +5,7 @@ import json
 import logging
 
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import AbstractPydanticModel, AbstractModel, NamedModel, ErrorModel, ResponseModel
+from framework.orm.pydantic.model import AbstractModel, BaseModel, NamedModel, ErrorModel, ResponseModel
 from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)
@@ -16,14 +16,14 @@ class TestPydanticModel(AbstractTestCase):
     def test_abstract_pydantic_model(self):
         """Tests an AbstractEntity object"""
         logger.debug("+test_abstract_pydantic_model()")
-        abstract_model = AbstractPydanticModel(id=1)
+        abstract_model = AbstractModel(id=1)
         logger.debug(f"abstract_model={abstract_model}")
 
         # valid object and expected results
-        self.assertTrue(isinstance(abstract_model, AbstractPydanticModel))
+        self.assertTrue(isinstance(abstract_model, AbstractModel))
         self.assertFalse(isinstance(abstract_model, TestPydanticModel))
-        self.assertTrue(issubclass(AbstractPydanticModel, object))
-        self.assertFalse(issubclass(object, AbstractPydanticModel))
+        self.assertTrue(issubclass(AbstractModel, object))
+        self.assertFalse(issubclass(object, AbstractModel))
 
         logger.debug("-test_abstract_pydantic_model()")
         print()
@@ -108,14 +108,14 @@ class TestPydanticModel(AbstractTestCase):
     def test_abstract_model(self):
         """Tests an AbstractModel object"""
         logger.debug("+test_abstract_model()")
-        abstract_model = AbstractModel(id=1)
+        abstract_model = BaseModel(id=1)
         logger.debug(f"abstract_model={abstract_model}")
 
         # valid object and expected results
-        self.assertTrue(isinstance(abstract_model, AbstractModel))
+        self.assertTrue(isinstance(abstract_model, BaseModel))
         self.assertFalse(isinstance(abstract_model, TestPydanticModel))
-        self.assertTrue(issubclass(AbstractModel, object))
-        self.assertFalse(issubclass(object, AbstractModel))
+        self.assertTrue(issubclass(BaseModel, object))
+        self.assertFalse(issubclass(object, BaseModel))
 
         logger.debug("-test_abstract_model()")
         print()
@@ -130,11 +130,11 @@ class TestPydanticModel(AbstractTestCase):
         self.assertEqual(10, named_model.get_id())
         self.assertNotEqual(2, named_model.get_id())
 
-        self.assertTrue(isinstance(named_model, AbstractModel))
+        self.assertTrue(isinstance(named_model, BaseModel))
         self.assertTrue(isinstance(named_model, NamedModel))
         self.assertFalse(isinstance(named_model, TestPydanticModel))
-        self.assertTrue(issubclass(NamedModel, AbstractModel))
-        self.assertFalse(issubclass(AbstractModel, NamedModel))
+        self.assertTrue(issubclass(NamedModel, BaseModel))
+        self.assertFalse(issubclass(BaseModel, NamedModel))
 
         logger.debug("-test_named_model()")
         print()
@@ -153,12 +153,12 @@ class TestPydanticModel(AbstractTestCase):
         self.assertNotEqual(HTTPStatus.INTERNAL_SERVER_ERROR.message, error_model.message)
         self.assertNotEqual(HTTPStatus.BAD_REQUEST, error_model.status)
 
-        self.assertTrue(isinstance(error_model, AbstractPydanticModel))
+        self.assertTrue(isinstance(error_model, AbstractModel))
         self.assertTrue(isinstance(error_model, ErrorModel))
-        self.assertFalse(isinstance(error_model, AbstractModel))
+        self.assertFalse(isinstance(error_model, BaseModel))
         self.assertTrue(issubclass(ErrorModel, object))
-        self.assertTrue(issubclass(ErrorModel, AbstractPydanticModel))
-        self.assertFalse(issubclass(AbstractPydanticModel, ErrorModel))
+        self.assertTrue(issubclass(ErrorModel, AbstractModel))
+        self.assertFalse(issubclass(AbstractModel, ErrorModel))
 
         logger.debug("-test_error_model()")
         print()
@@ -166,7 +166,7 @@ class TestPydanticModel(AbstractTestCase):
     def test_models(self):
         """Tests all entities object"""
         logger.debug("+test_models()")
-        entity_object = AbstractModel(id=100)
+        entity_object = BaseModel(id=100)
         logger.debug(f"entity_object: {entity_object}")
         self.assertEqual(100, entity_object.get_id())
         self.assertNotEqual("Lakra", entity_object.get_id())
@@ -185,9 +185,9 @@ class TestPydanticModel(AbstractTestCase):
 
         # valid object and expected results
         self.assertTrue(isinstance(entity_object, NamedModel))
-        self.assertTrue(isinstance(entity_object, AbstractModel))
+        self.assertTrue(isinstance(entity_object, BaseModel))
         self.assertFalse(isinstance(entity_object, ErrorModel))
-        self.assertFalse(issubclass(object, AbstractModel))
+        self.assertFalse(issubclass(object, BaseModel))
 
         errorModel = ErrorModel.buildError(httpStatus=HTTPStatus.BAD_REQUEST, message="Error")
         logger.debug(f"errorModel={errorModel}")

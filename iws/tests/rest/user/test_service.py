@@ -134,6 +134,11 @@ class UserServiceTest(AbstractTestCase):
         self.assertIsNotNone(self.user)
         self.assertIsNotNone(self.user.id)
         self.assertEquals("Roh", self.user.first_name)
+
+        # find registered user
+        user = self.userService.findByFilter({"email": self.user.email})[0]
+        self.assertIsNotNone(user)
+        self.assertEqual(self.user.email, user.email)
         logger.debug("-test_register_user()")
         print()
 

@@ -6,7 +6,7 @@ from typing import List, Optional, Dict, Any
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from rest.company.mapper import CompanyMapper
@@ -55,7 +55,7 @@ class CompanyService(AbstractService):
         return CompanyMapper.fromSchema(self.repository.findById(CompanySchema, id))
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AbstractModel]]:
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"+findByFilter({filters})")
         companySchemas = self.repository.findByFilter(filters)
         companyModels = []

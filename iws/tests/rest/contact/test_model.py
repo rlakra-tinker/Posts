@@ -5,7 +5,7 @@ import json
 import logging
 
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import AbstractPydanticModel, ResponseModel, ErrorModel
+from framework.orm.pydantic.model import AbstractModel, ResponseModel, ErrorModel
 from rest.contact.model import Contact
 from tests.base import AbstractTestCase
 
@@ -62,7 +62,7 @@ class ContactModelTest(AbstractTestCase):
         logger.debug(f"contact={self.contact}")
         self.assertIsNotNone(self.contact)
         # valid object and expected results
-        self.assertTrue(isinstance(self.contact, AbstractPydanticModel))
+        self.assertTrue(isinstance(self.contact, AbstractModel))
         self.assertFalse(isinstance(self.contact, AbstractTestCase))
         self.assertTrue(issubclass(Contact, object))
         self.assertFalse(issubclass(object, Contact))

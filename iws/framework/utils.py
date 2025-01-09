@@ -6,6 +6,7 @@ import os
 import re
 import sys
 import traceback
+import uuid
 
 import requests
 
@@ -22,7 +23,12 @@ CAPITALS = re.compile('([A-Z])')
 class Utils(BaseEnum):
 
     @staticmethod
-    def stack_trace(exception: Exception):
+    def randomUUID() -> str:
+        """Generate a random UUID (Universally Unique Identifier)."""
+        return uuid.uuid4().hex
+
+    @staticmethod
+    def stackTrace(exception: Exception):
         """Returns the string representation of exception"""
         exc_info = sys.exc_info()
         return ''.join(traceback.format_exception(*exc_info))
@@ -32,7 +38,7 @@ class Utils(BaseEnum):
         return exception(message)
 
     @staticmethod
-    def camel_case_to_pep8(text):
+    def camelCaseToSnakeCase(text):
         """Convert a camel cased text to PEP8 style."""
         converted = CAPITALS.sub(lambda m: '_' + m.groups()[0].lower(), text)
         if converted[0] == '_':
@@ -41,7 +47,7 @@ class Utils(BaseEnum):
             return converted
 
     @staticmethod
-    def pep8_to_camel_case(text, initial=False):
+    def snakeCaseToCamelCase(text, initial=False):
         """Convert a PEP8 style text to camel case."""
         chunks = text.split('_')
         converted = [s[0].upper() + s[1:].lower() for s in chunks]
@@ -66,6 +72,7 @@ class Utils(BaseEnum):
         _watcher = StopWatch()
         _watcher.start()
         response = requests.get(url)
+        logger.debug(f"response={response}")
         _watcher.stop()
         elapsed = _watcher.elapsed()
         logger.debug(f"elapsed={elapsed}")

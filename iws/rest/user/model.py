@@ -6,12 +6,12 @@ from dataclasses import field
 from datetime import datetime
 from typing import Optional, List
 
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import BaseModel
 
 logger = logging.getLogger(__name__)
 
 
-class Person(AbstractModel):
+class Person(BaseModel):
     """Person contains properties specific to this object."""
 
     email: str = None
@@ -61,7 +61,7 @@ class User(Person):
         return str(self)
 
 
-class Address(AbstractModel):
+class Address(BaseModel):
     """Address contains properties specific to this object."""
 
     user_id: int | None = None

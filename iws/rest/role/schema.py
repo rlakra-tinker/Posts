@@ -124,3 +124,30 @@ class RolePermissionSchema(AbstractSchema):
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
         return str(self)
+
+
+class CapabilitySchema(NamedSchema):
+    """ CapabilitySchema represents [roles] Table
+
+    Capability = refers the action allowed to a resource.
+    A capability can be assigned to many roles.
+    A capability can be assigned to many operations.
+    """
+
+    __tablename__ = "capabilities"
+
+    # Optional[], therefore will be NULL
+    description: Mapped[Optional[str]] = mapped_column(String(128))
+
+    # not Optional[], therefore will be NOT NULL
+    active: Mapped[bool] = mapped_column(unique=False, default=False)
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
+                .format(self.getClassName(),
+                        self.id,
+                        self.name,
+                        self.description,
+                        self.active,
+                        self.auditable()))

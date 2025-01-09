@@ -2,9 +2,9 @@ import logging
 import unittest
 
 from framework.time import timeMillis
-from rest.role.mapper import RoleMapper, PermissionMapper
-from rest.role.model import Role, Permission
-from rest.role.schema import RoleSchema, PermissionSchema
+from rest.role.mapper import RoleMapper, PermissionMapper, CapabilityMapper
+from rest.role.model import Role, Permission, Capability
+from rest.role.schema import RoleSchema, PermissionSchema, CapabilitySchema
 from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)
@@ -145,6 +145,59 @@ class RoleMapperTest(AbstractTestCase):
         # asset role's permission
         self.assertPermissionSchemaAndPermission(readOnlyRoleSchema.permissions[0], readPermission)
         logger.debug("-test_role_fromModel_with_permission()")
+        print()
+
+    def assertCapabilitySchemaAndCapability(self, expectedObject: CapabilitySchema, actualObject: Capability):
+        """Asserts the schema and model objects."""
+        logger.debug(
+            f"assertCapabilitySchemaAndCapability(), expectedObject={expectedObject}, actualObject={actualObject}")
+        self.assertEqual(expectedObject.id, actualObject.id)
+        self.assertEqual(expectedObject.name, actualObject.name)
+        self.assertEqual(expectedObject.description, actualObject.description)
+        self.assertEqual(expectedObject.active, actualObject.active)
+
+    def test_capability_fromSchema(self):
+        logger.debug("+test_capability_fromSchema()")
+        # create a capability
+        capabilityName = f"Create-{timeMillis()}"
+        capability_json = {
+            "name": capabilityName,
+            "active": True,
+            "description": "Create Capability"
+        }
+
+        capabilitySchema = CapabilitySchema(**capability_json)
+        logger.debug(f"capabilitySchema={capabilitySchema}")
+        self.assertIsNotNone(capabilitySchema)
+        capability = CapabilityMapper.fromSchema(capabilitySchema)
+        logger.debug(f"capability={capability}")
+        self.assertIsNotNone(capability)
+
+        # validate objects
+        self.assertCapabilitySchemaAndCapability(capabilitySchema, capability)
+        logger.debug("-test_capability_fromSchema()")
+        print()
+
+    def test_capability_fromModel(self):
+        logger.debug("+test_capability_fromModel()")
+        # create a capability
+        capabilityName = f"Create-{timeMillis()}"
+        capability_json = {
+            "name": capabilityName,
+            "active": True,
+            "description": "Create Capability"
+        }
+
+        capability = Capability(**capability_json)
+        logger.debug(f"capability={capability}")
+        self.assertIsNotNone(capability)
+        capabilitySchema = CapabilityMapper.fromModel(capability)
+        logger.debug(f"capabilitySchema={capabilitySchema}")
+        self.assertIsNotNone(capabilitySchema)
+
+        # validate objects
+        self.assertCapabilitySchemaAndCapability(capabilitySchema, capability)
+        logger.debug("-test_capability_fromModel()")
         print()
 
 

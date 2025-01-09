@@ -4,8 +4,8 @@
 import logging
 
 from framework.orm.mapper import Mapper
-from rest.role.model import Role, Permission
-from rest.role.schema import RoleSchema, PermissionSchema
+from rest.role.model import Role, Permission, Capability
+from rest.role.schema import RoleSchema, PermissionSchema, CapabilitySchema
 
 logger = logging.getLogger(__name__)
 
@@ -51,3 +51,20 @@ class PermissionMapper(Mapper):
         permissionSchema = PermissionSchema(**permissionModel.toJSONObject())
         logger.debug(f"-fromModel(), permissionSchema={permissionSchema}")
         return permissionSchema
+
+
+class CapabilityMapper(Mapper):
+
+    @classmethod
+    def fromSchema(cls, schemaObject: CapabilitySchema) -> Capability:
+        logger.debug(f"+fromSchema({schemaObject})")
+        modelObject = Capability(**schemaObject.toJSONObject())
+        logger.debug(f"-fromSchema(), modelObject={modelObject}")
+        return modelObject
+
+    @classmethod
+    def fromModel(cls, modelObject: Capability) -> CapabilitySchema:
+        logger.debug(f"+fromModel({modelObject})")
+        schemaObject = CapabilitySchema(**modelObject.toJSONObject())
+        logger.debug(f"-fromModel(), schemaObject={schemaObject}")
+        return schemaObject

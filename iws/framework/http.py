@@ -2,12 +2,12 @@
 # Author: Rohtash Lakra
 #
 import logging
-import uuid
 from enum import auto, unique
 from typing import Dict, Any
 
 from flask import g, request, current_app, Request
 
+from framework.utils import Utils
 from framework.enums import AutoUpperCase
 
 logger = logging.getLogger(__name__)
@@ -27,7 +27,7 @@ def log_decorator(func):
 
         if not g.get('execute_request'):
             g.execute_request = {
-                'x-request-id': HTTPUtils.get_uuid(),
+                'x-request-id': Utils.randomUUID(),
                 'platform': g.user_agent.get('platform') if g.get('user_agent') else None
             }
 
@@ -167,10 +167,6 @@ class HTTPUtils:
     def __init__(self):
         self.method = None
         self.url = None
-
-    @staticmethod
-    def get_uuid() -> str:
-        return uuid.uuid4().hex
 
     # @log_decorator
     def __execute(self, http_method: HTTPMethod, url: str):
