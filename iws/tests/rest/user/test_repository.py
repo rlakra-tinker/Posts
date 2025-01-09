@@ -1,8 +1,10 @@
 import logging
 import unittest
 
+from framework.security.hash import HashUtils
+from framework.utils import Utils
 from rest.user.repository import UserRepository, AddressRepository
-from rest.user.schema import UserSchema, AddressSchema
+from rest.user.schema import UserSchema, UserSecuritySchema, AddressSchema
 from tests.base import AbstractTestCase
 
 logger = logging.getLogger(__name__)
@@ -73,6 +75,41 @@ class UserRepositoryTest(AbstractTestCase):
         self.assertIsNotNone(userSchema.id)
         self.assertEqual(False, userSchema.admin)
         logger.debug("-test_create_user()")
+        print()
+
+    def test_create_user_security(self):
+        logger.debug("+test_create_user_security()")
+        userEmail = super().getTestEmail()
+        userName = userEmail.split("@")[0]
+        userSchema = UserSchema(email=userEmail, first_name="Roh", last_name="Lak", birth_date="2024-12-27",
+                                user_name=userName, password="password")
+        logger.debug(f"userSchema={userSchema}")
+        userSchema = self.userRepository.save(userSchema)
+        logger.debug(f"userSchema={userSchema}")
+        self.assertIsNotNone(userSchema.id)
+        self.assertEqual(False, userSchema.admin)
+
+        # userSecurity
+        salt = Utils.randomUUID()
+        passwordHashCode = HashUtils.hashCode(userSchema.password)
+        userSecuritySchema = UserSecuritySchema(platform="Python", salt=salt, hashed_auth_token=passwordHashCode)
+        logger.debug(f"userSecuritySchema={userSecuritySchema}")
+        userSchema.user_security = userSecuritySchema
+        # userSecuritySchema.user = userSchema
+        userSecuritySchema = self.addressRepository.save(userSecuritySchema)
+        logger.debug(f"userSecuritySchema={userSecuritySchema}")
+        self.assertIsNotNone(userSecuritySchema.id)
+        self.assertEqual("Python", userSecuritySchema.platform)
+        self.assertEqual(salt, userSecuritySchema.salt)
+        self.assertEqual(passwordHashCode, userSecuritySchema.hashed_auth_token)
+
+        # validate password
+        saltHashCode, hashCode = HashUtils.hashCodeWithSalt(userSecuritySchema.hashed_auth_token,
+                                                            userSecuritySchema.salt)
+        logger.debug(f"saltHashCode={saltHashCode}, hashCode={hashCode}")
+        self.assertTrue(HashUtils.checkHashCode(userSchema.password, saltHashCode, hashCode))
+
+        logger.debug("-test_create_user_security()")
         print()
 
     def test_create_address(self):

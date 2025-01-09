@@ -52,6 +52,11 @@ class UserSchema(PersonSchema):
     # not Optional[], therefore will be NOT NULL
     avatar_url: Mapped[Optional[str]] = mapped_column(String(128))
 
+    # not Optional[], therefore will be NOT NULL
+    # 'one-to-one' pattern can be enabled using the 'relationship.uselist' parameter set to 'False'
+    user_security: Mapped["UserSecuritySchema"] = relationship("UserSecuritySchema", back_populates="user",
+                                                               uselist=False)
+
     # Other variants of 'Mapped' are available, most commonly the 'relationship()' construct indicated above.
     # In contrast to the column-based attributes, 'relationship()' denotes a linkage between two ORM classes.
     # addresses: Mapped[List["Role"]] = relationship(back_populates="role", cascade="all, delete-orphan")
@@ -79,6 +84,39 @@ class UserSchema(PersonSchema):
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
         return str(self)
+
+
+class UserSecuritySchema(BaseSchema):
+    """ UserSecuritySchema represents [user_sessions] Table """
+
+    __tablename__ = "user_securities"
+
+    # foreign key to "users.id" is added
+    # not Optional[], therefore will be NOT NULL
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False, unique=True)
+    # Define the one-to-one relationship
+    user: Mapped["UserSchema"] = relationship("UserSchema", back_populates="user_security")
+
+    # not Optional[], therefore will be NOT NULL
+    platform: Mapped[str] = mapped_column(String(64))
+
+    # not Optional[], therefore will be NOT NULL
+    salt: Mapped[str] = mapped_column(String(32))
+
+    # not Optional[], therefore will be NOT NULL
+    hashed_auth_token: Mapped[str] = mapped_column(String(128))
+
+    # Optional[], therefore will be NULL
+    expire_at: Mapped[Optional[str]] = mapped_column(String(64))
+
+    # Optional[], therefore will be NULL
+    meta_data: Mapped[Optional[PickleType]] = mapped_column(JSON)
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return ("{} <id={}, user_id={}, platform={}, salt={}, hashed_auth_token={}, expire_at={}, meta_data={}, {}>"
+                .format(self.getClassName(), self.id, self.user_id, self.platform, self.salt, self.hashed_auth_token,
+                        self.expire_at, self.meta_data, self.auditable()))
 
 
 class UserRoleSchema(AbstractSchema):
@@ -135,37 +173,6 @@ class AddressSchema(BaseSchema):
         return ("{} <id={}, user_id={}, street1={}, street2={}, city={}, state={}, country={}, zip={}, {}>"
                 .format(self.getClassName(), self.id, self.user_id, self.street1, self.street2, self.city,
                         self.state, self.country, self.zip, self.auditable()))
-
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
-
-
-class UserSecuritySchema(BaseSchema):
-    """ UserSessionSchema represents [user_sessions] Table """
-
-    __tablename__ = "user_securities"
-
-    # foreign key to "users.id" is added
-    # not Optional[], therefore will be NOT NULL
-    # user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
-    # Define the many-to-one relationship
-    # user: Mapped["UserSchema"] = relationship(back_populates="sessions")
-
-    # not Optional[], therefore will be NOT NULL
-    hashed_auth_token: Mapped[str] = mapped_column(String(128))
-    # Optional[], therefore will be NULL
-    expire_at: Mapped[Optional[str]] = mapped_column(String(64))
-    # not Optional[], therefore will be NOT NULL
-    platform: Mapped[str] = mapped_column(String(64))
-    # Optional[], therefore will be NULL
-    meta_data: Mapped[Optional[PickleType]] = mapped_column(JSON)
-
-    def __str__(self) -> str:
-        """Returns the string representation of this object"""
-        return ("{} <id={}, user_id={}, hashed_auth_token={}, expire_at={}, platform={}, meta_data={}, {}>"
-                .format(self.getClassName(), self.id, self.user_id, self.hashed_auth_token, self.expire_at,
-                        self.platform, self.meta_data, self.auditable()))
 
     def __repr__(self) -> str:
         """Returns the string representation of this object"""
