@@ -28,40 +28,6 @@ class SqlAlchemyTest(AbstractTestCase):
         self.assertEqual(expected, roleJSONObject)
         print()
 
-    def test_json(self):
-        logger.debug(f"+test_json()")
-        user = UserSchema(
-            user_name="roh@lakra.com",
-            password="Roh",
-            email="roh@lakra.com",
-            first_name="Rohtash",
-            last_name="Lakra",
-            admin=True,
-            # birth_date=datetime.now(),
-            # last_seen=datetime.now(),
-            addresses=[]
-        )
-
-        self.assertIsNotNone(user)
-
-        expected = {'user_name': 'roh@lakra.com', 'password': 'Roh', 'admin': True, 'last_seen': None,
-                    'avatar_url': None, 'email': 'roh@lakra.com', 'first_name': 'Rohtash', 'last_name': 'Lakra',
-                    'birth_date': None, 'id': None, 'created_at': None, 'updated_at': None}
-
-        user_json = user.to_json()
-        self.assertIsNotNone(user_json)
-        logger.debug(f"user={user}, user_json={user_json}")
-        self.assertEqual(expected, user_json)
-        print()
-
-        userJSONObject = user.toJSONObject()
-        self.assertIsNotNone(userJSONObject)
-        logger.debug(f"user={user}, userJSONObject={userJSONObject}")
-        self.assertEqual(expected, userJSONObject)
-
-        logger.debug(f"-test_json()")
-        print()
-
     def test_recursive_encoder(self):
         logger.debug(f"+test_recursive_encoder()")
         address = AddressSchema(
@@ -76,6 +42,70 @@ class SqlAlchemyTest(AbstractTestCase):
         # address_json = json.dumps(address, cls=RecursiveJSONEncoder)
         # logger.debug(f"address={address}, address_json={address_json}")
         # self.assertIsNotNone(address_json)
+
+        user = UserSchema(
+            user_name="roh@lakra.com",
+            password="Roh",
+            email="roh@lakra.com",
+            first_name="Rohtash",
+            last_name="Lakra",
+            admin=True,
+            addresses=[address],
+        )
+
+        self.assertIsNotNone(user)
+        # user_json = json.dumps(user, cls=RecursiveJSONEncoder)
+        # logger.debug(f"user={user}, user_json={user_json}")
+        # self.assertIsNotNone(user_json)
+
+        logger.debug(f"-test_recursive_encoder()")
+        print()
+
+    def test_to_json(self):
+        logger.debug(f"+test_to_json()")
+        user = UserSchema(
+            user_name="roh@lakra.com",
+            password="Roh",
+            email="roh@lakra.com",
+            first_name="Rohtash",
+            last_name="Lakra",
+            admin=True,
+            # birth_date=datetime.now(),
+            # last_seen=datetime.now(),
+            addresses=[]
+        )
+
+        self.assertIsNotNone(user)
+
+        expected = {'user_name': 'roh@lakra.com', 'admin': True, 'last_seen': None,
+                    'avatar_url': None, 'email': 'roh@lakra.com', 'first_name': 'Rohtash', 'last_name': 'Lakra',
+                    'birth_date': None, 'id': None, 'created_at': None, 'updated_at': None}
+
+        user_json = user.to_json()
+        self.assertIsNotNone(user_json)
+        logger.debug(f"user={user}, user_json={user_json}")
+        self.assertEqual(expected, user_json)
+        print()
+
+        userJSONObject = user.toJSONObject()
+        self.assertIsNotNone(userJSONObject)
+        logger.debug(f"user={user}, userJSONObject={userJSONObject}")
+        self.assertEqual(expected, userJSONObject)
+
+        logger.debug(f"-test_to_json()")
+        print()
+
+    def test_toJSONObject(self):
+        logger.debug(f"+test_toJSONObject()")
+        address = AddressSchema(
+            street1="123 Great Rd",
+            city="Hayward",
+            state="California",
+            country="US",
+            zip="94544"
+        )
+
+        self.assertIsNotNone(address)
 
         expected = {'user_id': None, 'street1': '123 Great Rd', 'street2': None, 'city': 'Hayward',
                     'state': 'California', 'country': 'US', 'zip': '94544', 'id': None, 'created_at': None,
@@ -97,11 +127,8 @@ class SqlAlchemyTest(AbstractTestCase):
         )
 
         self.assertIsNotNone(user)
-        # user_json = json.dumps(user, cls=RecursiveJSONEncoder)
-        # logger.debug(f"user={user}, user_json={user_json}")
-        # self.assertIsNotNone(user_json)
 
-        expected = {'user_name': 'roh@lakra.com', 'password': 'Roh', 'admin': True, 'last_seen': None,
+        expected = {'user_name': 'roh@lakra.com', 'admin': True, 'last_seen': None,
                     'avatar_url': None, 'email': 'roh@lakra.com', 'first_name': 'Rohtash', 'last_name': 'Lakra',
                     'birth_date': None, 'id': None, 'created_at': None, 'updated_at': None}
 
@@ -109,7 +136,7 @@ class SqlAlchemyTest(AbstractTestCase):
         self.assertIsNotNone(userJSONObject)
         logger.debug(f"user={user}, userJSONObject={userJSONObject}")
         self.assertEqual(expected, userJSONObject)
-        logger.debug(f"-test_recursive_encoder()")
+        logger.debug(f"-test_toJSONObject()")
         print()
 
 

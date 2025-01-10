@@ -4,8 +4,8 @@
 import logging
 
 from framework.orm.mapper import Mapper
-from rest.user.model import User, Address
-from rest.user.schema import UserSchema, AddressSchema
+from rest.user.model import User, Address, UserSecurity
+from rest.user.schema import UserSchema, AddressSchema, UserSecuritySchema
 
 logger = logging.getLogger(__name__)
 
@@ -14,37 +14,60 @@ class UserMapper(Mapper):
 
     @classmethod
     # @override
-    def fromSchema(self, userSchema: UserSchema) -> User:
-        logger.debug(f"+fromSchema({userSchema})")
-        user = User(**userSchema.toJSONObject())
-        logger.debug(f"userSchema={userSchema}, userSchema.addresses={userSchema.addresses}")
-        if userSchema.addresses:
-            user.addresses = [AddressMapper.fromSchema(address) for address in
-                              userSchema.addresses] if userSchema.addresses else None
-        logger.debug(f"-fromSchema(), user={user}")
-        return user
+    def fromSchema(cls, schemaObject: UserSchema) -> User:
+        logger.debug(f"+fromSchema({schemaObject})")
+        modelObject = User(**schemaObject.toJSONObject())
+        if schemaObject.addresses:
+            logger.debug(f"schemaObject={schemaObject}, schemaObject.addresses={schemaObject.addresses}")
+            modelObject.addresses = [AddressMapper.fromSchema(address) for address in
+                                     schemaObject.addresses] if schemaObject.addresses else None
+        # user_security
+        # modelObject.user_security = UserSecurityMapper.fromSchema(
+        #     schemaObject.user_security) if schemaObject.user_security else None
+
+        logger.debug(f"-fromSchema(), modelObject={modelObject}")
+        return modelObject
 
     @classmethod
     # @override
-    def fromModel(self, user: User) -> UserSchema:
-        logger.debug(f"+fromModel({user})")
-        userSchema = UserSchema(**user.toJSONObject())
-        logger.debug(f"user={user}, user.addresses={user.addresses}")
-        if user.addresses:
-            userSchema.addresses = [AddressMapper.fromModel(address) for address in
-                                    user.addresses] if user.addresses else None
-        logger.debug(f"-fromModel(), userSchema={userSchema}")
-        return userSchema
+    def fromModel(cls, modelObject: User) -> UserSchema:
+        logger.debug(f"+fromModel({modelObject})")
+        schemaObject = UserSchema(**modelObject.toJSONObject())
+        if modelObject.addresses:
+            logger.debug(f"modelObject={modelObject}, modelObject.addresses={modelObject.addresses}")
+            schemaObject.addresses = [AddressMapper.fromModel(address) for address in
+                                      modelObject.addresses] if modelObject.addresses else None
+
+        # user_security
+        logger.debug(f"modelObject.user_security={modelObject.user_security}")
+        schemaObject.user_security = UserSecurityMapper.fromModel(
+            modelObject.user_security) if modelObject.user_security else None
+
+        logger.debug(f"-fromModel(), schemaObject={schemaObject}")
+        return schemaObject
+
+
+class UserSecurityMapper(Mapper):
+
+    @classmethod
+    def fromSchema(cls, schemaObject: UserSecuritySchema) -> UserSecurity:
+        # logger.debug(f"+fromSchema(), schemaObject={schemaObject}")
+        return UserSecurity(**schemaObject.toJSONObject())
+
+    @classmethod
+    def fromModel(cls, modelObject: UserSecurity) -> UserSecuritySchema:
+        # logger.debug(f"+fromModel(), modelObject={modelObject}")
+        return UserSecuritySchema(**modelObject.toJSONObject())
 
 
 class AddressMapper(Mapper):
 
     @classmethod
-    def fromSchema(cls, addressSchema: AddressSchema) -> Address:
-        # logger.debug(f"+fromSchema(), addressSchema={addressSchema}")
-        return Address(**addressSchema.toJSONObject())
+    def fromSchema(cls, schemaObject: AddressSchema) -> Address:
+        # logger.debug(f"+fromSchema(), schemaObject={schemaObject}")
+        return Address(**schemaObject.toJSONObject())
 
     @classmethod
-    def fromModel(cls, addressModel: Address) -> AddressSchema:
-        # logger.debug(f"+fromModel(), addressModel={addressModel}")
-        return AddressSchema(**addressModel.toJSONObject())
+    def fromModel(cls, modelObject: Address) -> AddressSchema:
+        # logger.debug(f"+fromModel(), modelObject={modelObject}")
+        return AddressSchema(**modelObject.toJSONObject())

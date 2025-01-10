@@ -40,7 +40,7 @@ class TestPydanticModel(AbstractTestCase):
         self.assertTrue(issubclass(NamedModel, object))
         self.assertFalse(issubclass(object, NamedModel))
 
-        expected = ['id', 'created_at', 'updated_at', 'name']
+        expected = ['created_at', 'updated_at', 'id', 'name']
         allFields = named_model.getAllFields()
         logger.debug(f"allFields={allFields}")
         self.assertIsNotNone(allFields)
@@ -61,7 +61,7 @@ class TestPydanticModel(AbstractTestCase):
         self.assertTrue(issubclass(NamedModel, object))
         self.assertFalse(issubclass(object, NamedModel))
 
-        expected = ['id', 'created_at', 'updated_at', 'name']
+        expected = ['created_at', 'updated_at', 'id', 'name']
         classFields = NamedModel.getClassFields()
         logger.debug(f"classFields={classFields}")
         self.assertIsNotNone(classFields)

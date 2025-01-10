@@ -43,6 +43,10 @@ class AbstractModel(PydanticBaseModel):
     """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
     model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
 
+    # auditable properties
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+
     def getClassName(self) -> str:
         """Returns the name of the class."""
         return type(self).__name__
@@ -73,6 +77,10 @@ class AbstractModel(PydanticBaseModel):
             f"{self.getClassName()} => type={type(self)}, object={str(self)}, json={self.model_dump(mode='json')}")
         return self.model_dump(mode="json")
 
+    def _auditable(self) -> str:
+        """Returns the string representation of this object"""
+        return f"created_at={self.created_at}, updated_at={self.updated_at}"
+
     def __str__(self):
         """Returns the string representation of this object."""
         return self.getClassName()
@@ -86,8 +94,6 @@ class BaseModel(AbstractModel):
     """BaseModel is a base model for all models inherit and provides basic configuration parameters."""
 
     id: int | None = None
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
 
     # @root_validator()
     # def on_create(cls, values):
@@ -108,16 +114,6 @@ class BaseModel(AbstractModel):
 
     def get_id(self):
         return self.id
-
-    def get_created_at(self):
-        return self.created_at
-
-    def get_updated_at(self):
-        return self.updated_at
-
-    def _auditable(self) -> str:
-        """Returns the string representation of this object"""
-        return f"created_at={self.get_created_at()}, updated_at={self.get_updated_at()}"
 
     def load_and_not_raise(self, data):
         try:

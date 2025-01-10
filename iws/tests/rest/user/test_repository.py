@@ -98,7 +98,7 @@ class UserRepositoryTest(AbstractTestCase):
         # userSecuritySchema.user = userSchema
         userSecuritySchema = self.addressRepository.save(userSecuritySchema)
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
-        self.assertIsNotNone(userSecuritySchema.id)
+        self.assertIsNotNone(userSecuritySchema.user_id)
         self.assertEqual("Python", userSecuritySchema.platform)
         self.assertEqual(salt, userSecuritySchema.salt)
         self.assertEqual(passwordHashCode, userSecuritySchema.hashed_auth_token)
