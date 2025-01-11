@@ -3,9 +3,10 @@
 #
 
 import logging
-from typing import Optional, List
+from typing import Optional, List, Any
 
 from pydantic import model_validator
+from typing_extensions import Self
 
 from framework.orm.pydantic.model import NamedModel
 
@@ -27,15 +28,15 @@ class Company(NamedModel):
         logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
 
-    @classmethod
     @model_validator(mode="before")
-    def pre_validator(cls, values):
-        logger.debug(f"pre_validator({values})")
+    @classmethod
+    def preValidator(cls, values: Any) -> Any:
+        logger.debug(f"preValidator({values})")
         return values
 
     @model_validator(mode="after")
-    def post_validator(self, values):
-        logger.debug(f"post_validator({values})")
+    def postValidator(self, values) -> Self:
+        logger.debug(f"postValidator({values})")
         return self
 
     def __str__(self) -> str:

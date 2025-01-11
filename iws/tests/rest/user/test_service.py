@@ -150,6 +150,7 @@ class UserServiceTest(AbstractTestCase):
                     user_name=userName, password="password")
         address = Address(street1="123 Test Dr.", city="Hayward", state="California", country="United States",
                           zip="94544")
+        logger.debug(f"address={address}")
         user.addresses.append(address)
         logger.debug(f"user={user}")
 

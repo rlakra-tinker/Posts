@@ -9,9 +9,12 @@ import json
 import logging
 from datetime import datetime
 from enum import unique, auto
-from typing import Optional, Dict, List, Any
+from typing import Optional, Dict, List, Any, Union
 
-from pydantic import BaseModel as PydanticBaseModel, ValidationError, ConfigDict, model_validator, field_validator
+from pydantic import BaseModel as PydanticBaseModel, ValidationError, ConfigDict, model_validator, \
+    field_validator
+# from pydantic.alias_generators import to_camel, to_snake
+from typing_extensions import Self
 
 from framework.enums import BaseEnum
 from framework.exception import AbstractException, ValidationException, DuplicateRecordException, NoRecordFoundException
@@ -41,7 +44,15 @@ class SyncStatus(BaseEnum):
 
 class AbstractModel(PydanticBaseModel):
     """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
-    model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True)
+
+    # protected_namespaces=() disables the protected namespace validation
+    # model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True,
+    #                           use_enum_values=True, alias_generator=AliasGenerator(
+    #         validation_alias=to_snake,
+    #         serialization_alias=to_snake,
+    #     ), protected_namespaces=())
+    model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True,
+                              use_enum_values=True, protected_namespaces=())
 
     # auditable properties
     created_at: Optional[datetime] = None
@@ -66,6 +77,44 @@ class AbstractModel(PydanticBaseModel):
 
         return field_names
 
+    @model_validator(mode="before")
+    @classmethod
+    def preValidator(cls, values: Any) -> Any:
+        """Before validators: are run before the model is instantiated. These are more flexible than after validators,
+        but they also have to deal with the raw input, which in theory could be any arbitrary object.
+
+        Note:- The order of annotations should be same as given here to invoke it automatically.
+            @model_validator(mode="before")
+            @classmethod
+        """
+        logger.debug(f"+preValidator(), values={values}")
+        # <class 'pydantic._internal._model_construction.ModelMetaclass'>
+        # if isinstance(values, dict):
+        #     if 'created_at' in values:
+        #         raise ValueError("'created_at' should not be included!")
+        #     if 'updated_at' in values:
+        #         raise ValueError("'updated_at' should not be included!")
+
+        logger.debug(f"-preValidator(), values={values}")
+        return values
+
+    @model_validator(mode="after")
+    def postValidator(self, values) -> Self:
+        """After validators: run after the whole model has been validated. As such, they are defined as instance methods
+        and can be seen as post-initialization hooks. Important note: the validated instance should be returned.
+        """
+        logger.debug(f"postValidator() => type={type(self)}, values={values}")
+        return self
+
+    # @model_validator(mode="wrap")
+    # def modelValidator(self, values) -> Self:
+    #     """Wrap validators: are the most flexible of all. You can run code before or after Pydantic and other validators
+    #     process the input data, or you can terminate validation immediately, either by returning the data early or by
+    #     raising an error.
+    #     """
+    #     logger.debug(f"modelValidator() => type={type(self)}, values={values}")
+    #     return self
+
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
         logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
@@ -89,6 +138,53 @@ class AbstractModel(PydanticBaseModel):
         """Returns the string representation of this object."""
         return str(self)
 
+    @classmethod
+    def validate_and_raise(cls, data, is_query_params: bool = False):
+        try:
+            if is_query_params:
+                for k, v in data.items():
+                    if ',' in v:
+                        data[k] = v.split(',')
+            return cls(**data)
+
+        except ValidationError as e:
+            # later can use the error response class and throw 422 validation error
+            logger.error(f"Failed to validate [{type(cls)}]! Error={e}")
+            for it in e.errors():
+                logger.error(f"it={it}")
+
+            raise e
+
+    @classmethod
+    def listOfClassInstances(cls, data: List[Dict]) -> List['AbstractModel']:
+        """Converts a list of dictionaries into a list of class instances.
+
+        Arguments:
+            - data: A list of dictionaries, each representing an instance of the model.
+
+        Returns:
+            A list of validated class instances.
+        """
+        return list(map(lambda it: cls(**it), data))
+
+    @classmethod
+    def toResponse(cls, data: Union['AbstractModel', List['AbstractModel']]) -> Union[None, List[Dict], Dict]:
+        """Converts an instance or list of instances of the pydantic classes into a serializable format.
+
+        Arguments:
+            - data: A single class instance or a list of class instances.
+
+        Returns:
+            A dictionary or list of dictionaries representing the data, or None if no data is provided.
+        """
+        if isinstance(data, list):
+            # Use `dict()` instead of `model_dump()` for better compatibility
+            return list(map(lambda it: it.dict(), data))
+        elif isinstance(data, cls):
+            return data.model_dump()
+
+        return None
+
 
 class BaseModel(AbstractModel):
     """BaseModel is a base model for all models inherit and provides basic configuration parameters."""
@@ -101,15 +197,39 @@ class BaseModel(AbstractModel):
     #     print("Put your logic here!")
     #     return values
 
-    @classmethod
     @model_validator(mode="before")
-    def pre_validator(cls, values):
-        logger.debug(f"pre_validator({values})")
+    @classmethod
+    def preValidator(cls, values: Any) -> Any:
+        """Before validators: are run before the model is instantiated. These are more flexible than after validators,
+        but they also have to deal with the raw input, which in theory could be any arbitrary object.
+
+        Note:- The order of annotations should be same as given here to invoke it automatically.
+            @model_validator(mode="before")
+            @classmethod
+        """
+        logger.debug(f"+preValidator(), type={type(values)} values={values}")
+        # <class 'pydantic._internal._model_construction.ModelMetaclass'>
+        if not isinstance(values, dict):
+            raise ValueError("Invalid 'Model' type!")
+
+        if isinstance(values, dict):
+            if not values:
+                raise ValueError("'Model' is not fully defined!")
+
+        #     if 'created_at' in values:
+        #         raise ValueError("'created_at' should not be included!")
+        #     if 'updated_at' in values:
+        #         raise ValueError("'updated_at' should not be included!")
+
+        logger.debug(f"-preValidator(), values={values}")
         return values
 
     @model_validator(mode="after")
-    def post_validator(self, values):
-        logger.debug(f"post_validator() type={type(self)} => {values}")
+    def postValidator(self, values) -> Self:
+        """After validators: run after the whole model has been validated. As such, they are defined as instance methods
+        and can be seen as post-initialization hooks. Important note: the validated instance should be returned.
+        """
+        logger.debug(f"postValidator() => type={type(self)}, values={values}")
         return self
 
     def get_id(self):
@@ -124,7 +244,7 @@ class BaseModel(AbstractModel):
             # return abort(make_response(err, err.get('error').get('status')))
 
     def validate_and_raise(self, data):
-        errors = self.validate(data)
+        errors = self.model_validate(data)
         if errors:
             logger.error(f"validate_and_raise() => Error:{errors}")
             # err = get_error(exception=None, msg=errors, status=422)
@@ -141,30 +261,30 @@ class BaseModel(AbstractModel):
 
 class NamedModel(BaseModel):
     """NamedModel used an entity with a property called 'name' in it"""
+
     name: str
 
-    @classmethod
     @model_validator(mode="before")
-    def pre_validator(cls, values):
-        logger.debug(f"pre_validator({values})")
-        if "name" not in values:
-            raise ValueError("The model 'name' should be provided!")
+    @classmethod
+    def preValidator(cls, values: Any) -> Any:
+        logger.debug(f"+preValidator(), values={values}")
+        # logging.error(f"Model [{cls}] failed to validate values={values}!")
+        superPreValidated = super().preValidator(values)
+        if isinstance(values, dict):
+            if "name" not in values:
+                raise ValueError("The model 'name' should be provided!")
 
+        logger.debug(f"-preValidator(), values={values}")
         return values
 
-    @classmethod
     @field_validator('name')
-    def name_validator(cls, value):
-        logger.info(f"name_validator({value})")
-        if value is None or len(value) == 0:
+    @classmethod
+    def nameValidator(cls, value: str):
+        logger.info(f"nameValidator({value})")
+        if value is None or len(value.strip()) == 0:
             raise ValueError("The model 'name' should not be null or empty!")
 
         return value
-
-    @model_validator(mode="after")
-    def post_validator(self, values):
-        logger.debug(f"post_validator({values})")
-        return self
 
     def get_name(self):
         return self.name

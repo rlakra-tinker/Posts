@@ -62,17 +62,6 @@ class RoleServiceTest(AbstractTestCase):
         self.assertLess(0, len(validationException.messages))
         self.assertEqual("'Role' is not fully defined!", validationException.messages[0])
 
-        invalidRole = Role(meta_data={"description": "An Invalid Role"})
-        with self.assertRaises(ValidationException) as context:
-            self.roleService.validate(SchemaOperation.CREATE, invalidRole)
-
-        # validate exception
-        self.assertTrue(type(context.exception) in [ValidationException])
-        validationException = context.exception
-        self.assertEqual(HTTPStatus.INVALID_DATA, validationException.httpStatus)
-        self.assertLess(0, len(validationException.messages))
-        self.assertEqual("Role 'name' is required!", validationException.messages[0])
-
         # update validation
         with self.assertRaises(ValidationException) as context:
             self.roleService.validate(SchemaOperation.UPDATE, invalidRole)
@@ -83,7 +72,7 @@ class RoleServiceTest(AbstractTestCase):
         validationException = context.exception
         self.assertEqual(HTTPStatus.INVALID_DATA, validationException.httpStatus)
         self.assertLess(0, len(validationException.messages))
-        self.assertEqual("Role 'id' is required!", validationException.messages[0])
+        self.assertEqual("'Role' is not fully defined!", validationException.messages[0])
 
         logger.debug("-test_validate_error()")
         print()

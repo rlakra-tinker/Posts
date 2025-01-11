@@ -7,35 +7,35 @@ from dataclasses import field
 from typing import Dict, Any, List, Optional
 
 from pydantic import model_validator
+from typing_extensions import Self
 
-from framework.orm.pydantic.model import BaseModel
+from framework.orm.pydantic.model import NamedModel
 
 logger = logging.getLogger(__name__)
 
 
-class Role(BaseModel):
+class Role(NamedModel):
     """Role contains properties specific to this object."""
 
-    name: str = None
     active: bool = False
     meta_data: Dict[str, Any] | None = None
     permissions: Optional[List["Permission"]] = field(default_factory=list)
+
+    @model_validator(mode="before")
+    @classmethod
+    def preValidator(cls, values: Any) -> Any:
+        logger.debug(f"preValidator({values})")
+        return super().preValidator(values)
+
+    @model_validator(mode="after")
+    def postValidator(self, values) -> Self:
+        logger.debug(f"postValidator({values})")
+        return super().postValidator(values)
 
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
         logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
-
-    @classmethod
-    @model_validator(mode="before")
-    def pre_validator(cls, values):
-        logger.debug(f"pre_validator({values})")
-        return values
-
-    @model_validator(mode="after")
-    def post_validator(self, values):
-        logger.debug(f"post_validator({values})")
-        return self
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -48,15 +48,10 @@ class Role(BaseModel):
                         self.permissions,
                         self._auditable()))
 
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
 
-
-class Permission(BaseModel):
+class Permission(NamedModel):
     """Permission contains properties specific to this object."""
 
-    name: str = None
     description: Optional[str] = None
     active: bool = False
 
@@ -64,17 +59,6 @@ class Permission(BaseModel):
         """Returns the JSON representation of this object."""
         logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         return self.model_dump_json()
-
-    @classmethod
-    @model_validator(mode="before")
-    def pre_validator(cls, values):
-        logger.debug(f"pre_validator({values})")
-        return values
-
-    @model_validator(mode="after")
-    def post_validator(self, values):
-        logger.debug(f"post_validator({values})")
-        return self
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
@@ -86,15 +70,10 @@ class Permission(BaseModel):
                         self.active,
                         self._auditable()))
 
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
 
-
-class Capability(BaseModel):
+class Capability(NamedModel):
     """Capability contains properties specific to this object."""
 
-    name: str = None
     description: Optional[str] = None
     active: bool = False
 

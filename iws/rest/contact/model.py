@@ -2,8 +2,10 @@
 # Author: Rohtash Lakra
 #
 import logging
+from typing import Any
 
 from pydantic import model_validator
+from typing_extensions import Self
 
 from framework.orm.pydantic.model import BaseModel
 
@@ -18,15 +20,15 @@ class Contact(BaseModel):
     country: str = None
     subject: str = None
 
-    @classmethod
     @model_validator(mode="before")
-    def pre_validator(cls, values):
-        logger.debug(f"pre_validator({values})")
+    @classmethod
+    def preValidator(cls, values: Any) -> Any:
+        logger.debug(f"preValidator({values})")
         return values
 
     @model_validator(mode="after")
-    def post_validator(self, values):
-        logger.debug(f"post_validator({values})")
+    def postValidator(self, values) -> Self:
+        logger.debug(f"postValidator({values})")
         return self
 
     def __str__(self) -> str:
