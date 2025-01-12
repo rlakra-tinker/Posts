@@ -4,48 +4,45 @@
 # - https://realpython.com/flask-blueprint/
 # - https://flask.palletsprojects.com/en/2.3.x/tutorial/views/#require-authentication-in-other-views
 #
+
 import logging
 
 from flask import make_response, request
 
+from framework.blueprint import AbstractBlueprint
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import ResponseModel
-from framework.orm.sqlalchemy.schema import SchemaOperation
-from rest.role.model import Role
-from rest.role.service import RoleService
-from rest.role.v1 import bp as bp_role_v1
+from rest.role.model import Permission
+from rest.role.service import PermissionService
 
 logger = logging.getLogger(__name__)
 
 
-# class RoleController:
-#
-#     # roleService = RoleService()
-#
-#     def __init__(self):
-#         logger.debug("RoleController()")
-#         self.roleService = RoleService()
+class PermissionBlueprint(AbstractBlueprint):
+    pass
 
-@bp_role_v1.post("/")
+
+bp = PermissionBlueprint("permissions", __name__, url_prefix="/permissions")
+
+
+@bp.post("/")
 def create():
     logger.debug(f"+create() => request={request}, args={request.args}, is_json:{request.is_json}")
-    # post_data = request.form.to_dict(flat=False)
-    if request.is_json:
-        body = request.get_json()
-        logger.debug(f"body={body}")
-        role = Role(**body)
-        logger.debug(f"role={role}")
-
     try:
-        roleService = RoleService()
-        roleService.validate(SchemaOperation.CREATE, role)
-        role = roleService.create(role)
-        logger.debug(f"role={role}")
+        # post_data = request.form.to_dict(flat=False)
+        if request.is_json:
+            body = request.get_json()
+            logger.debug(f"body={body}")
+            permissions = Permission(**body)
+            logger.debug(f"permissions={permissions}")
+
+        permissionService = PermissionService()
+        permissions = permissionService.create(permissions)
+        logger.debug(f"permissions={permissions}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Role is successfully created.")
-        response.addInstance(role)
-        # response = response.to_json()
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Permission is successfully created.")
+        response.addInstance(permissions)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except DuplicateRecordException as ex:
@@ -57,31 +54,30 @@ def create():
     return make_response(response.to_json(), response.status)
 
 
-@bp_role_v1.post("/batch")
+@bp.post("/batch")
 def bulkCreate():
     logger.debug(f"+bulkCreate() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
-        roles = []
+        permissions = []
         if request.is_json:
             body = request.get_json()
             logger.debug(f"type={type(body)}, body={body}")
             if isinstance(body, list):
-                roles = [Role(**entry) for entry in body]
+                permissions = [Permission(**entry) for entry in body]
             elif isinstance(body, dict):
-                roles.append(Role(**body))
+                permissions.append(Permission(**body))
             else:
                 # handle form fields here.
                 body = request.form.to_dict()
-                roles.append(Role(**body))
+                permissions.append(Permission(**body))
 
-        logger.debug(f"roles={roles}")
-        roleService = RoleService()
-        roleService.validates(SchemaOperation.CREATE, roles)
-        roles = roleService.bulkCreate(roles)
-        logger.debug(f"roles={roles}")
+        logger.debug(f"permissions={permissions}")
+        permissionService = PermissionService()
+        permissions = permissionService.bulkCreate(permissions)
+        logger.debug(f"permissions={permissions}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Roles are successfully created.")
-        response.addInstances(roles)
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="Permissions are successfully created.")
+        response.addInstances(permissions)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except DuplicateRecordException as ex:
@@ -93,17 +89,16 @@ def bulkCreate():
     return make_response(response.to_json(), response.status)
 
 
-@bp_role_v1.get("/")
+@bp.get("/")
 def get():
     logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
-        roleService = RoleService()
-        roles = roleService.findByFilter(request.args)
-
+        permissionService = PermissionService()
+        modelObjects = permissionService.findByFilter(request.args)
         # build success response
         response = ResponseModel.buildResponse(HTTPStatus.OK)
-        if roles:
-            response.addInstances(roles)
+        if modelObjects:
+            response.addInstances(modelObjects)
         else:
             response.message = "No Records Exist!"
     except Exception as ex:
@@ -113,24 +108,23 @@ def get():
     return make_response(response.to_json(), response.status)
 
 
-@bp_role_v1.put("/")
+@bp.put("/")
 def update():
     logger.debug(f"+update() => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
         if request.is_json:
             body = request.get_json()
             logger.debug(f"body={body}")
-            role = Role(**body)
-            logger.debug(f"role={role}")
+            modelObject = Permission(**body)
+            logger.debug(f"modelObject={modelObject}")
 
-        roleService = RoleService()
-        roleService.validate(SchemaOperation.UPDATE, role)
-        role = roleService.update(role)
-        logger.debug(f"role={role}")
+        permissionService = PermissionService()
+        modelObject = permissionService.update(modelObject)
+        logger.debug(f"modelObject={modelObject}")
 
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Role is successfully updated.")
-        response.addInstance(role)
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Permission is successfully updated.")
+        response.addInstance(modelObject)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except NoRecordFoundException as ex:
@@ -142,21 +136,20 @@ def update():
     return make_response(response.to_json(), response.status)
 
 
-@bp_role_v1.delete("/<id>")
+@bp.delete("/<id>")
 def delete(id: int):
     logger.debug(f"+delete({id}) => request={request}, args={request.args}, is_json:{request.is_json}")
     if request.is_json:
         body = request.get_json()
         logger.debug(f"body={body}")
-        role = Role(**body)
-        logger.debug(f"role={role}")
+        modelObject = Permission(**body)
+        logger.debug(f"modelObject={modelObject}")
 
     try:
-        roleService = RoleService()
-        roleService.delete(id)
-
+        permissionService = PermissionService()
+        permissionService.delete(id)
         # build success response
-        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Role is successfully deleted.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Permission is successfully deleted.")
     except NoRecordFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:

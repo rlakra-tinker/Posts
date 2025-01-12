@@ -307,7 +307,7 @@ class ErrorModel(AbstractModel):
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
         logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
-        return self.model_dump_json()
+        return self.model_dump_json(exclude=["created_at", "updated_at"])
 
     @staticmethod
     def buildError(httpStatus: HTTPStatus, message: str = None, exception: Exception = None,
@@ -365,6 +365,8 @@ class ResponseModel(AbstractModel):
         """Returns the JSON representation of this object."""
         logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
         jsonObjects = {field: getattr(self, field) for field in self.getAllFields()}
+        jsonObjects.pop("created_at")
+        jsonObjects.pop("updated_at")
         # logger.debug(f"jsonObjects type={type(jsonObjects)}, jsonObjects={jsonObjects}")
         # parse list of data to json
         if jsonObjects['data']:
@@ -402,10 +404,6 @@ class ResponseModel(AbstractModel):
     def __str__(self) -> str:
         """Returns the string representation of this object"""
         return f"{self.getClassName()} <status={self.status}, data={self.data}, errors={self.errors}>"
-
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
 
     def addInstance(self, instance: AbstractModel = None):
         """Adds an object into the list of data or errors"""

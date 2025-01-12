@@ -25,17 +25,17 @@ class RoleRepository(SqlAlchemyRepository):
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[RoleSchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
-        roleSchemas = None
+        schemaObjects = None
         # verbose version of what a context manager will do
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             # session.begin()
             try:
                 if filters:
-                    roleSchemas = session.query(RoleSchema).filter_by(**filters).all()
+                    schemaObjects = session.query(RoleSchema).filter_by(**filters).all()
                 else:
-                    roleSchemas = session.query(RoleSchema).all()
+                    schemaObjects = session.query(RoleSchema).all()
 
-                logger.debug(f"Loaded [{len(roleSchemas)}] roles => roleSchemas={roleSchemas}")
+                logger.debug(f"Loaded [{len(schemaObjects)}] roles. schemaObjects={schemaObjects}")
 
                 # Commit:
                 # The pending changes above are flushed via flush(), the Transaction is committed, the Connection
@@ -70,8 +70,8 @@ class RoleRepository(SqlAlchemyRepository):
                 # is removed.
                 session.close()
 
-        logger.debug(f"-findByFilter(), roleSchemas={roleSchemas}")
-        return roleSchemas
+        logger.debug(f"-findByFilter(), schemaObjects={schemaObjects}")
+        return schemaObjects
 
     def findByName(self, name: str) -> RoleSchema:
         logger.debug(f"+findByName({name})")
@@ -96,15 +96,15 @@ class RoleRepository(SqlAlchemyRepository):
         logger.info(f"-findByName(), results={results}")
         return results
 
-    def update(self, roleSchema: RoleSchema) -> RoleSchema:
-        logger.debug(f"+update({roleSchema})")
+    def update(self, schemaObject: RoleSchema) -> RoleSchema:
+        logger.debug(f"+update({schemaObject})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                roleSchema.updated_at = func.now()
+                schemaObject.updated_at = func.now()
                 results = session.execute(
                     update(RoleSchema)
-                    .values(roleSchema.to_json())
-                    .where(RoleSchema.id == roleSchema.id)
+                    .values(schemaObject.to_json())
+                    .where(RoleSchema.id == schemaObject.id)
                 ).rowcount
                 logger.debug(f"Updated [{results}] role.")
 
@@ -153,12 +153,12 @@ class RoleRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                roleSchemas = self.findByFilter({"id": ids})
-                for roleSchema in roleSchemas:
-                    logger.debug(f"Deleting role with id=[{roleSchema.id}]")
-                    session.delete(roleSchema)
+                schemaObjects = self.findByFilter({"id": ids})
+                for schemaObject in schemaObjects:
+                    logger.debug(f"Deleting role with id=[{schemaObject.id}]")
+                    session.delete(schemaObject)
 
-                logger.debug(f"Deleted [{len(roleSchemas)}] roles successfully.")
+                logger.debug(f"Deleted [{len(schemaObjects)}] roles successfully.")
                 session.commit()
             except NoResultFound as ex:
                 logger.error(f"NoResultFound while bulk deleting roles! Error={ex}")
@@ -186,16 +186,16 @@ class PermissionRepository(SqlAlchemyRepository):
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[PermissionSchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
-        permissionSchemas = None
+        schemaObjects = None
         # verbose version of what a context manager will do
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
                 if filters:
-                    permissionSchemas = session.query(PermissionSchema).filter_by(**filters).all()
+                    schemaObjects = session.query(PermissionSchema).filter_by(**filters).all()
                 else:
-                    permissionSchemas = session.query(PermissionSchema).all()
+                    schemaObjects = session.query(PermissionSchema).all()
 
-                logger.debug(f"Loaded [{len(permissionSchemas)}] permissions => permissionSchemas={permissionSchemas}")
+                logger.debug(f"Loaded [{len(schemaObjects)}] permissions. schemaObjects={schemaObjects}")
 
                 # Commit:
                 # The pending changes above are flushed via flush(), the Transaction is committed, the Connection
@@ -230,18 +230,18 @@ class PermissionRepository(SqlAlchemyRepository):
                 # is removed.
                 session.close()
 
-        logger.debug(f"-findByFilter(), permissionSchemas={permissionSchemas}")
-        return permissionSchemas
+        logger.debug(f"-findByFilter(), schemaObjects={schemaObjects}")
+        return schemaObjects
 
-    def update(self, permissionSchema: PermissionSchema) -> PermissionSchema:
-        logger.debug(f"+update({permissionSchema})")
+    def update(self, schemaObject: PermissionSchema) -> PermissionSchema:
+        logger.debug(f"+update({schemaObject})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                permissionSchema.updated_at = func.now()
+                schemaObject.updated_at = func.now()
                 results = session.execute(
                     update(PermissionSchema)
-                    .values(permissionSchema.to_json())
-                    .where(PermissionSchema.id == permissionSchema.id)
+                    .values(schemaObject.to_json())
+                    .where(PermissionSchema.id == schemaObject.id)
                 ).rowcount
                 logger.debug(f"Updated [{results}] rows.")
 
@@ -290,12 +290,12 @@ class PermissionRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                permissionSchemas = self.findByFilter({"id": ids})
-                for permissionSchema in permissionSchemas:
-                    logger.debug(f"Deleting permission with id=[{permissionSchema.id}]")
-                    session.delete(permissionSchema)
+                schemaObjects = self.findByFilter({"id": ids})
+                for schemaObject in schemaObjects:
+                    logger.debug(f"Deleting permission with id=[{schemaObject.id}]")
+                    session.delete(schemaObject)
 
-                logger.debug(f"Deleted [{len(permissionSchemas)}] permissions successfully.")
+                logger.debug(f"Deleted [{len(schemaObjects)}] permissions successfully.")
                 session.commit()
             except NoResultFound as ex:
                 logger.error(f"NoResultFound while bulk deleting permissions! Error={ex}")

@@ -25,8 +25,8 @@ class AbstractService(object):
         return type(self).__name__
 
     @abstractmethod
-    def validate(self, operation: SchemaOperation, baseModel: BaseModel) -> None:
-        logger.debug(f"validate({operation}, {baseModel})")
+    def validate(self, operation: SchemaOperation, modelObject: BaseModel) -> None:
+        logger.debug(f"validate({operation}, {modelObject})")
         pass
 
     @abstractmethod

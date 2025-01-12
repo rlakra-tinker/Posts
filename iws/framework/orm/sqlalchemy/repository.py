@@ -1,7 +1,6 @@
 #
 # Author: Rohtash Lakra
 #
-import json
 import logging
 from typing import Iterable, Dict, Any
 from typing import List, Optional
@@ -22,9 +21,6 @@ class SqlAlchemyRepository(AbstractRepository):
 
     def __init__(self, engine: Engine):
         super().__init__(engine=engine)
-
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
-        pass
 
     def save(self, instance: BaseSchema) -> BaseSchema:
         """Returns records by filter or empty list"""
@@ -101,22 +97,26 @@ class SqlAlchemyRepository(AbstractRepository):
         logger.debug(f"-save_all(), instances={instances}")
         return instances
 
-    def findById(self, baseSchema: BaseSchema, id: int) -> Optional[BaseSchema]:
-        """Finds the record by id in the provided table and parses as list of dict.
+    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+        pass
 
-        :param Engine engine: Database engine to handle raw SQL queries.
-        :param str table: table name which records to fetch.
+    def findById(self, schemaObject: BaseSchema, id: int) -> Optional[BaseSchema]:
+        """Finds the record by id in the provided table and parses object's dict.
 
-        :return: Optional[List[dict]]
+        Parameters:
+        :schemaObject BaseSchema: The schema class that represents the db schema.
+        :id int: id of the object
+
+        :return: Optional[BaseSchema]
         """
-        logger.debug(f"+findById({baseSchema}, {id})")
+        logger.debug(f"+findById({schemaObject}, {id})")
         with Session(self.get_engine()) as session:
             try:
                 # session.begin()
-                result = session.query(baseSchema).filter(baseSchema.id == id).one()
+                result = session.query(schemaObject).filter(schemaObject.id == id).one()
                 # rows = session.execute(text(query)).fetchall()
                 # results = [row._asdict() for row in rows]
-                logger.debug(f"Loaded a record => result={result}")
+                logger.debug(f"Loaded {type(result).__name__} record. result={result}")
             except NoResultFound as ex:
                 logger.error(f"NoResultFound while loading records! Error={ex}")
                 session.rollback()
@@ -130,30 +130,57 @@ class SqlAlchemyRepository(AbstractRepository):
                 # session.rollback()
                 raise ex
         logger.debug(f"-findById(), result={result}")
+        return result
 
-    def findAll(self, table: str, fields=[]) -> Optional[List[dict]]:
-        """Finds rows of the provided table from the database and parses as list of dict.
+    def findAll(self, schemaObject: BaseSchema, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+        """Returns the records by filter or empty list"""
+        logger.debug(f"+findAll({schemaObject}, {filters})")
+        schemaObjects = None
+        # verbose version of what a context manager will do
+        with Session(bind=self.get_engine(), expire_on_commit=False) as session:
+            try:
+                if filters:
+                    schemaObjects = session.query(schemaObject).filter_by(**filters).all()
+                else:
+                    schemaObjects = session.query(schemaObject).all()
 
-        :param Engine engine: Database engine to handle raw SQL queries.
-        :param str table: table name which records to fetch.
+                logger.debug(f"Loaded [{len(schemaObjects)}] records. schemaObjects={schemaObjects}")
 
-        :return: Optional[List[dict]]
-        """
-        logger.debug(f"+findAll({table}, {fields})")
-        results = dict()
-        try:
-            query = f'SELECT {fields} FROM {table}'
-            with Session(self.get_engine()) as session:
-                rows = session.execute(text(query), ).fetchall()
-                results = [row._asdict() for row in rows]
-                logger.debug(f"Loaded [{rows.rowcount}] rows => results={results}")
-                logger.debug(f"Loaded [{rows.rowcount}] rows => results={json.dumps(results, indent=2)}")
-        except SQLAlchemyError as ex:
-            logger.error(f"SQLAlchemyError while loading records! Error={ex}")
-        except Exception as ex:
-            logger.error(f"Exception while loading records! Error={ex}")
+                # Commit:
+                # The pending changes above are flushed via flush(), the Transaction is committed, the Connection
+                # object closed and discarded, the underlying DBAPI connection returned to the connection pool.
+                session.commit()
+            except NoResultFound as ex:
+                logger.error(f"NoResultFound while loading permissions! Error={ex}")
+                # on rollback, the same closure of state as that of commit proceeds.
+                session.rollback()
+                raise ex
+            except MultipleResultsFound as ex:
+                logger.error(f"MultipleResultsFound while loading permissions! Error={ex}")
+                # on rollback, the same closure of state as that of commit proceeds.
+                session.rollback()
+                raise ex
+            except Exception as ex:
+                logger.error(f"Exception while loading permissions! Error={ex}")
+                # on rollback, the same closure of state as that of commit proceeds.
+                session.rollback()
+                raise ex
+            except:
+                # on rollback, the same closure of state as that of commit proceeds.
+                logger.error(f"Exception while loading permissions!")
+                session.rollback()
+                raise
+            finally:
+                # close the Session.
+                # This will expunge any remaining objects as well as reset any existing 'SessionTransaction' state.
+                # Neither of these steps are usually essential.
+                # However, if the commit() or rollback() itself experienced an unanticipated internal failure
+                # (such as due to a mis-behaved user-defined event handler), .close() will ensure that invalid state
+                # is removed.
+                session.close()
 
-        logger.debug(f"-findAll(), results={results}")
+        logger.debug(f"-findAll(), schemaObjects={schemaObjects}")
+        return schemaObjects
 
     def updateObjects(self, table: str, update_json=[]) -> Optional[List[dict]]:
         """Finds rows of the provided table from the database and parses as list of dict.

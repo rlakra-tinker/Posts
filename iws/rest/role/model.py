@@ -62,7 +62,7 @@ class Permission(NamedModel):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
+        return ("{} <id={}, name={}, description={}, active={}, {}>"
                 .format(self.getClassName(),
                         self.id,
                         self.name,

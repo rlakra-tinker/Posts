@@ -59,10 +59,6 @@ class RoleSchema(NamedSchema):
                         self.permissions,
                         self.auditable()))
 
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
-
 
 class PermissionSchema(NamedSchema):
     """ PermissionSchema represents [roles] Table
@@ -85,17 +81,13 @@ class PermissionSchema(NamedSchema):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
+        return ("{} <id={}, name={}, description={}, active={}, {}>"
                 .format(self.getClassName(),
                         self.id,
                         self.name,
                         self.description,
                         self.active,
                         self.auditable()))
-
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
 
 
 class RolePermissionSchema(AbstractSchema):
@@ -106,13 +98,13 @@ class RolePermissionSchema(AbstractSchema):
     # foreign key to "roles.id" and "users.id" are added
     # not Optional[], therefore will be NOT NULL
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
-
-    # not Optional[], therefore will be NOT NULL
-    permission_id: Mapped[int] = mapped_column(ForeignKey("permissions.id"), primary_key=True)
-
     # Define the many-to-one relationship
     # association between Association -> Role
     role: Mapped["RoleSchema"] = relationship("RoleSchema")
+
+    # not Optional[], therefore will be NOT NULL
+    permission_id: Mapped[int] = mapped_column(ForeignKey("permissions.id"), primary_key=True)
+    # Define the many-to-one relationship
     # association between Association -> Permission
     permission: Mapped["PermissionSchema"] = relationship("PermissionSchema")
 
@@ -120,10 +112,6 @@ class RolePermissionSchema(AbstractSchema):
         """Returns the string representation of this object"""
         return ("{} <id={}, role_id={}, permission_id={}, {}>"
                 .format(self.getClassName(), self.id, self.role_id, self.permission_id, self.auditable()))
-
-    def __repr__(self) -> str:
-        """Returns the string representation of this object"""
-        return str(self)
 
 
 class CapabilitySchema(NamedSchema):
@@ -144,7 +132,7 @@ class CapabilitySchema(NamedSchema):
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
-        return ("{} <id={}, name={}, active={}, meta_data={}, {}>"
+        return ("{} <id={}, name={}, description={}, active={}, {}>"
                 .format(self.getClassName(),
                         self.id,
                         self.name,

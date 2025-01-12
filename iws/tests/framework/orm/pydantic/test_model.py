@@ -142,20 +142,20 @@ class TestPydanticModel(AbstractTestCase):
     def test_error_model(self):
         """Tests an ErrorEntity object"""
         logger.debug("+test_error_model()")
-        error_model = ErrorModel.buildError(httpStatus=HTTPStatus.INTERNAL_SERVER_ERROR,
-                                            message="Internal Server Error!")
-        logger.debug(f"error_model={error_model}")
+        errorModel = ErrorModel.buildError(httpStatus=HTTPStatus.INTERNAL_SERVER_ERROR,
+                                           message="Internal Server Error!")
+        logger.debug(f"errorModel={errorModel}")
 
         # valid object and expected results
-        self.assertIsNotNone(error_model)
-        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR.statusCode, error_model.status)
-        self.assertEqual("Internal Server Error!", error_model.message)
-        self.assertNotEqual(HTTPStatus.INTERNAL_SERVER_ERROR.message, error_model.message)
-        self.assertNotEqual(HTTPStatus.BAD_REQUEST, error_model.status)
+        self.assertIsNotNone(errorModel)
+        self.assertEqual(HTTPStatus.INTERNAL_SERVER_ERROR.statusCode, errorModel.status)
+        self.assertEqual("Internal Server Error!", errorModel.message)
+        self.assertNotEqual(HTTPStatus.INTERNAL_SERVER_ERROR.message, errorModel.message)
+        self.assertNotEqual(HTTPStatus.BAD_REQUEST, errorModel.status)
 
-        self.assertTrue(isinstance(error_model, AbstractModel))
-        self.assertTrue(isinstance(error_model, ErrorModel))
-        self.assertFalse(isinstance(error_model, BaseModel))
+        self.assertTrue(isinstance(errorModel, AbstractModel))
+        self.assertTrue(isinstance(errorModel, ErrorModel))
+        self.assertFalse(isinstance(errorModel, BaseModel))
         self.assertTrue(issubclass(ErrorModel, object))
         self.assertTrue(issubclass(ErrorModel, AbstractModel))
         self.assertFalse(issubclass(AbstractModel, ErrorModel))
@@ -166,27 +166,27 @@ class TestPydanticModel(AbstractTestCase):
     def test_models(self):
         """Tests all entities object"""
         logger.debug("+test_models()")
-        entity_object = BaseModel(id=100)
-        logger.debug(f"entity_object: {entity_object}")
-        self.assertEqual(100, entity_object.get_id())
-        self.assertNotEqual("Lakra", entity_object.get_id())
-        entity_object_json = entity_object.to_json()
-        logger.debug(f"entity_object_json: \n{entity_object_json}")
-        self.assertEqual(entity_object_json, entity_object.to_json())
+        baseModel = BaseModel(id=100)
+        logger.debug(f"baseModel: {baseModel}")
+        self.assertEqual(100, baseModel.get_id())
+        self.assertNotEqual("Lakra", baseModel.get_id())
+        jsonBaseModel = baseModel.to_json()
+        logger.debug(f"jsonBaseModel={jsonBaseModel}")
+        self.assertEqual(jsonBaseModel, baseModel.to_json())
 
-        entity_object = NamedModel(id=1600, name="R. Lakra")
-        logger.debug(f"entity_object: {entity_object}")
-        self.assertEqual(1600, entity_object.get_id())
-        self.assertEqual("R. Lakra", entity_object.name)
-        self.assertNotEqual("Lakra", entity_object.get_id())
-        entity_object_json = entity_object.to_json()
-        logger.debug(f"entity_object_json: \n{entity_object_json}")
-        self.assertEqual(entity_object_json, entity_object.to_json())
+        namedModel = NamedModel(id=1600, name="R. Lakra")
+        logger.debug(f"namedModel: {namedModel}")
+        self.assertEqual(1600, namedModel.get_id())
+        self.assertEqual("R. Lakra", namedModel.name)
+        self.assertNotEqual("Lakra", namedModel.get_id())
+        jsonNamedModel = namedModel.to_json()
+        logger.debug(f"jsonNamedModel={jsonNamedModel}")
+        self.assertEqual(jsonNamedModel, namedModel.to_json())
 
         # valid object and expected results
-        self.assertTrue(isinstance(entity_object, NamedModel))
-        self.assertTrue(isinstance(entity_object, BaseModel))
-        self.assertFalse(isinstance(entity_object, ErrorModel))
+        self.assertTrue(isinstance(namedModel, NamedModel))
+        self.assertTrue(isinstance(namedModel, BaseModel))
+        self.assertFalse(isinstance(namedModel, ErrorModel))
         self.assertFalse(issubclass(object, BaseModel))
 
         errorModel = ErrorModel.buildError(httpStatus=HTTPStatus.BAD_REQUEST, message="Error")
@@ -199,33 +199,36 @@ class TestPydanticModel(AbstractTestCase):
         self.assertNotEqual(HTTPStatus.BAD_REQUEST.message, errorModel.message)
         self.assertNotEqual(HTTPStatus.OK, errorModel.status)
 
-        errorEntityJson = errorModel.to_json()
-        logger.debug(f"errorEntityJson=\n{errorEntityJson}")
+        jsonErrorModel = errorModel.to_json()
+        logger.debug(f"jsonErrorModel={jsonErrorModel}")
         logger.debug("-test_models()")
         print()
 
-    def test_response_entity_success(self):
-        """Tests an ResponseEntity object"""
-        logger.debug("\n+test_response_entity_success()")
+    def test_response_model_success(self):
+        """Tests an ResponseModel object"""
+        logger.debug("+test_response_model_success()")
         named_entity = NamedModel(id=1600, name="R. Lakra")
-        response_entity = ResponseModel.buildResponse(HTTPStatus.CREATED, named_entity)
-        logger.debug(f"response_entity={response_entity}")
-        self.assertIsNotNone(response_entity)
-        self.assertEqual(HTTPStatus.CREATED.statusCode, response_entity.status)
-        self.assertIsNotNone(response_entity.data)
-        self.assertIsNone(response_entity.errors)
-        self.assertFalse(response_entity.hasError())
+        responseModel = ResponseModel.buildResponse(HTTPStatus.CREATED, named_entity)
+        logger.debug(f"responseModel={responseModel}")
+        self.assertIsNotNone(responseModel)
+        self.assertEqual(HTTPStatus.CREATED.statusCode, responseModel.status)
+        self.assertIsNotNone(responseModel.data)
+        self.assertIsNone(responseModel.errors)
+        self.assertFalse(responseModel.hasError())
+        jsonResponseModel = responseModel.to_json()
+        self.assertIsNotNone(jsonResponseModel)
+        logger.debug(f"jsonResponseModel={jsonResponseModel}")
 
         # build json response
         response_entity_json = ResponseModel.jsonResponse(HTTPStatus.CREATED, named_entity)
         self.assertIsNotNone(response_entity_json)
         logger.debug(f"response_entity_json={response_entity_json}")
-        logger.debug("-test_response_entity_success()")
+        logger.debug("-test_response_model_success()")
         print()
 
-    def test_response_entity_error(self):
-        """Tests an ResponseEntity object"""
-        logger.debug("\n+test_response_entity_error()")
+    def test_response_model_error(self):
+        """Tests an ResponseModel object"""
+        logger.debug("+test_response_model_error()")
         error_entity = ErrorModel.buildError(httpStatus=HTTPStatus.BAD_REQUEST, message="Error")
         response = ResponseModel.buildResponse(HTTPStatus.BAD_REQUEST, error_entity)
         logger.debug(f"response: {response}")
@@ -234,12 +237,15 @@ class TestPydanticModel(AbstractTestCase):
         self.assertIsNone(response.data)
         self.assertTrue(response.hasError())
         self.assertIsNotNone(response.errors)
+        jsonResponse = response.to_json()
+        self.assertIsNotNone(jsonResponse)
+        logger.debug(f"jsonResponse={jsonResponse}")
 
         # build json response
         response_entity_json = ResponseModel.jsonResponse(HTTPStatus.BAD_REQUEST, error_entity)
         self.assertIsNotNone(response_entity_json)
-        logger.debug(f"response_entity_json: {response_entity_json}")
-        logger.debug("-test_response_entity_error()")
+        logger.debug(f"response_entity_json={response_entity_json}")
+        logger.debug("-test_response_model_error()")
         print()
 
     def test_build_response_with_critical(self):

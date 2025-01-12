@@ -6,6 +6,7 @@ from flask import Blueprint
 from rest.company.v1 import bp as company_v1_bp
 from rest.contact.v1 import bp as contact_v1_bp
 from rest.post.v1 import bp as post_v1_bp
+from rest.role.permission_routes import bp as permission_bp
 from rest.role.v1 import bp as role_v1_bp
 from rest.user.v1 import bp as user_v1_bp
 
@@ -20,6 +21,7 @@ Parameters:
 
 # Register REST APIs (end-points) here
 bp.register_blueprint(role_v1_bp)
+bp.register_blueprint(permission_bp)
 bp.register_blueprint(user_v1_bp)
 bp.register_blueprint(company_v1_bp)
 bp.register_blueprint(contact_v1_bp)
