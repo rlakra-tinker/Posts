@@ -179,6 +179,57 @@ class RoleRepositoryTest(AbstractTestCase):
         #
         # print(has_permission(user, "write"))  # True
 
+    def test_assign_permission(self):
+        logger.debug("+test_assign_permission()")
+        # Create roles
+        adminRole = RoleSchema(name=f"Admin-{timeMillis()}", active=True, meta_data={"description": "An Admin Role"})
+        logger.debug(f"adminRole={adminRole}")
+
+        # Create permissions
+        readPermission = PermissionSchema(name=f"Read-{timeMillis()}", description="Allows read access", active=True)
+        writePermission = PermissionSchema(name=f"Write-{timeMillis()}", description="Allows write access", active=True)
+        logger.debug(f"readPermission={readPermission}")
+        logger.debug(f"writePermission={writePermission}")
+
+        # persist roles and permissions
+        self.roleRepository.save_all([adminRole, readPermission, writePermission])
+        # validate role
+        adminRole = self.roleRepository.findByFilter({"name": adminRole.name})[0]
+        logger.debug(f"adminRole={adminRole}")
+        self.assertIsNotNone(adminRole.id)
+        self.assertIsNotNone(adminRole.permissions)
+
+        # validate permissions
+        readPermission = self.permissionRepository.findByFilter({"name": readPermission.name})[0]
+        logger.debug(f"readPermission={readPermission}")
+        self.assertIsNotNone(readPermission.id)
+
+        writePermission = self.permissionRepository.findByFilter({"name": writePermission.name})[0]
+        logger.debug(f"writePermission={writePermission}")
+        self.assertIsNotNone(writePermission.id)
+
+        # Assign permissions to roles
+        adminRole.permissions.append(readPermission)
+        adminRole.permissions.append(writePermission)
+        logger.debug(f"adminRole={adminRole}")
+
+        # persist roles and permissions
+        adminRole = self.roleRepository.save(adminRole)
+
+        # find roles and validate
+        # self.roleRepository.save_all([adminRole, editorRole])
+        adminRole = self.roleRepository.findByFilter({"name": adminRole.name})[0]
+        logger.debug(f"adminRole={adminRole}")
+        self.assertIsNotNone(adminRole.id)
+        self.assertIsNotNone(adminRole.permissions)
+        self.assertEqual(2, len(adminRole.permissions))
+
+        # asset role's permission
+        self.assertPermissionSchema(adminRole.permissions[0], readPermission)
+        self.assertPermissionSchema(adminRole.permissions[1], writePermission)
+        logger.debug("-test_assign_permission()")
+        print()
+
 
 # Starting point
 if __name__ == 'main':

@@ -31,6 +31,18 @@ class Mapper:
         pass
 
     @classmethod
+    @abstractmethod
+    def fromSchemas(cls, schemaObjects: list[BaseSchema]) -> list[BaseModel]:
+        logger.debug(f"fromSchemas({schemaObjects})")
+        pass
+
+    @classmethod
+    @abstractmethod
+    def fromModels(cls, modelObjects: list[BaseModel]) -> list[BaseSchema]:
+        logger.debug(f"fromModels({modelObjects})")
+        pass
+
+    @classmethod
     def fromPydanticModel(cls, modelInstance: BaseModel) -> BaseSchema:
         logger.debug(f"+fromPydanticModel({modelInstance})")
         classObject = cls()

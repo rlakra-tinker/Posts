@@ -10,9 +10,9 @@ from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.service import AbstractService
 from rest.role.mapper import RoleMapper, PermissionMapper
-from rest.role.model import Role, Permission
+from rest.role.model import Role, Permission, RoleAssignPermission
 from rest.role.repository import RoleRepository, PermissionRepository
-from rest.role.schema import PermissionSchema
+from rest.role.schema import PermissionSchema, RoleSchema
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +23,7 @@ class RoleService(AbstractService):
     def __init__(self):
         logger.debug("RoleService()")
         self.roleRepository = RoleRepository()
+        self.permissionRepository = PermissionRepository()
 
     def validate(self, operation: SchemaOperation, role: Role) -> None:
         logger.debug(f"+validate({operation}, {role})")
@@ -163,6 +164,56 @@ class RoleService(AbstractService):
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Role doesn't exist!")
 
         logger.debug(f"-delete()")
+
+    def assignPermissions(self, rolePermissions: list[RoleAssignPermission]) -> List[Role]:
+        """Grants the permissions to the roles"""
+        logger.debug(f"+assignPermissions({rolePermissions})")
+        schemaObjects = []
+        for rolePermission in rolePermissions:
+            # load roles
+            schemaObject = self.roleRepository.findById(RoleSchema, rolePermission.role_id)
+            # load roles permissions
+            permissions = self.permissionRepository.findByFilter({"id": rolePermission.permissions})
+            if schemaObject and permissions:
+                # assign permissions to role
+                schemaObject.permissions.extend(permissions)
+                # persist role
+                schemaObject = self.roleRepository.save(schemaObject)
+                # logger.debug(f"schemaObject=>{schemaObject}")
+                schemaObjects.append(schemaObject)
+
+        # logger.debug(f"schemaObjects=>{schemaObjects}")
+        if schemaObjects:
+            modelObjects = RoleMapper.fromSchemas(schemaObjects)
+        else:
+            modelObjects = None
+
+        logger.debug(f"-assignPermissions(), modelObjects={modelObjects}")
+        return modelObjects
+
+    def revokePermissions(self, rolePermissions: list[RoleAssignPermission]) -> List[Role]:
+        """Revokes the permissions of the roles"""
+        logger.debug(f"+revokePermissions({rolePermissions})")
+        schemaObjects = []
+        for rolePermission in rolePermissions:
+            # load roles
+            schemaObject = self.roleRepository.findById(RoleSchema, rolePermission.role_id)
+            if schemaObject and schemaObject.permissions:
+                for permission in rolePermission.permissions:
+                    schemaObject.permissions.pop(permission)
+                if len(schemaObject.permissions) > 0:
+                    # persist role and remove permissions
+                    schemaObject = self.roleRepository.save(schemaObject)
+                    schemaObjects.append(schemaObject)
+
+        # logger.debug(f"schemaObjects=>{schemaObjects}")
+        if schemaObjects:
+            modelObjects = RoleMapper.fromSchemas(schemaObjects)
+        else:
+            modelObjects = None
+
+        logger.debug(f"-revokePermissions(), modelObjects={modelObjects}")
+        return modelObjects
 
 
 class PermissionService(AbstractService):

@@ -12,7 +12,7 @@ from framework.exception import DuplicateRecordException, ValidationException, N
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
-from rest.role.model import Role
+from rest.role.model import Role, RoleAssignPermission
 from rest.role.service import RoleService
 from rest.role.v1 import bp as bp_role_v1
 
@@ -31,13 +31,13 @@ logger = logging.getLogger(__name__)
 def create():
     logger.debug(f"+create() => request={request}, args={request.args}, is_json:{request.is_json}")
     # post_data = request.form.to_dict(flat=False)
-    if request.is_json:
-        body = request.get_json()
-        logger.debug(f"body={body}")
-        role = Role(**body)
-        logger.debug(f"role={role}")
-
     try:
+        if request.is_json:
+            body = request.get_json()
+            logger.debug(f"body={body}")
+            role = Role(**body)
+            logger.debug(f"role={role}")
+
         roleService = RoleService()
         roleService.validate(SchemaOperation.CREATE, role)
         role = roleService.create(role)
@@ -69,10 +69,10 @@ def bulkCreate():
                 roles = [Role(**entry) for entry in body]
             elif isinstance(body, dict):
                 roles.append(Role(**body))
-            else:
-                # handle form fields here.
-                body = request.form.to_dict()
-                roles.append(Role(**body))
+        elif request.form:
+            # handle form fields here.
+            body = request.form.to_dict()
+            roles.append(Role(**body))
 
         logger.debug(f"roles={roles}")
         roleService = RoleService()
@@ -145,13 +145,14 @@ def update():
 @bp_role_v1.delete("/<id>")
 def delete(id: int):
     logger.debug(f"+delete({id}) => request={request}, args={request.args}, is_json:{request.is_json}")
-    if request.is_json:
-        body = request.get_json()
-        logger.debug(f"body={body}")
-        role = Role(**body)
-        logger.debug(f"role={role}")
 
     try:
+        if request.is_json:
+            body = request.get_json()
+            logger.debug(f"body={body}")
+            role = Role(**body)
+            logger.debug(f"role={role}")
+
         roleService = RoleService()
         roleService.delete(id)
 
@@ -163,4 +164,78 @@ def delete(id: int):
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
     logger.debug(f"-delete() <= response={response}")
+    return make_response(response.to_json(), response.status)
+
+
+@bp_role_v1.post("/assign-permission")
+def assignPermission():
+    logger.debug(f"+assignPermission() => request={request}, args={request.args}, is_json:{request.is_json}")
+    try:
+        rolePermissions = []
+        if request.is_json:
+            body = request.get_json()
+            logger.debug(f"type={type(body)}, body={body}")
+            if isinstance(body, list):
+                rolePermissions = [RoleAssignPermission(**entry) for entry in body]
+            elif isinstance(body, dict):
+                rolePermissions.append(RoleAssignPermission(**body))
+        elif request.form:
+            # handle form fields here.
+            body = request.form.to_dict()
+            logger.debug(f"type={type(body)}, body={body}")
+            rolePermissions.append(RoleAssignPermission(**body))
+
+        logger.debug(f"rolePermissions={rolePermissions}")
+        roleService = RoleService()
+        modelObjects = roleService.assignPermissions(rolePermissions)
+        logger.debug(f"modelObjects={modelObjects}")
+        # build success response
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode,
+                                 message="Successfully assigned permission to role.")
+        response.addInstances(modelObjects)
+    except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except DuplicateRecordException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except Exception as ex:
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+
+    logger.debug(f"-assignPermission() <= response={response}")
+    return make_response(response.to_json(), response.status)
+
+
+@bp_role_v1.post("/revoke-permission")
+def revokePermission():
+    logger.debug(f"+revokePermission() => request={request}, args={request.args}, is_json:{request.is_json}")
+    try:
+        rolePermissions = []
+        if request.is_json:
+            body = request.get_json()
+            logger.debug(f"type={type(body)}, body={body}")
+            if isinstance(body, list):
+                rolePermissions = [RoleAssignPermission(**entry) for entry in body]
+            elif isinstance(body, dict):
+                rolePermissions.append(RoleAssignPermission(**body))
+        elif request.form:
+            # handle form fields here.
+            body = request.form.to_dict()
+            logger.debug(f"type={type(body)}, body={body}")
+            rolePermissions.append(RoleAssignPermission(**body))
+
+        logger.debug(f"rolePermissions={rolePermissions}")
+        roleService = RoleService()
+        modelObjects = roleService.revokePermissions(rolePermissions)
+        logger.debug(f"modelObjects={modelObjects}")
+        # build success response
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode,
+                                 message="Successfully assigned permission to role.")
+        response.addInstances(modelObjects)
+    except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except DuplicateRecordException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except Exception as ex:
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+
+    logger.debug(f"-revokePermission() <= response={response}")
     return make_response(response.to_json(), response.status)

@@ -9,6 +9,7 @@ from sqlalchemy.exc import NoResultFound, MultipleResultsFound
 from sqlalchemy.orm import Session
 
 from framework.orm.sqlalchemy.repository import SqlAlchemyRepository
+from framework.orm.sqlalchemy.schema import BaseSchema
 from globals import connector
 from rest.role.schema import RoleSchema, PermissionSchema
 
@@ -30,8 +31,11 @@ class RoleRepository(SqlAlchemyRepository):
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             # session.begin()
             try:
-                if filters:
-                    schemaObjects = session.query(RoleSchema).filter_by(**filters).all()
+                if filters and filters is not None:
+                    if len(filters) == 1 and "id" in filters.keys() and isinstance(filters.get("id"), list):
+                        schemaObjects = session.query(RoleSchema).filter(RoleSchema.id.in_(filters.get("id"))).all()
+                    else:
+                        schemaObjects = session.query(RoleSchema).filter_by(**filters).all()
                 else:
                     schemaObjects = session.query(RoleSchema).all()
 
@@ -96,10 +100,14 @@ class RoleRepository(SqlAlchemyRepository):
         logger.info(f"-findByName(), results={results}")
         return results
 
-    def update(self, schemaObject: RoleSchema) -> RoleSchema:
+    def update(self, schemaObject: RoleSchema) -> int:
         logger.debug(f"+update({schemaObject})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
+                if not isinstance(schemaObject, BaseSchema):
+                    raise ValueError(f"Invalid schemaObject type={type(schemaObject)}")
+
+                # update updated_at to current datetime value
                 schemaObject.updated_at = func.now()
                 results = session.execute(
                     update(RoleSchema)
@@ -191,7 +199,11 @@ class PermissionRepository(SqlAlchemyRepository):
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
                 if filters:
-                    schemaObjects = session.query(PermissionSchema).filter_by(**filters).all()
+                    if len(filters) == 1 and "id" in filters.keys() and isinstance(filters.get("id"), list):
+                        schemaObjects = session.query(PermissionSchema).filter(
+                            PermissionSchema.id.in_(filters.get("id"))).all()
+                    else:
+                        schemaObjects = session.query(PermissionSchema).filter_by(**filters).all()
                 else:
                     schemaObjects = session.query(PermissionSchema).all()
 
