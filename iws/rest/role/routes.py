@@ -190,8 +190,8 @@ def assignPermission():
         modelObjects = roleService.assignPermissions(rolePermissions)
         logger.debug(f"modelObjects={modelObjects}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.statusCode,
-                                 message="Successfully assigned permission to role.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode,
+                                 message="Successfully granted permission to role.")
         response.addInstances(modelObjects)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
@@ -227,8 +227,8 @@ def revokePermission():
         modelObjects = roleService.revokePermissions(rolePermissions)
         logger.debug(f"modelObjects={modelObjects}")
         # build success response
-        response = ResponseModel(status=HTTPStatus.CREATED.statusCode,
-                                 message="Successfully assigned permission to role.")
+        response = ResponseModel(status=HTTPStatus.OK.statusCode,
+                                 message="Successfully revoked permission from role.")
         response.addInstances(modelObjects)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)

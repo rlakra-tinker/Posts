@@ -100,13 +100,13 @@ class RolePermissionSchema(AbstractSchema):
     role_id: Mapped[int] = mapped_column(ForeignKey("roles.id"), primary_key=True)
     # Define the many-to-one relationship
     # association between Association -> Role
-    role: Mapped["RoleSchema"] = relationship("RoleSchema")
+    role: Mapped["RoleSchema"] = relationship("RoleSchema", overlaps="permissions")
 
     # not Optional[], therefore will be NOT NULL
     permission_id: Mapped[int] = mapped_column(ForeignKey("permissions.id"), primary_key=True)
     # Define the many-to-one relationship
     # association between Association -> Permission
-    permission: Mapped["PermissionSchema"] = relationship("PermissionSchema")
+    permission: Mapped["PermissionSchema"] = relationship("PermissionSchema", overlaps="permissions")
 
     def __str__(self) -> str:
         """Returns the string representation of this object"""
