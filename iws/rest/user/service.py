@@ -8,11 +8,13 @@ from framework.exception import DuplicateRecordException, ValidationException, N
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
+from framework.security.hash import HashUtils
 from framework.service import AbstractService
 from rest.role.service import RoleService
 from rest.user.mapper import UserMapper
 from rest.user.model import User
 from rest.user.repository import UserRepository
+from rest.user.schema import UserSecuritySchema
 
 logger = logging.getLogger(__name__)
 
@@ -108,26 +110,39 @@ class UserService(AbstractService):
 
         logger.debug(f"-validates()")
 
-    def register(self, user: User) -> User:
+    def register(self, modelObject: User) -> User:
         """Crates a new user"""
-        logger.debug(f"+register({user})")
-        if self.existsByFilter({"email": user.email}):
-            raise DuplicateRecordException(HTTPStatus.CONFLICT, f"User '{user.email}' is already registered!")
+        logger.debug(f"+register({modelObject})")
+        self.validate(SchemaOperation.CREATE, modelObject)
+        if self.existsByFilter({"email": modelObject.email}):
+            raise DuplicateRecordException(HTTPStatus.CONFLICT, f"User '{modelObject.email}' is already registered!")
 
         # load user's email address
         roleService = RoleService()
-        roleModel = roleService.findByFilter({"name": "Manager"})
+        roleModel = roleService.findByFilter({"name": "Owner"})
         logger.debug(f"roleModel={roleModel}")
-        userSchema = UserMapper.fromModel(user)
-        userSchema = self.userRepository.save(userSchema)
-        if userSchema and userSchema.id is None:
-            userSchema = self.userRepository.findByFilter({"name": user.name})
+        schemaObject = UserMapper.fromModel(modelObject)
+        schemaObject = self.userRepository.save(schemaObject)
+        if schemaObject and schemaObject.id is None:
+            schemaObject = self.userRepository.findByFilter({"name": schemaObject.name})
 
-        user = UserMapper.fromSchema(userSchema)
+        # persist user's security
+        passwordHashCode = HashUtils.hashCode(modelObject.password)
+        logger.debug(f"modelObject.password={modelObject.password}, passwordHashCode={passwordHashCode}")
+        saltHashCode, hashCode = HashUtils.hashCodeWithSalt(passwordHashCode)
+        logger.debug(f"saltHashCode={saltHashCode}, hashCode={hashCode}")
+        # TODO: Capture platform value form user-agent
+        userSecuritySchema = UserSecuritySchema(platform="Service", salt=saltHashCode, hashed_auth_token=hashCode)
+        logger.debug(f"userSecuritySchema={userSecuritySchema}")
+        schemaObject.user_security = userSecuritySchema
+        userSecuritySchema = self.userRepository.save(userSecuritySchema)
+        logger.debug(f"userSecuritySchema={userSecuritySchema}")
+
+        modelObject = UserMapper.fromSchema(schemaObject)
         # user = User.model_validate(userSchema)
 
-        logger.debug(f"-register(), user={user}")
-        return user
+        logger.debug(f"-register(), modelObject={modelObject}")
+        return modelObject
 
     def bulkCreate(self, users: List[User]) -> List[User]:
         """Crates a new user"""

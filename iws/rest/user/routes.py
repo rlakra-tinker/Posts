@@ -41,31 +41,35 @@ def register():
         body = None
         if request.is_json:
             body = request.get_json()
+            logger.debug(f"type={type(body)}, body={body}")
+        elif request.form:
+            logger.debug(f"request.form={request.form}")
+            # handle form fields here.
+            body = request.form.to_dict()
+
+        modelObject = None
+        if body:
             # user = UserSchema(**request.get_json())
             # user = userService.register()
             # user = UserSchema.model_construct(request.get_json())
             # user = userService.create(user)
             # return user, 201
-
-        elif request.form:
-            logger.debug(f"request.form={request.form}")
-            body = request.form.to_dict()
-
-        if not body:
+            if isinstance(body, list):
+                modelObject = [User(**entry) for entry in body]
+            elif isinstance(body, dict):
+                modelObject = User(**body)
+        else:
             raise ValidationException(httpStatus=HTTPStatus.INVALID_DATA, messages=["'User' is not fully defined!"])
 
         # body["birth_date"] = datetime.now().strftime("%Y-%m-%d")
-        logger.debug(f"body={body}")
         # user = User.model_validate(obj=body)
-        user = User(**body)
-        logger.debug(f"user={user}")
+        logger.debug(f"modelObject={modelObject}")
         userService = UserService()
-        userService.validate(SchemaOperation.CREATE, user)
-        user = userService.register(user)
+        modelObject = userService.register(modelObject)
 
         # build success response
         response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="User is successfully created.")
-        response.addInstance(user)
+        response.addInstance(modelObject)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except DuplicateRecordException as ex:

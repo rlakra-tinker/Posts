@@ -96,7 +96,7 @@ class UserRepositoryTest(AbstractTestCase):
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
         userSchema.user_security = userSecuritySchema
         # userSecuritySchema.user = userSchema
-        userSecuritySchema = self.addressRepository.save(userSecuritySchema)
+        userSecuritySchema = self.userRepository.save(userSecuritySchema)
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
         self.assertIsNotNone(userSecuritySchema.user_id)
         self.assertEqual("Python", userSecuritySchema.platform)
