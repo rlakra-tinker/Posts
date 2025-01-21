@@ -63,8 +63,8 @@ class Mapper:
         logger.debug(f"+parsePydanticModel({modelInstance})")
         if Mapper.isPydantic(modelInstance):
             try:
-                converted_model = self.parsePydanticModel(dict(modelInstance))
-                return modelInstance.Meta.orm_model(**converted_model)
+                schemaInstance = cls.parsePydanticModel(dict(modelInstance))
+                return modelInstance.Meta.orm_model(**schemaInstance)
 
             except AttributeError:
                 model_name = modelInstance.__class__.__name__
@@ -74,11 +74,12 @@ class Mapper:
             return [cls.parsePydanticModel(model) for model in modelInstance]
 
         elif isinstance(modelInstance, dict):
+            schemaInstance: dict()
             for key, model in modelInstance.items():
-                modelInstance[key] = self.parsePydanticModel(model)
+                schemaInstance[key] = cls.parsePydanticModel(model)
 
-        logger.debug(f"-parsePydanticModel(), modelInstance={modelInstance}")
-        return modelInstance
+        logger.debug(f"-parsePydanticModel(), schemaInstance={schemaInstance}")
+        return schemaInstance
 
     @classmethod
     # @abstractmethod
