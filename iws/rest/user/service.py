@@ -2,18 +2,23 @@
 # Author: Rohtash Lakra
 #
 import logging
+from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
 
-from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
+from common.config import Config
+from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException, \
+    AuthenticationException
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
+from framework.security.crypto import CryptoUtils
 from framework.security.hash import HashUtils
+from framework.security.jwt import AuthModel, AuthenticatedUser, TokenType
 from framework.service import AbstractService
-from rest.role.service import RoleService
+from framework.utils import Utils
 from rest.user.mapper import UserMapper
-from rest.user.model import User
-from rest.user.repository import UserRepository
+from rest.user.model import User, LoginUser
+from rest.user.repository import UserRepository, UserSecurityRepository
 from rest.user.schema import UserSecuritySchema
 
 logger = logging.getLogger(__name__)
@@ -24,6 +29,7 @@ class UserService(AbstractService):
     def __init__(self):
         logger.debug(f"UserService()")
         self.userRepository = UserRepository()
+        self.userSecurityRepository = UserSecurityRepository()
 
     def validate(self, operation: SchemaOperation, user: User) -> None:
         logger.debug(f"+validate({operation}, {user})")
@@ -69,29 +75,24 @@ class UserService(AbstractService):
 
     # @override
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
+        """Returns the records based on the provided filters"""
         logger.debug(f"+findByFilter({filters})")
-        userSchemas = self.userRepository.findByFilter(filters)
-        # logger.debug(f"userSchemas => type={type(userSchemas)}, values={userSchemas}")
-        roleModels = []
-        for userSchema in userSchemas:
-            # logger.debug(f"userSchema type={type(userSchema)}, value={userSchema}")
-            userModel = UserMapper.fromSchema(userSchema)
-            # logger.debug(f"type={type(userModel)}, userModel={userModel}")
-            roleModels.append(userModel)
-
-        logger.debug(f"-findByFilter(), roleModels={roleModels}")
-        return roleModels
+        schemaObjects = self.userRepository.findByFilter(filters)
+        modelObjects = [UserMapper.fromSchema(schemaObject) for schemaObject in schemaObjects]
+        logger.debug(f"-findByFilter(), modelObjects={modelObjects}")
+        return modelObjects
 
     # @override
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        userSchemas = self.userRepository.findByFilter(filters)
-        result = True if userSchemas else False
+        schemaObjects = self.userRepository.findByFilter(filters)
+        result = True if schemaObjects else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
 
     def validates(self, operation: SchemaOperation, users: List[User]) -> None:
+        """Validates the objects based on the operation"""
         logger.debug(f"+validates({operation}, {users})")
         error_messages = []
 
@@ -111,41 +112,48 @@ class UserService(AbstractService):
         logger.debug(f"-validates()")
 
     def register(self, modelObject: User) -> User:
-        """Crates a new user"""
+        """Crates/Registers a new user"""
         logger.debug(f"+register({modelObject})")
         self.validate(SchemaOperation.CREATE, modelObject)
+        # check user already exists or not
         if self.existsByFilter({"email": modelObject.email}):
             raise DuplicateRecordException(HTTPStatus.CONFLICT, f"User '{modelObject.email}' is already registered!")
 
         # load user's email address
-        roleService = RoleService()
-        roleModel = roleService.findByFilter({"name": "Owner"})
-        logger.debug(f"roleModel={roleModel}")
+        # roleService = RoleService()
+        # roleModel = roleService.findByFilter({"name": "Owner"})
+        # logger.debug(f"roleModel={roleModel}")
         schemaObject = UserMapper.fromModel(modelObject)
         schemaObject = self.userRepository.save(schemaObject)
-        if schemaObject and schemaObject.id is None:
-            schemaObject = self.userRepository.findByFilter({"name": schemaObject.name})
 
         # persist user's security
         passwordHashCode = HashUtils.hashCode(modelObject.password)
         logger.debug(f"modelObject.password={modelObject.password}, passwordHashCode={passwordHashCode}")
-        saltHashCode, hashCode = HashUtils.hashCodeWithSalt(passwordHashCode)
-        logger.debug(f"saltHashCode={saltHashCode}, hashCode={hashCode}")
+        # saltHashCode, hashCode = HashUtils.hashCodeWithSalt(passwordHashCode)
+        # logger.debug(f"saltHashCode={saltHashCode}, hashCode={hashCode}")
         # TODO: Capture platform value form user-agent
-        userSecuritySchema = UserSecuritySchema(platform="Service", salt=saltHashCode, hashed_auth_token=hashCode)
+        userSecuritySchema = UserSecuritySchema(platform="Service", salt=Utils.randomUUID(),
+                                                hashed_auth_token=passwordHashCode)
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
         schemaObject.user_security = userSecuritySchema
         userSecuritySchema = self.userRepository.save(userSecuritySchema)
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
 
         modelObject = UserMapper.fromSchema(schemaObject)
+        logger.debug(f"modelObject={modelObject}")
         # user = User.model_validate(userSchema)
+
+        # # build auth-token
+        # authModel = AuthModel(user_id=modelObject.id, auth_token=modelObject.password,
+        #                       iat=int(datetime.now(timezone.utc).timestamp()))
+        # authModelEncrypted = CryptoUtils.encrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, authModel.to_json())
+        # logger.debug(f"authModelEncrypted={authModelEncrypted}")
 
         logger.debug(f"-register(), modelObject={modelObject}")
         return modelObject
 
     def bulkCreate(self, users: List[User]) -> List[User]:
-        """Crates a new user"""
+        """Crates users in bulk"""
         logger.debug(f"+bulkCreate({users})")
         results = []
         for user in users:
@@ -154,6 +162,89 @@ class UserService(AbstractService):
 
         logger.debug(f"-bulkCreate(), results={results}")
         return results
+
+    def authenticate(self, token_type: TokenType, auth_token: str) -> User:
+        """Authenticates the token"""
+        logger.debug(f"+authenticate({token_type}, {auth_token})")
+        try:
+            # JWT Based Authentication
+            if TokenType.JWT == TokenType:
+                raise AuthenticationException(HTTPStatus.UNAUTHORIZED, "Not yet supported!")
+            else:
+                authModelDecrypted = CryptoUtils.decrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, auth_token)
+                logger.debug(f"type={type(authModelDecrypted)}, authModelDecrypted={authModelDecrypted}")
+                authModel = AuthModel(**authModelDecrypted)
+
+                # TODO: Time comparison with iat and expiry max
+                userSecuritySchema = self.userSecurityRepository.findByFilter({"user_id": authModel.user_id})[0]
+                if userSecuritySchema:
+                    passwordHashCode = HashUtils.hashCode(authModel.auth_token)
+                    if userSecuritySchema.hashed_auth_token != passwordHashCode:
+                        raise AuthenticationException(HTTPStatus.UNAUTHORIZED, "Invalid Token!")
+
+                    if userSecuritySchema.expire_at and userSecuritySchema.expire_at < int(
+                            datetime.now(timezone.utc).timestamp()):
+                        raise AuthenticationException(HTTPStatus.UNAUTHORIZED, "Auth token has expired!")
+
+                    saltHashCode, hashCode = HashUtils.hashCodeWithSalt(passwordHashCode, userSecuritySchema.salt)
+                    if not HashUtils.checkHashCode(authModel.auth_token, saltHashCode, hashCode):
+                        raise AuthenticationException(HTTPStatus.UNAUTHORIZED, "Invalid Token!")
+
+                    # load authenticated user
+                    schemaObject = self.userRepository.findByFilter({"id": authModel.user_id})[0]
+                    userObject = UserMapper.fromSchema(schemaObject)
+
+        except Exception as e:
+            logger.error(f"Auth token {auth_token} seems to have been tampered!, Error:{e}")
+            raise AuthenticationException(HTTPStatus.UNAUTHORIZED, str(e))
+
+        logger.debug(f"-authenticate(), userObject={userObject}")
+        return userObject
+
+    def login(self, loginUser: LoginUser) -> AuthenticatedUser:
+        logger.debug(f"+login({loginUser})")
+        # check user exists either by email or username
+        if loginUser.email and not self.existsByFilter({"email": loginUser.email}):
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User '{loginUser.email}' is not registered!")
+        elif loginUser.user_name and not self.existsByFilter({"user_name": loginUser.user_name}):
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User '{loginUser.user_name}' is not registered!")
+
+        # userObject:User = None
+        # load user
+        if loginUser.email:
+            userObject = self.findByFilter({"email": loginUser.email})[0]
+        elif loginUser.user_name:
+            userObject = self.findByFilter({"user_name": loginUser.user_name})[0]
+        logger.debug(f"userObject={userObject}")
+
+        # authenticate user
+        # load user's details
+        userSecuritySchema = self.userSecurityRepository.findByFilter({"user_id": userObject.id})[0]
+        logger.debug(f"userSecuritySchema={userSecuritySchema}")
+
+        # validate password
+        passwordHashCode = HashUtils.hashCode(loginUser.password)
+        logger.debug(f"loginUser.password={loginUser.password}, passwordHashCode={passwordHashCode}")
+        if userSecuritySchema.hashed_auth_token != passwordHashCode:
+            raise AuthenticationException(HTTPStatus.UNAUTHORIZED, f"Either username or password is wrong!")
+
+        # check other patterns
+        saltHashCode, hashCode = HashUtils.hashCodeWithSalt(passwordHashCode, userSecuritySchema.salt)
+        userObject.authenticated = HashUtils.checkHashCode(loginUser.password, saltHashCode, hashCode)
+        logger.debug(f"userObject={userObject}")
+        if not userObject.isAuthenticated():
+            raise AuthenticationException(HTTPStatus.UNAUTHORIZED, f"Either username or password is wrong!")
+
+        # build auth-token
+        authModel = AuthModel(user_id=userObject.id, auth_token=loginUser.password,
+                              iat=int(datetime.now(timezone.utc).timestamp()))
+        authModelEncrypted = CryptoUtils.encrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, authModel.to_json())
+        logger.debug(f"authModelEncrypted={authModelEncrypted}")
+
+        authUser = AuthenticatedUser(user_id=authModel.user_id, token_type=TokenType.AUTH.name,
+                                     token=authModelEncrypted, user_exists=True)
+        logger.debug(f"-login(), authUser={authUser}")
+        return authUser
 
     def update(self, user: User) -> User:
         """Updates the user"""

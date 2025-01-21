@@ -38,6 +38,11 @@ class User(Person):
     # roles: Optional[List["Role"]] = None
     addresses: Optional[List["Address"]] = field(default_factory=list)
 
+    authenticated: bool = False
+
+    def isAuthenticated(self) -> bool:
+        return self.authenticated
+
     def to_json(self) -> str:
         """Returns the JSON representation of this object."""
         logger.debug(f"{self.getClassName()} => type={type(self)}, object={str(self)}")
@@ -57,6 +62,14 @@ class User(Person):
             "{} <id={}, email={}, user_name={}, first_name={}, last_name={}, admin={}, {}, user_security={}, addresses={}>"
             .format(self.getClassName(), self.id, self.email, self.user_name, self.first_name,
                     self.last_name, self.admin, self._auditable(), self.user_security, self.addresses))
+
+
+class LoginUser(AbstractModel):
+    """LoginUser contains properties specific to this object."""
+
+    email: str = None
+    user_name: str = None
+    password: str = None
 
 
 class UserSecurity(AbstractModel):

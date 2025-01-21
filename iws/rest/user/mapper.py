@@ -4,6 +4,8 @@
 import logging
 
 from framework.orm.mapper import Mapper
+from framework.orm.pydantic.model import BaseModel
+from framework.orm.sqlalchemy.schema import BaseSchema
 from rest.user.model import User, Address, UserSecurity
 from rest.user.schema import UserSchema, AddressSchema, UserSecuritySchema
 
@@ -46,6 +48,14 @@ class UserMapper(Mapper):
         logger.debug(f"-fromModel(), schemaObject={schemaObject}")
         return schemaObject
 
+    @classmethod
+    def fromSchemas(cls, schemaObjects: list[BaseSchema]) -> list[BaseModel]:
+        return [UserMapper.fromSchema(schemaObject) for schemaObject in schemaObjects]
+
+    @classmethod
+    def fromModels(cls, modelObjects: list[BaseModel]) -> list[BaseSchema]:
+        return [UserMapper.fromModel(modelObject) for modelObject in modelObjects]
+
 
 class UserSecurityMapper(Mapper):
 
@@ -59,6 +69,14 @@ class UserSecurityMapper(Mapper):
         # logger.debug(f"+fromModel(), modelObject={modelObject}")
         return UserSecuritySchema(**modelObject.toJSONObject())
 
+    @classmethod
+    def fromSchemas(cls, schemaObjects: list[BaseSchema]) -> list[BaseModel]:
+        return [UserSecurityMapper.fromSchema(schemaObject) for schemaObject in schemaObjects]
+
+    @classmethod
+    def fromModels(cls, modelObjects: list[BaseModel]) -> list[BaseSchema]:
+        return [UserSecurityMapper.fromModel(modelObject) for modelObject in modelObjects]
+
 
 class AddressMapper(Mapper):
 
@@ -71,3 +89,11 @@ class AddressMapper(Mapper):
     def fromModel(cls, modelObject: Address) -> AddressSchema:
         # logger.debug(f"+fromModel(), modelObject={modelObject}")
         return AddressSchema(**modelObject.toJSONObject())
+
+    @classmethod
+    def fromSchemas(cls, schemaObjects: list[BaseSchema]) -> list[BaseModel]:
+        return [AddressMapper.fromSchema(schemaObject) for schemaObject in schemaObjects]
+
+    @classmethod
+    def fromModels(cls, modelObjects: list[BaseModel]) -> list[BaseSchema]:
+        return [AddressMapper.fromModel(modelObject) for modelObject in modelObjects]

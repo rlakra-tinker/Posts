@@ -4,7 +4,8 @@ import unittest
 from framework.exception import ValidationException
 from framework.http import HTTPStatus
 from framework.orm.sqlalchemy.schema import SchemaOperation
-from rest.user.model import User, Address
+from framework.security.jwt import TokenType
+from rest.user.model import User, Address, LoginUser
 from rest.user.service import UserService
 from tests.base import AbstractTestCase
 
@@ -140,6 +141,34 @@ class UserServiceTest(AbstractTestCase):
         self.assertIsNotNone(user)
         self.assertEqual(self.user.email, user.email)
         logger.debug("-test_register_user()")
+        print()
+
+    def test_login_user(self):
+        logger.debug("+test_login_user()")
+        logger.debug(f"user={self.user}")
+        # register
+        self.user = self.userService.register(self.user)
+        logger.debug(f"user={self.user}")
+        self.assertIsNotNone(self.user)
+        self.assertIsNotNone(self.user.id)
+        self.assertEquals("Roh", self.user.first_name)
+
+        # login
+        loginUser = LoginUser(email=self.user.email, password="password")
+        # 8QDVOXW4KjfBB2hiq8uNEI+QpvE2bhu71oQ+q9PcP8aoLKhT1g9RP65Mni7QWyJ7VJiSIh3LKAFJPv6fL8aCXqQEsObVrVJ2
+        authUser = self.userService.login(loginUser)
+        logger.debug(f"authUser={authUser}")
+        self.assertIsNotNone(authUser)
+        self.assertIsNotNone(authUser.token)
+        self.assertEqual(authUser.user_id, self.user.id)
+
+        # authenticate
+        userObject = self.userService.authenticate(TokenType.AUTH, authUser.token)
+        logger.debug(f"userObject={userObject}")
+        self.assertIsNotNone(userObject)
+        self.assertEqual(userObject.id, self.user.id)
+
+        logger.debug("-test_login_user()")
         print()
 
     def test_register_user_with_address(self):

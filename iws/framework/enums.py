@@ -1,9 +1,12 @@
 #
 # Author: Rohtash Lakra
 #
+import logging
 import os
 from enum import Enum, unique, auto
 from typing import Any
+
+logger = logging.getLogger(__name__)
 
 
 # Also, subclassing an enumeration is allowed only if the enumeration does not define any members.
@@ -46,8 +49,11 @@ class BaseEnum(Enum):
     def of_name(cls, name: str) -> Enum:
         "Returns the Service Request Type object based on request_type param"
         if name is not None:
+            # logger.debug(f"name type={type(name)}, name={name}")
+            name = name.lower()  # convert to lower-case
             for member in cls:
-                if member.name.lower() == name.lower():
+                # logger.debug(f"member type={type(member.name)}, name={member.name}")
+                if member.name.lower() == name:
                     return member
 
         return None

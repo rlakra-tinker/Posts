@@ -4,6 +4,8 @@
 import logging
 
 from framework.orm.mapper import Mapper
+from framework.orm.pydantic.model import BaseModel
+from framework.orm.sqlalchemy.schema import BaseSchema
 from rest.company.model import Company
 from rest.company.schema import CompanySchema
 
@@ -35,3 +37,11 @@ class CompanyMapper(Mapper):
 
         logger.debug(f"-fromModel(), companySchema={companySchema}")
         return companySchema
+
+    @classmethod
+    def fromSchemas(cls, schemaObjects: list[BaseSchema]) -> list[BaseModel]:
+        return [CompanyMapper.fromSchema(schemaObject) for schemaObject in schemaObjects]
+
+    @classmethod
+    def fromModels(cls, modelObjects: list[BaseModel]) -> list[BaseSchema]:
+        return [CompanyMapper.fromModel(modelObject) for modelObject in modelObjects]

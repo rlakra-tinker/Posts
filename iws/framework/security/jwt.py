@@ -11,13 +11,15 @@ import jwt
 from framework.enums import BaseEnum
 from framework.exception import AuthenticationException
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import AbstractModel
+from framework.orm.pydantic.model import AbstractModel, BaseModel
 
 
 @unique
 class TokenType(BaseEnum):
-    AUTH = auto()
-    JWT = auto()
+    """TokenType represents supported authentication types"""
+    AUTH = auto()  # Password
+    JWT = auto()  # JWT
+    OAUTH = auto()  # OAUTH
 
 
 class JWTTokenModel(AbstractModel):
@@ -36,14 +38,35 @@ class JWTModel(AbstractModel):
     email: str | None = None
 
 
-class AuthenticatedUser(AbstractModel):
+class AuthenticatedUser(BaseModel):
     """An Authenticated User's response payload """
-    user_id: str | None = None
+    user_id: int | None = None
+    token_type: TokenType
     token: str
     user_exists: bool
-    token_type: TokenType
     # Time since epoch
     exp: float | int | None = None
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return f"{self.getClassName()} <user_id={self.user_id}, token_type={self.token_type},token={self.token},user_exists={self.user_exists},exp={self.exp}>"
+
+
+class AuthModel(AbstractModel):
+    """Authentication model object."""
+
+    user_id: int = None
+    auth_token: str = None
+    iat: int = None
+
+    def to_json(self) -> str:
+        """Returns the JSON representation of this object."""
+        return self.model_dump_json(exclude=["created_at", "updated_at"])
+
+    def __str__(self) -> str:
+        """Returns the string representation of this object"""
+        return ("{} <user_id={}, auth_token={}, iat={}>"
+                .format(self.getClassName(), self.user_id, self.auth_token, self.iat))
 
 
 class JWTUtils(object):

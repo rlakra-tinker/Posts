@@ -44,6 +44,7 @@ class HashUtils(BaseEnum):
 
     @classmethod
     def checkHashCode(cls, text, salt, hash) -> bool:
+        # logger.debug(f"+checkHashCode({text}, {salt}, {hash})")
         saltBytes = bytes.fromhex(salt)
         hashBytes = bytes.fromhex(hash)
 
@@ -52,4 +53,7 @@ class HashUtils(BaseEnum):
         textSHA256Object = hashlib.sha256(text.encode())
         textDigest = textSHA256Object.digest()
 
-        return (textDigest + saltDigest) == hashBytes
+        authenticated = (textDigest + saltDigest) == hashBytes
+        # logger.debug(f"-checkHashCode(), authenticated={authenticated}")
+        logger.debug(f"checkHashCode(), authenticated={authenticated}")
+        return authenticated
