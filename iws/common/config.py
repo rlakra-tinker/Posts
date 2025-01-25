@@ -13,6 +13,8 @@ app_config = None
 
 
 class Config:
+    """Configuration file."""
+    
     __APP_CONFIG_FILE_PATH = 'tests/data/app-configs.json'
     __CORS_ENABLED = 'CORS_ENABLED'
 

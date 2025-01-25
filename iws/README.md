@@ -200,6 +200,40 @@ gunicorn -c gunicorn.conf.py wsgi:app
 python3 -m build
 ```
 
+
+### Docker Commands
+
+- Builds the docker container image
+```shell
+docker build -t posts-iws:latest -f Dockerfile .
+
+OR
+
+docker build -t posts-iws:latest .
+```
+
+- Runs the docker container as background service
+```shell
+docker run --name posts-iws -p 8080:8080 -d posts-iws:latest
+OR
+docker run --name posts-iws --rm -p 8080:8080 -d posts-iws:latest
+```
+
+- Shows the docker container's log
+```shell
+docker logs -f posts-iws
+```
+
+- Executes the 'bash' shell in the container
+```shell
+docker exec -it posts-iws bash
+```
+
+```shell
+docker stop posts-iws && docker container rm posts-iws
+```
+
+
 ### Save Requirements (Dependencies)
 ```shell
 pip freeze > requirements.txt

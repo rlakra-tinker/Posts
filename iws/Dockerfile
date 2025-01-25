@@ -16,14 +16,16 @@ WORKDIR /app
 
 # Copies the current directory (.) from the host machine to the `/app` directory in the Docker container.
 COPY . /app
-#COPY requirements.txt .
 
 # Installs the Python dependencies specified in the `requirements.txt` file.
-RUN pip install --upgrade pip
+#RUN pip install --upgrade pip
 #RUN pip install -r requirements.txt
 #RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install -r requirements.txt --no-cache-dir
-
+#RUN pip install -r requirements.txt --no-cache-dir
+RUN pip install --upgrade pip && \
+    pip install -r requirements.txt --no-cache-dir
+#RUN echo ls -la
+#RUN ls -la
 # Copy the rest of your application code into the container at /app
 #COPY . .
 

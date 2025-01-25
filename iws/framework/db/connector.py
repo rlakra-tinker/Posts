@@ -130,16 +130,19 @@ class SQLite3Connector(DatabaseConnector):
         """Initializes Configs"""
         with self.app.app_context():
             current_app.logger.debug(f"Initializing Configs ...")
-            #  current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
+            # current_app.logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
             # read db-name from app's config
             if not self.db_name:
                 self.db_name = self.app.config.get("DB_NAME")
-                if not self.db_name.endswith(".db"):
-                    self.db_name = self.db_name + '.db'
 
-                self.db_uri = ''.join([SQLITE_PREFIX, self.db_name])
-                self.db_password = Config.DB_PASSWORD
-            current_app.logger.debug(f"db_name:{self.db_name}, db_password:{self.db_password}, db_uri: {self.db_uri}")
+            current_app.logger.debug(f"self.db_name={self.db_name}")
+            if self.db_name and not self.db_name.endswith(".db"):
+                self.db_name = '.'.join([self.db_name, "db"])
+
+            # build db uri
+            self.db_uri = ''.join([SQLITE_PREFIX, self.db_name])
+            self.db_password = self.app.config.get("DB_PASSWORD")
+            current_app.logger.debug(f"db_name={self.db_name}, db_password={self.db_password}, db_uri={self.db_uri}")
 
     def init_db(self, configs: dict = None):
         """Initializes the database"""
