@@ -9,13 +9,16 @@ ARG API_ENV=develop
 # Define Env Variables
 ENV APP_ENV=$APP_ENV
 ENV API_ENV=$API_ENV
-#ENV APP_NAME=posts-iws
+ENV APP_NAME=posts-iws
 
 # Sets the working directory inside the Docker container at `/app`
 WORKDIR /app
 
 # Copies the current directory (.) from the host machine to the `/app` directory in the Docker container.
 COPY . /app
+
+# moved these configs to ENV variables and removed testing file
+#COPY default.env ./.env
 
 # Installs the Python dependencies specified in the `requirements.txt` file.
 #RUN pip install --upgrade pip
@@ -34,6 +37,7 @@ RUN pip install --upgrade pip && \
 EXPOSE 8080
 #HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=3 CMD  curl --silent --fail 0.0.0.0:8082/health_check || exit 1
 
+# Run Flask app
 # gunicorn -c gunicorn.conf.py wsgi:app
 #CMD ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:app"]
 #python -m flask --app wsgi run --port 8080 --debug

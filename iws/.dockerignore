@@ -30,7 +30,7 @@ eks/
 *.sqbpro
 
 # Other Folders & Files
-infra/
+iac/
 scripts/
 Dockerfile*
 Makefile
