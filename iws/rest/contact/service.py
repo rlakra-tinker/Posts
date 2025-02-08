@@ -59,7 +59,7 @@ class ContactService(AbstractService):
     # @override
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"+findByFilter({filters})")
-        contactSchemas = self.repository.findByFilter(filters)
+        contactSchemas = self.repository.filter(filters)
         contactModels = []
         for contactSchema in contactSchemas:
             contactModel = ContactMapper.fromSchema(contactSchema)
@@ -72,7 +72,7 @@ class ContactService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        contactSchemas = self.repository.findByFilter(filters)
+        contactSchemas = self.repository.filter(filters)
         result = True if contactSchemas else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
@@ -106,7 +106,7 @@ class ContactService(AbstractService):
         contactSchema = ContactMapper.fromModel(contact)
         contactSchema = self.repository.save(contactSchema)
         if contactSchema and contactSchema.id is None:
-            contactSchema = self.repository.findByFilter({"subject": contact.subject})
+            contactSchema = self.repository.filter({"subject": contact.subject})
 
         contact = ContactMapper.fromSchema(contactSchema)
         logger.debug(f"-create(), contact={contact}")
@@ -129,7 +129,7 @@ class ContactService(AbstractService):
         if not self.existsByFilter({"id": contact.id}):
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Contact doesn't exist!")
 
-        contactSchemas = self.repository.findByFilter({"id": contact.id})
+        contactSchemas = self.repository.filter({"id": contact.id})
         contactSchema = contactSchemas[0]
         if contact.first_name and contactSchema.first_name != contact.first_name:
             contactSchema.first_name = contact.first_name
@@ -144,7 +144,7 @@ class ContactService(AbstractService):
             contactSchema.subject = contact.subject
 
         self.repository.update(contactSchema)
-        contactSchema = self.repository.findByFilter({"id": contact.id})[0]
+        contactSchema = self.repository.filter({"id": contact.id})[0]
         contact = ContactMapper.fromSchema(contactSchema)
         logger.debug(f"-update(), contact={contact}")
         return contact

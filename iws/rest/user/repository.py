@@ -23,9 +23,9 @@ class UserRepository(SqlAlchemyRepository):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[UserSchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[UserSchema]]:
         """Returns records by filter or empty list"""
-        logger.debug(f"+findByFilter({filters})")
+        logger.debug(f"+filter({filters})")
         schemaObjects = None
         # verbose version of what a context manager will do
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
@@ -69,7 +69,7 @@ class UserRepository(SqlAlchemyRepository):
                 # is removed.
                 session.close()
 
-        logger.debug(f"-findByFilter(), schemaObjects={schemaObjects}")
+        logger.debug(f"-filter(), schemaObjects={schemaObjects}")
         return schemaObjects
 
     def findByUsername(self, userName: str) -> UserSchema:
@@ -149,7 +149,7 @@ class UserRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                schemaObjects = self.findByFilter({"id": ids})
+                schemaObjects = self.filter({"id": ids})
                 for schemaObject in schemaObjects:
                     logger.debug(f"Deleting record with id=[{schemaObject.id}]")
                     session.delete(schemaObject)
@@ -179,7 +179,7 @@ class UserSecurityRepository(SqlAlchemyRepository):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[UserSecuritySchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[UserSecuritySchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
         schemaObjects = None
@@ -285,7 +285,7 @@ class UserSecurityRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                schemaObjects = self.findByFilter({"id": ids})
+                schemaObjects = self.filter({"id": ids})
                 for schemaObject in schemaObjects:
                     logger.debug(f"Deleting record with id=[{schemaObject.id}]")
                     session.delete(schemaObject)
@@ -315,7 +315,7 @@ class AddressRepository(SqlAlchemyRepository):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[AddressSchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[AddressSchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
         addressSchemas = None
@@ -422,7 +422,7 @@ class AddressRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                addressSchemas = self.findByFilter({"id": ids})
+                addressSchemas = self.filter({"id": ids})
                 for addressSchema in addressSchemas:
                     logger.debug(f"Deleting address with id=[{addressSchema.id}]")
                     session.delete(addressSchema)

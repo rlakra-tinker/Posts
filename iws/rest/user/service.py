@@ -77,7 +77,7 @@ class UserService(AbstractService):
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         """Returns the records based on the provided filters"""
         logger.debug(f"+findByFilter({filters})")
-        schemaObjects = self.userRepository.findByFilter(filters)
+        schemaObjects = self.userRepository.filter(filters)
         modelObjects = [UserMapper.fromSchema(schemaObject) for schemaObject in schemaObjects]
         logger.debug(f"-findByFilter(), modelObjects={modelObjects}")
         return modelObjects
@@ -86,7 +86,7 @@ class UserService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        schemaObjects = self.userRepository.findByFilter(filters)
+        schemaObjects = self.userRepository.filter(filters)
         result = True if schemaObjects else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
@@ -176,7 +176,7 @@ class UserService(AbstractService):
                 authModel = AuthModel(**authModelDecrypted)
 
                 # TODO: Time comparison with iat and expiry max
-                userSecuritySchema = self.userSecurityRepository.findByFilter({"user_id": authModel.user_id})[0]
+                userSecuritySchema = self.userSecurityRepository.filter({"user_id": authModel.user_id})[0]
                 if userSecuritySchema:
                     passwordHashCode = HashUtils.hashCode(authModel.auth_token)
                     if userSecuritySchema.hashed_auth_token != passwordHashCode:
@@ -191,7 +191,7 @@ class UserService(AbstractService):
                         raise AuthenticationException(HTTPStatus.UNAUTHORIZED, "Invalid Token!")
 
                     # load authenticated user
-                    schemaObject = self.userRepository.findByFilter({"id": authModel.user_id})[0]
+                    schemaObject = self.userRepository.filter({"id": authModel.user_id})[0]
                     userObject = UserMapper.fromSchema(schemaObject)
 
         except Exception as e:
@@ -219,7 +219,7 @@ class UserService(AbstractService):
 
         # authenticate user
         # load user's details
-        userSecuritySchema = self.userSecurityRepository.findByFilter({"user_id": userObject.id})[0]
+        userSecuritySchema = self.userSecurityRepository.filter({"user_id": userObject.id})[0]
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
 
         # validate password
@@ -254,7 +254,7 @@ class UserService(AbstractService):
         if not self.existsByFilter({"id": user.id}):
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User doesn't exist!")
 
-        userSchemas = self.userRepository.findByFilter({"id": user.id})
+        userSchemas = self.userRepository.filter({"id": user.id})
         userSchema = userSchemas[0]
         #  Person
         if user.email and userSchema.email != user.email:
@@ -278,7 +278,7 @@ class UserService(AbstractService):
         # userSchema = CompanyMapper.fromModel(oldRole)
         self.userRepository.update(userSchema)
         # userSchema = self.userRepository.update(mapper=UserSchema, mappings=[userSchema])
-        userSchema = self.userRepository.findByFilter({"id": user.id})[0]
+        userSchema = self.userRepository.filter({"id": user.id})[0]
         user = UserMapper.fromSchema(userSchema)
         logger.debug(f"-update(), user={user}")
         return user

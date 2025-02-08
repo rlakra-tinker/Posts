@@ -96,17 +96,24 @@ class SqlAlchemyRepository(AbstractRepository):
 
         logger.debug(f"-save_all()")
 
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[BaseSchema]]:
+        """Filters the records of the provided table by parses filters dict.
+
+        Parameters:
+        - filters (Dict[str, Any]): The filter fields mappings that represents the db schema filters.
+        - return: Optional[BaseSchema]
+        """
+
         pass
 
     def findById(self, schemaObject: BaseSchema, id: int) -> Optional[BaseSchema]:
         """Finds the record by id in the provided table and parses object's dict.
 
         Parameters:
-        :schemaObject BaseSchema: The schema class that represents the db schema.
-        :id int: id of the object
+        - schemaObject (BaseSchema): The schema class that represents the db schema.
+        - id (int): id of the object
 
-        :return: Optional[BaseSchema]
+        - return: Optional[BaseSchema]
         """
         logger.debug(f"+findById({schemaObject}, {id})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:

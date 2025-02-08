@@ -58,7 +58,7 @@ class RoleService(AbstractService):
     # @override
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"+findByFilter({filters})")
-        roleSchemas = self.roleRepository.findByFilter(filters)
+        roleSchemas = self.roleRepository.filter(filters)
         # logger.debug(f"roleSchemas => type={type(roleSchemas)}, values={roleSchemas}")
         roleModels = []
         for roleSchema in roleSchemas:
@@ -76,7 +76,7 @@ class RoleService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        roleSchemas = self.roleRepository.findByFilter(filters)
+        roleSchemas = self.roleRepository.filter(filters)
         result = True if roleSchemas else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
@@ -110,7 +110,7 @@ class RoleService(AbstractService):
         roleSchema = RoleMapper.fromModel(role)
         roleSchema = self.roleRepository.save(roleSchema)
         if roleSchema and roleSchema.id is None:
-            roleSchema = self.roleRepository.findByFilter({"name": role.name})
+            roleSchema = self.roleRepository.filter({"name": role.name})
 
         role = RoleMapper.fromSchema(roleSchema)
         # role = Role.model_validate(roleSchema)
@@ -137,7 +137,7 @@ class RoleService(AbstractService):
         if not self.existsByFilter({"id": role.id}):
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Role doesn't exist!")
 
-        roleSchemas = self.roleRepository.findByFilter({"id": role.id})
+        roleSchemas = self.roleRepository.filter({"id": role.id})
         roleSchema = roleSchemas[0]
         if role.name and roleSchema.name != role.name:
             roleSchema.name = role.name
@@ -151,7 +151,7 @@ class RoleService(AbstractService):
         # roleSchema = CompanyMapper.fromModel(oldRole)
         self.roleRepository.update(roleSchema)
         # roleSchema = self.repository.update(mapper=RoleSchema, mappings=[roleSchema])
-        roleSchema = self.roleRepository.findByFilter({"id": role.id})[0]
+        roleSchema = self.roleRepository.filter({"id": role.id})[0]
         role = RoleMapper.fromSchema(roleSchema)
         logger.debug(f"-update(), role={role}")
         return role
@@ -179,7 +179,7 @@ class RoleService(AbstractService):
             for id in rolePermission.permissions:
                 filterPermissions.add("id", id)
 
-            permissions = self.permissionRepository.findByFilter(filterPermissions)
+            permissions = self.permissionRepository.filter(filterPermissions)
             if schemaObject and permissions:
                 # assign permissions to role
                 schemaObject.permissions.extend(permissions)
@@ -191,7 +191,7 @@ class RoleService(AbstractService):
             filterRoles = MultiDict()
             for schemaObject in schemaObjects:
                 filterRoles.add("id", schemaObject.id)
-            schemaObjects = self.roleRepository.findByFilter(filterRoles)
+            schemaObjects = self.roleRepository.filter(filterRoles)
             modelObjects = RoleMapper.fromSchemas(schemaObjects)
         else:
             modelObjects = None
@@ -267,7 +267,7 @@ class PermissionService(AbstractService):
     # @override
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"+findByFilter({filters})")
-        schemaObjects = self.permissionRepository.findByFilter(filters)
+        schemaObjects = self.permissionRepository.filter(filters)
         # logger.debug(f"schemaObjects => type={type(schemaObjects)}, values={schemaObjects}")
         modelObjects = []
         for schemaObject in schemaObjects:
@@ -285,7 +285,7 @@ class PermissionService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        schemaObjects = self.permissionRepository.findByFilter(filters)
+        schemaObjects = self.permissionRepository.filter(filters)
         result = True if schemaObjects else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
@@ -319,7 +319,7 @@ class PermissionService(AbstractService):
         schemaObject = PermissionMapper.fromModel(modelObject)
         schemaObject = self.permissionRepository.save(schemaObject)
         if schemaObject and schemaObject.id is None:
-            schemaObject = self.permissionRepository.findByFilter({"name": schemaObject.name})
+            schemaObject = self.permissionRepository.filter({"name": schemaObject.name})
 
         modelObject = PermissionMapper.fromSchema(schemaObject)
 
@@ -358,7 +358,7 @@ class PermissionService(AbstractService):
 
         # roleSchema = CompanyMapper.fromModel(oldRole)
         self.permissionRepository.update(schemaObject)
-        schemaObject = self.permissionRepository.findByFilter({"id": schemaObject.id})[0]
+        schemaObject = self.permissionRepository.filter({"id": schemaObject.id})[0]
         modelObject = PermissionMapper.fromSchema(schemaObject)
         logger.debug(f"-update(), modelObject={modelObject}")
         return modelObject

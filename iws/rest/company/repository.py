@@ -22,7 +22,7 @@ class CompanyRepository(SqlAlchemyRepository):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[CompanySchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[CompanySchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
         # verbose version of what a context manager will do
@@ -127,7 +127,7 @@ class CompanyRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                companySchemas = self.findByFilter({"id": ids})
+                companySchemas = self.filter({"id": ids})
                 for companySchema in companySchemas:
                     logger.debug(f"Deleting role with id=[{companySchema.id}]")
                     session.delete(companySchema)

@@ -174,7 +174,7 @@ class UserRepositoryTest(AbstractTestCase):
         self.assertEqual(True, userSchema.admin)
 
         # find user and validate
-        adminUserSchema = self.userRepository.findByFilter({"email": userEmail})[0]
+        adminUserSchema = self.userRepository.filter({"email": userEmail})[0]
         logger.debug(f"adminUserSchema={adminUserSchema}")
         self.assertIsNotNone(adminUserSchema.id)
         self.assertIsNotNone(adminUserSchema.addresses)

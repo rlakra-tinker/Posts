@@ -62,7 +62,7 @@ class AbstractRepository(ABC):
         self.__engine = engine
 
     @abstractmethod
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[Any]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[Any]]:
         pass
 
     def __str__(self):

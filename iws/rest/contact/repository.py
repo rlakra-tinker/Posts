@@ -22,7 +22,7 @@ class ContactRepository(SqlAlchemyRepository):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[ContactSchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[ContactSchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
         contactSchemas = None
@@ -129,7 +129,7 @@ class ContactRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                contactSchemas = self.findByFilter({"id": ids})
+                contactSchemas = self.filter({"id": ids})
                 for contactSchema in contactSchemas:
                     logger.debug(f"Deleting role with id=[{contactSchema.id}]")
                     session.delete(contactSchema)

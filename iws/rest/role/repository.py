@@ -23,7 +23,7 @@ class RoleRepository(SqlAlchemyRepository):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[RoleSchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[RoleSchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
         schemaObjects = None
@@ -161,7 +161,7 @@ class RoleRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                schemaObjects = self.findByFilter({"id": ids})
+                schemaObjects = self.filter({"id": ids})
                 for schemaObject in schemaObjects:
                     logger.debug(f"Deleting role with id=[{schemaObject.id}]")
                     session.delete(schemaObject)
@@ -191,7 +191,7 @@ class PermissionRepository(SqlAlchemyRepository):
         super().__init__(engine=connector.engine)
 
     # @override
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[PermissionSchema]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[PermissionSchema]]:
         """Returns records by filter or empty list"""
         logger.debug(f"+findByFilter({filters})")
         schemaObjects = None
@@ -302,7 +302,7 @@ class PermissionRepository(SqlAlchemyRepository):
         logger.debug(f"+bulkDelete({ids})")
         with Session(bind=self.get_engine(), expire_on_commit=False) as session:
             try:
-                schemaObjects = self.findByFilter({"id": ids})
+                schemaObjects = self.filter({"id": ids})
                 for schemaObject in schemaObjects:
                     logger.debug(f"Deleting permission with id=[{schemaObject.id}]")
                     session.delete(schemaObject)

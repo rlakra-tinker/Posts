@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 class ClassicalRepository(AbstractRepository):
     """The base repository of all non-ORM repositories."""
 
-    def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[Any]]:
+    def filter(self, filters: Dict[str, Any]) -> List[Optional[Any]]:
         pass
 
     def __init__(self):

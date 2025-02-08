@@ -130,13 +130,13 @@ class RoleRepositoryTest(AbstractTestCase):
 
         # find roles and validate
         # self.roleRepository.save_all([adminRole, editorRole])
-        adminRole = self.roleRepository.findByFilter({"name": adminRole.name})[0]
+        adminRole = self.roleRepository.filter({"name": adminRole.name})[0]
         logger.debug(f"adminRole={adminRole}")
         self.assertIsNotNone(adminRole.id)
         self.assertIsNotNone(adminRole.permissions)
         self.assertEqual(2, len(adminRole.permissions))
 
-        editorRole = self.roleRepository.findByFilter({"name": editorRole.name})[0]
+        editorRole = self.roleRepository.filter({"name": editorRole.name})[0]
         logger.debug(f"editorRole={editorRole}")
         self.assertIsNotNone(editorRole.id)
         self.assertIsNotNone(editorRole.permissions)
@@ -144,10 +144,10 @@ class RoleRepositoryTest(AbstractTestCase):
 
         # find permissions and validate
         # self.permissionRepository.save_all([readPermission, writePermission])
-        readPermission = self.permissionRepository.findByFilter({"name": readPermission.name})[0]
+        readPermission = self.permissionRepository.filter({"name": readPermission.name})[0]
         logger.debug(f"readPermission={readPermission}")
         self.assertIsNotNone(readPermission.id)
-        writePermission = self.permissionRepository.findByFilter({"name": writePermission.name})[0]
+        writePermission = self.permissionRepository.filter({"name": writePermission.name})[0]
         logger.debug(f"writePermission={writePermission}")
         self.assertIsNotNone(writePermission.id)
 
@@ -194,17 +194,17 @@ class RoleRepositoryTest(AbstractTestCase):
         # persist roles and permissions
         self.roleRepository.save_all([adminRole, readPermission, writePermission])
         # validate role
-        adminRole = self.roleRepository.findByFilter({"name": adminRole.name})[0]
+        adminRole = self.roleRepository.filter({"name": adminRole.name})[0]
         logger.debug(f"adminRole={adminRole}")
         self.assertIsNotNone(adminRole.id)
         self.assertIsNotNone(adminRole.permissions)
 
         # validate permissions
-        readPermission = self.permissionRepository.findByFilter({"name": readPermission.name})[0]
+        readPermission = self.permissionRepository.filter({"name": readPermission.name})[0]
         logger.debug(f"readPermission={readPermission}")
         self.assertIsNotNone(readPermission.id)
 
-        writePermission = self.permissionRepository.findByFilter({"name": writePermission.name})[0]
+        writePermission = self.permissionRepository.filter({"name": writePermission.name})[0]
         logger.debug(f"writePermission={writePermission}")
         self.assertIsNotNone(writePermission.id)
 
@@ -218,7 +218,7 @@ class RoleRepositoryTest(AbstractTestCase):
 
         # find roles and validate
         # self.roleRepository.save_all([adminRole, editorRole])
-        adminRole = self.roleRepository.findByFilter({"name": adminRole.name})[0]
+        adminRole = self.roleRepository.filter({"name": adminRole.name})[0]
         logger.debug(f"adminRole={adminRole}")
         self.assertIsNotNone(adminRole.id)
         self.assertIsNotNone(adminRole.permissions)

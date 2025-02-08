@@ -57,7 +57,7 @@ class CompanyService(AbstractService):
     # @override
     def findByFilter(self, filters: Dict[str, Any]) -> List[Optional[BaseModel]]:
         logger.debug(f"+findByFilter({filters})")
-        companySchemas = self.repository.findByFilter(filters)
+        companySchemas = self.repository.filter(filters)
         companyModels = []
         for companySchema in companySchemas:
             roleModel = CompanyMapper.fromSchema(companySchema)
@@ -70,7 +70,7 @@ class CompanyService(AbstractService):
     def existsByFilter(self, filters: Dict[str, Any]) -> bool:
         """Returns True if the records exist by filter otherwise False"""
         logger.debug(f"+existsByFilter({filters})")
-        companySchemas = self.repository.findByFilter(filters)
+        companySchemas = self.repository.filter(filters)
         result = True if companySchemas else False
         logger.debug(f"-existsByFilter(), result={result}")
         return result
@@ -104,7 +104,7 @@ class CompanyService(AbstractService):
         companySchema = CompanyMapper.fromModel(company)
         companySchema = self.repository.save(companySchema)
         if companySchema and companySchema.id is None:
-            companySchema = self.repository.findByFilter({"name": company.name})
+            companySchema = self.repository.filter({"name": company.name})
 
         company = CompanyMapper.fromSchema(companySchema)
         logger.debug(f"-create(), company={company}")
@@ -129,7 +129,7 @@ class CompanyService(AbstractService):
         if not self.existsByFilter({"id": company.id}):
             raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"Company doesn't exist!")
 
-        companySchemas = self.repository.findByFilter({"id": company.id})
+        companySchemas = self.repository.filter({"id": company.id})
         companySchema = companySchemas[0]
         if company.name and companySchema.name != company.name:
             companySchema.name = company.name
@@ -146,7 +146,7 @@ class CompanyService(AbstractService):
         # companySchema = CompanyMapper.fromModel(oldRole)
         self.repository.update(companySchema)
         # companySchema = self.repository.update(mapper=CompanySchema, mappings=[companySchema])
-        companySchema = self.repository.findByFilter({"id": company.id})[0]
+        companySchema = self.repository.filter({"id": company.id})[0]
         company = CompanyMapper.fromSchema(companySchema)
         logger.debug(f"-update(), company={company}")
         return company
