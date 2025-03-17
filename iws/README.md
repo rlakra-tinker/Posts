@@ -264,6 +264,7 @@ kubectl run -i --tty load-generator --rm --image=busybox:1.28 --restart=Never --
 - [Python Packaging User Guide](https://packaging.python.org/en/latest/)
 - [The Twelve Factors App](https://12factor.net/)
 - [werkzeug examples](https://github.com/pallets/werkzeug/tree/main/examples)
+- [Gunicorn Settings](https://docs.gunicorn.org/en/stable/settings.html)
 
 ### Logger Guide
 - [Logging HOWTO](https://docs.python.org/3/howto/logging.html)

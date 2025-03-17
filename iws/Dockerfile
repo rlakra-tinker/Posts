@@ -35,10 +35,21 @@ RUN pip install --upgrade pip && \
 # EXPOSE is for documentation only - does not do anything
 # 8082 is the default port the server is listening on
 EXPOSE 8080
+
 #HEALTHCHECK --interval=15s --timeout=5s --start-period=5s --retries=3 CMD  curl --silent --fail 0.0.0.0:8082/health_check || exit 1
 
 # Run Flask app
+# python -m flask --app wsgi run --port 8080 --debug
+# If needs override answers Yes, use CMD else ENTRYPOINT
+#CMD ["python", "-m", "flask", "--app", "wsgi", "run", "--port=8080", "--host=0.0.0.0"]
+#ENTRYPOINT ["python", "-m", "flask", "--app", "wsgi", "run", "--port=8080", "--host=0.0.0.0"]
+
+# Run Gunicorn app
 # gunicorn -c gunicorn.conf.py wsgi:app
-#CMD ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:app"]
-#python -m flask --app wsgi run --port 8080 --debug
-CMD ["python", "-m", "flask", "--app", "wsgi", "run", "--port=8080", "--host=0.0.0.0"]
+# gunicorn --name "gunicorn" -c gunicorn.conf.py wsgi:app
+# gunicorn --bind "0.0.0.0:8080" -c gunicorn.conf.py wsgi:app
+# If needs override answers Yes, use CMD else ENTRYPOINT
+CMD ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:app"]
+#ENTRYPOINT ["gunicorn", "-c", "gunicorn.conf.py", "wsgi:app"]
+#CMD ["gunicorn", "--bind", "0.0.0.0:8080", "-c", "gunicorn.conf.py", "wsgi:app"]
+#ENTRYPOINT ["gunicorn", "--bind", "0.0.0.0:8080", "-c", "gunicorn.conf.py", "wsgi:app"]

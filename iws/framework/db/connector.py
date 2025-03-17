@@ -11,7 +11,6 @@ from flask import Flask, g, current_app
 from sqlalchemy import Engine, URL, create_engine
 from sqlalchemy.orm import Session
 
-from common.config import Config
 from framework.enums import KeyEnum
 from framework.orm.sqlalchemy.schema import BaseSchema
 
@@ -42,7 +41,11 @@ def createDatabase(engine: Engine) -> None:
     # MetaData.create_all(BaseSchema, bind=self.engine)
     # self.metadata.create_all(self.engine)
     # AbstractEntity.metadata.create_all(bind=self.engine)
-    BaseSchema.metadata.create_all(bind=engine)
+    try:
+        BaseSchema.metadata.create_all(bind=engine)
+    except Exception as ex:
+        logger.error(f"Error while creating database! Exception={ex}")
+
     logger.debug(f"-createDatabase(), engine={engine}")
 
 

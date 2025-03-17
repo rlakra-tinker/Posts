@@ -60,7 +60,7 @@ sensitive_keys = (
 
 
 class SensitiveDataFilter(logging.Filter):
-    sensitive__patterns = sensitive_regex_patterns
+    sensitive_regex_patterns = sensitive_regex_patterns
     sensitive_keys = sensitive_keys
 
     def filter(self, record):
@@ -80,12 +80,12 @@ class SensitiveDataFilter(logging.Filter):
                     masked_args[key] = "******"
                 else:
                     # mask sensitive data in dict values
-                    masked_args[key] = self.mask_sensitive_msg(args[key])
+                    masked_args[key] = self.mask_sensitive_data(args[key])
 
             return masked_args
 
         # when there are multi arg in record.args
-        return tuple([self.mask_sensitive_msg(arg) for arg in args])
+        return tuple([self.mask_sensitive_data(arg) for arg in args])
 
     def mask_sensitive_data(self, message):
         # mask sensitive data in multi record.args
@@ -94,7 +94,7 @@ class SensitiveDataFilter(logging.Filter):
 
         # mask sensitive data in message
         if isinstance(message, str):
-            for pattern in self.sensitive__patterns:
+            for pattern in self.sensitive_regex_patterns:
                 message = re.sub(pattern, "******", message)
 
             # replace sensitive data with asterisks
