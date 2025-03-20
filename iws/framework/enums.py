@@ -197,3 +197,11 @@ class EnvType(BaseEnum):
             flask_env = os.getenv(KeyEnum.FLASK_ENV.name.lower())
 
         return flask_env
+
+    @classmethod
+    def getenv_bool(cls, key: str, default=False):
+        """Get an environment variable boolean value, return False if it doesn't exist.
+        The optional second argument can specify an alternate default.
+        key, default and the result are bool."""
+        return os.getenv(key, str(default)).lower() in ("yes", "true", "1")
+
