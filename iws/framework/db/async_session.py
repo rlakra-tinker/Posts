@@ -2,7 +2,10 @@
 # Author: Rohtash Lakra
 #
 import os
+from asyncio import current_task
+from collections.abc import AsyncIterator
 
+from sqlalchemy import SC
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
@@ -15,7 +18,7 @@ from sqlalchemy.ext.asyncio import (
 from framework.enums import EnvType
 
 
-class DatabaseSessionManager:
+class AsyncSessionManager:
     """Creates an AsyncSession and managing its lifecycle using the asyncio module, along with demonstrating the use
     of dependency injection for cleaner and more maintainable code.
     """
@@ -71,9 +74,10 @@ class DatabaseSessionManager:
 
         try:
             # Setting the search path and yielding the session...
-            await session.execute(
-                text(f"SET search_path TO {SCHEMA}")
-            )
+            # TODO: FIX ME
+            # await session.execute(
+            #     text(f"SET search_path TO {SCHEMA}")
+            # )
             yield session
 
         except Exception:
@@ -86,7 +90,7 @@ class DatabaseSessionManager:
 
 # Note: - move to middleware
 # Initialize the DatabaseSessionManager
-sessionManager = DatabaseSessionManager()
+sessionManager = AsyncSessionManager()
 
 
 async def getDatabase() -> AsyncIterator[AsyncSession]:
