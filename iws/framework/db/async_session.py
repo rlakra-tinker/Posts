@@ -5,8 +5,6 @@ import os
 from asyncio import current_task
 from collections.abc import AsyncIterator
 
-from sqlalchemy import SC
-from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
     AsyncEngine,
     create_async_engine,
@@ -59,6 +57,7 @@ class AsyncSessionManager:
 
     async def close(self):
         """Closing the database session."""
+
         if self.engine is None:
             raise Exception("DatabaseSessionManager is not initialized!")
 
@@ -68,6 +67,7 @@ class AsyncSessionManager:
         """Initialize and close the database session properly. It ensures that we have a valid and scoped database
         session for each request.
         """
+
         session = self.session()
         if session is None:
             raise Exception("DatabaseSessionManager is not initialized")
@@ -83,6 +83,7 @@ class AsyncSessionManager:
         except Exception:
             await session.rollback()
             raise
+
         finally:
             # Closing the session after use...
             await session.close()
@@ -95,3 +96,4 @@ sessionManager = AsyncSessionManager()
 
 async def getDatabase() -> AsyncIterator[AsyncSession]:
     return sessionManager.getDatabase()
+
