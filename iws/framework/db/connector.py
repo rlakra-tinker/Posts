@@ -9,7 +9,7 @@ from typing import Union, Iterable
 import click
 from flask import Flask, g, current_app
 from sqlalchemy import Engine, URL, create_engine
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, sessionmaker
 
 from framework.enums import KeyEnum
 from framework.orm.sqlalchemy.schema import BaseSchema
@@ -28,6 +28,15 @@ def createEngine(dbUri: Union[str, URL], debug: bool = False) -> Engine:
     engine.execution_options(isolation_level="AUTOCOMMIT")
     logger.debug(f"-createEngine(), engine={engine}")
     return engine
+
+
+@staticmethod
+def createSessionMaker(engine: Engine) -> None:
+    """Create a new :class:`Engine` instance."""
+    logger.debug(f"+createSessionMaker({engine})")
+    sessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+    logger.debug(f"-createSessionMaker(), sessionLocal={sessionLocal}")
+    return sessionLocal
 
 
 @staticmethod
@@ -156,9 +165,12 @@ class SQLite3Connector(DatabaseConnector):
             if dbType and KeyEnum.equals(KeyEnum.SQLALCHEMY, dbType):
                 """Initializes the SQLAlchemy database"""
                 # Set up the SQLAlchemy Database to be a local file 'posts.db'
+                # SQLALCHEMY_DATABASE_URL
                 self.app.config['SQLALCHEMY_DATABASE_URI'] = self.db_uri
                 # SQLAlchemy DB Creation
                 self.engine = createEngine(self.db_uri, debug=True)
+                self.sessionLocal = createSessionMaker(self.engine)
+
                 createDatabase(self.engine)
 
             else:
@@ -250,3 +262,11 @@ class SQLite3Connector(DatabaseConnector):
         current_app.logger.info(f"select => entity={entity}")
         with Session(self.engine) as session:
             return session.query(entity).first()
+
+    def getDatabase(self):
+        """Returns the database."""
+        db_session = self.sessionLocal
+        try:
+            yield db_session
+        finally:
+            db_session.close()
