@@ -10,7 +10,7 @@ from typing import AsyncIterator
 from typing import Union, Iterable, Any
 
 import click
-from flask import Flask, g, current_app
+from flask import g, current_app
 from sqlalchemy import Engine, URL, create_engine
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
@@ -95,7 +95,7 @@ class DatabaseConnector(object):
         logger.debug("Initializing Connector ...")
         self.UTF_8 = 'UTF-8'
 
-    def init(self, app: Flask = None):
+    def init(self, app=None):
         logger.debug("Initializing Connector with application ...")
 
     def init_db(self, configs: dict = None):
@@ -286,7 +286,7 @@ class AsyncSQLite3Connector(DatabaseConnector):
     def __init__(self):
         """Initialize"""
         logger.debug("Initializing Async SQLite3 Connector ...")
-        self.config_initialized = False
+        self._configInitialized = False
         self.app = None
         self.pool = None
         self.db_name: str = None
@@ -303,15 +303,14 @@ class AsyncSQLite3Connector(DatabaseConnector):
         self.data_path = self.cur_dir.joinpath("data")
         # logger.debug(f"data_path:{self.data_path}")
 
-    def getConnection(self):
-        """Returns SQLite3 Connection"""
-        logger.debug(f"getConnection(), db_name: {self.db_name}, db_password: {self.db_password}")
-        return sqlite3.connect(self.db_name, detect_types=sqlite3.PARSE_DECLTYPES)
+    @property
+    def isConfigInitialized(self):
+        return self._configInitialized
 
     def _init_configs(self, configs: dict[str, Any] = None):
         """Initializes Connector's Configs"""
         logger.debug(f"Initializing Connector's Configs ...")
-        if not self.config_initialized:
+        if not self.isConfigInitialized:
             # logger.debug(f"current_app: {current_app}, current_app.config: {current_app.config}")
             # read db-name from app's config
             if not self.db_name:
@@ -325,7 +324,7 @@ class AsyncSQLite3Connector(DatabaseConnector):
             self.db_uri = ''.join([SQLITE_PREFIX, self.db_name])
             self.db_password = configs.get("DB_PASSWORD")
             logger.debug(f"db_name={self.db_name}, db_password={self.db_password}, db_uri={self.db_uri}")
-            self.config_initialized = True
+            self._configInitialized = True
         else:
             logger.debug("Connector's Configs already Initialized.")
 
@@ -347,6 +346,11 @@ class AsyncSQLite3Connector(DatabaseConnector):
             self.engine = createEngine(self.db_uri, debug=True)
             self.sessionMaker = createSessionMaker(self.engine)
             createDatabase(self.engine)
+
+    def getConnection(self):
+        """Returns SQLite3 Connection"""
+        logger.debug(f"getConnection(), db_name: {self.db_name}, db_password: {self.db_password}")
+        return sqlite3.connect(self.db_name, detect_types=sqlite3.PARSE_DECLTYPES)
 
     def openConnection(self):
         """Opens the database connection"""
