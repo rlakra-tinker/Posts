@@ -17,8 +17,10 @@ from werkzeug.middleware.proxy_fix import ProxyFix
 
 from api import bp as api_bp
 from common.config import Config
-from framework.enums import EnvType
-from framework.enums import KeyEnum
+from framework.enums import (
+    EnvType,
+    KeyEnum,
+    DbType)
 from framework.http import HTTPStatus
 from framework.logger import DefaultLogger
 from framework.orm.pydantic.model import ResponseModel
@@ -126,7 +128,7 @@ class WebApp:
         # Initialize/Register Flask Extensions/Components, if any
         # if not test_mode:
         connector.init(app)
-        connector.init_db({KeyEnum.DB_TYPE.name: KeyEnum.SQLALCHEMY.name})
+        connector.init_db({KeyEnum.DB_TYPE.name: DbType.SQLALCHEMY.name})
 
         # Initialize/Register Default Error Handlers, if any
 

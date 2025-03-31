@@ -6,12 +6,17 @@ import logging
 import time
 from contextlib import asynccontextmanager
 from functools import lru_cache
-from typing import (AsyncIterator, List)
+from typing import (
+    AsyncIterator,
+    List
+)
 
+import uvicorn
 from dotenv import (load_dotenv, find_dotenv)
 from fastapi import FastAPI, Depends, status, Request
 from fastapi.responses import FileResponse, JSONResponse
 from sqlalchemy.orm import Session
+from sqlalchemy.types import Text
 
 from framework.orm.pydantic.model import ConfigSetting
 from globals import connector
@@ -35,15 +40,20 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:  # pylint: disable=rede
     To understand more, read https://fastapi.tiangolo.com/advanced/events/
     """
 
+    print('Startup')
+    logger.info("Startup")
     logger.info("Validating DB connection on startup...")
     async with connector.connect() as conn:
-        await conn.execute(text("SELECT 1"))
+        await conn.execute(Text("SELECT 1"))
         logger.info("Database connection validated during startup.")
     yield
 
     if connector.engine is not None:  # pylint: disable=protected-access
         await connector.close()
         logger.info("Database engine closed on shutdown.")
+
+    logger.info("Shutdown")
+    print('Shutdown')
 
 
 # Initialize 'FastAPI' Application
@@ -66,7 +76,7 @@ async def add_process_time_header(request: Request, next_call):
 # app.logger = DefaultLogger(app)
 # app.logger.logConfig()
 # init configs
-configSettings = ConfigSetting()
+configSettings = getSettings()
 logger.debug(f"configSettings={configSettings}")
 logger.debug(f"configSettings dump={configSettings.model_dump()}")
 # init connector
@@ -152,3 +162,11 @@ def getContact(contact_id: int, session: Session = Depends(connector.getSession)
     contacts = contactService.findByFilter({"id": contact_id})
     contact = contacts[0] if contacts else None
     return contact
+
+
+if __name__ == '__main__':
+    uvicorn.run(
+        app,
+        host='0.0.0.0',
+        port=8082
+    )

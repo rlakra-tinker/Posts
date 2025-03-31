@@ -16,6 +16,7 @@ from sqlalchemy.ext.asyncio import (
     AsyncSession,
 )
 
+from framework.enums import DbType
 from framework.enums import EnvType
 
 logger = logging.getLogger(__name__)
@@ -74,9 +75,10 @@ class AsyncSessionManager:
             logger.debug(f"self.db_name={self.db_name}")
             if self.db_name and not self.db_name.endswith(".db"):
                 self.db_name = '.'.join([self.db_name, "db"])
+                configs["DB_NAME"] = self.db_name
 
             # build db uri
-            self.db_uri = ''.join([SQLITE_PREFIX, self.db_name])
+            self.db_uri = DbType.dbUri(configs)
             self.db_password = configs.get("DB_PASSWORD")
             logger.debug(f"db_name={self.db_name}, db_password={self.db_password}, db_uri={self.db_uri}")
             self._configInitialized = True

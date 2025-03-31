@@ -4,12 +4,13 @@
 import contextlib
 import logging
 import sqlite3
-from contextvars import Context
 from pathlib import Path
 from typing import AsyncIterator
 from typing import Union, Iterable, Any
 
 import click
+import sqlalchemy
+from contextvars import ContextVar
 from flask import g, current_app
 from sqlalchemy import Engine, URL, create_engine
 from sqlalchemy.ext.asyncio import (
@@ -17,6 +18,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import Session, sessionmaker
 
+from framework.enums import DbType
 from framework.enums import KeyEnum
 from framework.orm.sqlalchemy.schema import BaseSchema
 
@@ -37,7 +39,7 @@ def createEngine(dbUri: Union[str, URL], debug: bool = False) -> Engine:
 
 
 @staticmethod
-def createSessionMaker(engine: Engine) -> None:
+def createSessionMaker(engine: Engine):
     """Create a new :class:`Engine` instance."""
     logger.debug(f"+createSessionMaker({engine})")
     sessionMaker = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -144,7 +146,7 @@ class SQLite3Connector(DatabaseConnector):
         # app.cli.add_command() adds a new command that can be called with the flask command.
         # self.app.cli.add_command(self.init_db)
 
-    def _init_configs(self):
+    def _init_configs(self, configs: dict[str, Any] = None):
         """Initializes Configs"""
         with self.app.app_context():
             current_app.logger.debug(f"Initializing Configs ...")
@@ -156,9 +158,10 @@ class SQLite3Connector(DatabaseConnector):
             current_app.logger.debug(f"self.db_name={self.db_name}")
             if self.db_name and not self.db_name.endswith(".db"):
                 self.db_name = '.'.join([self.db_name, "db"])
+                configs["DB_NAME"] = self.db_name
 
             # build db uri
-            self.db_uri = ''.join([SQLITE_PREFIX, self.db_name])
+            self.db_uri = DbType.dbUri(configs)
             self.db_password = self.app.config.get("DB_PASSWORD")
             current_app.logger.debug(f"db_name={self.db_name}, db_password={self.db_password}, db_uri={self.db_uri}")
 
@@ -286,6 +289,7 @@ class AsyncSQLite3Connector(DatabaseConnector):
     def __init__(self):
         """Initialize"""
         logger.debug("Initializing Async SQLite3 Connector ...")
+        self.context: ContextVar[Any] = ContextVar('connection', default=None)
         self._configInitialized = False
         self.app = None
         self.pool = None
@@ -294,8 +298,9 @@ class AsyncSQLite3Connector(DatabaseConnector):
         self.db_password = None
         self.db_uri = None
         self.engine: Engine = None
-        # self.metadata = None
-        # self.session = None
+        self.sessionMaker = None
+        # Database table definitions.
+        self.metadata = sqlalchemy.MetaData()
 
         # paths
         self.cur_dir = Path(__file__).parent
@@ -319,9 +324,10 @@ class AsyncSQLite3Connector(DatabaseConnector):
             logger.debug(f"self.db_name={self.db_name}")
             if self.db_name and not self.db_name.endswith(".db"):
                 self.db_name = '.'.join([self.db_name, "db"])
+                configs["DB_NAME"] = self.db_name
 
             # build db uri
-            self.db_uri = ''.join([SQLITE_PREFIX, self.db_name])
+            self.db_uri = DbType.dbUri(configs)
             self.db_password = configs.get("DB_PASSWORD")
             logger.debug(f"db_name={self.db_name}, db_password={self.db_password}, db_uri={self.db_uri}")
             self._configInitialized = True
@@ -333,11 +339,10 @@ class AsyncSQLite3Connector(DatabaseConnector):
         logger.debug(f"Initializing Database. configs={configs}")
         self.app = app
         self._init_configs(configs)
-        self.context = Context()
 
         dbType = configs.get(KeyEnum.DB_TYPE.name)
         logger.debug(f"dbType={dbType}")
-        if dbType and KeyEnum.equals(KeyEnum.SQLALCHEMY, dbType):
+        if dbType and KeyEnum.equals(DbType.SQLALCHEMY, dbType):
             """Initializes the SQLAlchemy database"""
             # Set up the SQLAlchemy Database to be a local file 'posts.db'
             # SQLALCHEMY_DATABASE_URL
@@ -355,12 +360,12 @@ class AsyncSQLite3Connector(DatabaseConnector):
     def openConnection(self):
         """Opens the database connection"""
         logger.debug("Opening database connection ...")
-        connection = self.context.get('connection')
+        connection = self.context.get()
         if connection is None:
             logger.debug(f"db_name:{self.db_name}, db_password:{self.db_password}")
             connection = self.getConnection()
             connection.row_factory = sqlite3.Row
-            self.context.__setattr__('connection', connection)
+            self.context.set(connection)
             logger.debug(f"connection: {connection}")
             # g.connection.cursor(dictionary=True)
             # g.connection.autocommit = False
@@ -443,6 +448,7 @@ class AsyncSQLite3Connector(DatabaseConnector):
         logger.debug("-save_all()")
 
     def select(self, entity: BaseSchema):
+        """Selects the first instance"""
         logger.debug(f"select => entity={entity}")
         with Session(self.engine) as session:
             return session.query(entity).first()
