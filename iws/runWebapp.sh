@@ -5,7 +5,7 @@ echo
 if [ "$1" == "production" ]; then
   gunicorn -c gunicorn.conf.py wsgi:app
 else
-  python -m flask --app wsgi run --port 8080 --debug
+  uvicorn main:app --host 0.0.0.0 --port ${PORT:-8082} --reload
 fi
 echo
 
