@@ -80,6 +80,32 @@ pip freeze > requirements.txt
 python -m unittest discover -s ./tests -p "test_*.py"
 ```
 
+# Enable ```sudo``` without a password on MacOS
+
+- Option #1
+
+Create a file name password under your root folder, i.e. ```~/password``` that contains your password.
+
+Then run the following command to access without entering password via terminal:
+```shell
+echo password | sudo -S cat /etc/sudoers
+```
+
+- Option #2
+
+Modify sudoers file using the following command:
+```shell
+sudo visudo
+```
+
+Then find the ```admin``` group permission section: ```%admin ALL = (ALL) ALL```.
+Change to add NOPASSWD:
+```text
+%admin		ALL = (ALL) NOPASSWD:ALL
+```
+Save the file as normal ```vi```` editor command.
+
+
 # Reference
 
 - [Gunicorn - WSGI server](https://docs.gunicorn.org/en/latest/index.html)

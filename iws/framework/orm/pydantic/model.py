@@ -11,13 +11,28 @@ from datetime import datetime
 from enum import unique, auto
 from typing import Optional, Dict, List, Any, Union
 
-from pydantic import BaseModel as PydanticBaseModel, ValidationError, ConfigDict, model_validator, \
+from pydantic import (
+    BaseModel as PydanticBaseModel,
+    ValidationError,
+    ConfigDict,
+    model_validator,
     field_validator
-# from pydantic.alias_generators import to_camel, to_snake
+)
+# from pydantic.alias_generators import (
+#     to_camel,
+#     to_pascal,
+#     to_snake
+# )
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from typing_extensions import Self
 
 from framework.enums import BaseEnum
-from framework.exception import AbstractException, ValidationException, DuplicateRecordException, NoRecordFoundException
+from framework.exception import (
+    AbstractException,
+    ValidationException,
+    DuplicateRecordException,
+    NoRecordFoundException
+)
 from framework.http import HTTPStatus
 from framework.utils import Utils
 
@@ -42,8 +57,24 @@ class SyncStatus(BaseEnum):
     SCHEDULED = auto()
 
 
-class AbstractModel(PydanticBaseModel):
-    """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
+class ConfigSetting(BaseSettings):
+    """ConfigSetting is a base model for all configuration parameters."""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding='utf-8',
+        case_sensitive=True,
+        extra="allow"
+    )
+
+    # class Config:
+    #     env_file = ".env"
+    #     case_sensitive = True
+    #     extra = "allow"
+
+
+class PydanticAbstractModel(PydanticBaseModel):
+    """PydanticAbstractModel is a base model for all models inherit and provides basic configuration parameters."""
 
     # protected_namespaces=() disables the protected namespace validation
     # model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True,
@@ -51,12 +82,13 @@ class AbstractModel(PydanticBaseModel):
     #         validation_alias=to_snake,
     #         serialization_alias=to_snake,
     #     ), protected_namespaces=())
-    model_config = ConfigDict(from_attributes=True, validate_assignment=True, arbitrary_types_allowed=True,
-                              use_enum_values=True, protected_namespaces=())
-
-    # auditable properties
-    created_at: Optional[datetime] = None
-    updated_at: Optional[datetime] = None
+    model_config = ConfigDict(
+        from_attributes=True,
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+        use_enum_values=True,
+        protected_namespaces=()
+    )
 
     def getClassName(self) -> str:
         """Returns the name of the class."""
@@ -76,6 +108,22 @@ class AbstractModel(PydanticBaseModel):
                 field_names.append(key)
 
         return field_names
+
+    def __str__(self):
+        """Returns the string representation of this object."""
+        return self.getClassName()
+
+    def __repr__(self):
+        """Returns the string representation of this object."""
+        return str(self)
+
+
+class AbstractModel(PydanticAbstractModel):
+    """AbstractModel is a base model for all models inherit and provides basic configuration parameters."""
+
+    # auditable properties
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
 
     @model_validator(mode="before")
     @classmethod
@@ -129,14 +177,6 @@ class AbstractModel(PydanticBaseModel):
     def _auditable(self) -> str:
         """Returns the string representation of this object"""
         return f"created_at={self.created_at}, updated_at={self.updated_at}"
-
-    def __str__(self):
-        """Returns the string representation of this object."""
-        return self.getClassName()
-
-    def __repr__(self):
-        """Returns the string representation of this object."""
-        return str(self)
 
     @classmethod
     def validate_and_raise(cls, data, is_query_params: bool = False):
