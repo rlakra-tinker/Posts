@@ -131,9 +131,13 @@ setup:
 	python3 -m $(VENV) $(VENV)
 	#source $(VENV)/bin/activate
 	. $(VENV)/bin/activate
+	@echo
+	$(pwd)
+	@echo
+	#$(PIP) install --upgrade pip
 	$(PIP) install --upgrade pip
+	#$(PYTHON) -m pip install --upgrade pip
 	$(PYTHON) -m pip install -r requirements.txt
-
 
 #
 # Clean Commands

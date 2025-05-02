@@ -62,3 +62,18 @@ class CryptoUtils:
         decrypted = json.loads(decrypted)
         logger.debug(f"-decrypt_with_aesgcm(), type={type(decrypted)}, decrypted={decrypted}")
         return decrypted
+
+    @staticmethod
+    def random_password(length: int = 10, atLeastDigits: int = 1) -> str:
+        """
+        Generate a ten-character alphanumeric password with at least one lowercase character, at least one uppercase character, and at least three digits:
+        """
+        alphabet = string.ascii_letters + string.digits
+        while True:
+            password = ''.join(secrets.choice(alphabet) for i in range(length))
+            if (any(c.islower() for c in password)
+                    and any(c.isupper() for c in password)
+                    and sum(c.isdigit() for c in password) >= atLeastDigits):
+                break
+
+        return password
