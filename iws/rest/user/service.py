@@ -66,6 +66,7 @@ class UserService(AbstractService):
             error_messages.append("'User' is not fully defined!")
 
         # throw an error if any validation error
+        logger.debug(f"error_messages={error_messages}")
         if error_messages and len(error_messages) > 0:
             error = ValidationException(httpStatus=HTTPStatus.INVALID_DATA, messages=error_messages)
             logger.debug(f"-validate(), {type(error)} = exception={error}")
@@ -202,29 +203,42 @@ class UserService(AbstractService):
         return userObject
 
     def login(self, loginUser: LoginUser) -> AuthenticatedUser:
+        """Login a registered user"""
         logger.debug(f"+login({loginUser})")
-        # check user exists either by email or username
-        if loginUser.email and not self.existsByFilter({"email": loginUser.email}):
-            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User '{loginUser.email}' is not registered!")
-        elif loginUser.user_name and not self.existsByFilter({"user_name": loginUser.user_name}):
-            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User '{loginUser.user_name}' is not registered!")
+        # validate login-info
+        error_messages = []
 
-        # userObject:User = None
-        # load user
+        # validate either an email or user_name is provided
+        if not (loginUser and (Utils.is_valid_email(loginUser.email) or Utils.is_valid_username(loginUser.user_name))):
+            error_messages.append("Either email or user_id is required!")
+
+        logger.debug(f"error_messages={error_messages}")
+        # throw an error if any validation error
+        if error_messages and len(error_messages) > 0:
+            error = ValidationException(httpStatus=HTTPStatus.INVALID_DATA, messages=error_messages)
+            logger.debug(f"-validate(), {type(error)} = exception={error}")
+            raise error
+
+        userObjects = None
+        # load user either by email or user_name
         if loginUser.email:
-            userObject = self.findByFilter({"email": loginUser.email})[0]
+            userObjects = self.findByFilter({"email": loginUser.email})
         elif loginUser.user_name:
-            userObject = self.findByFilter({"user_name": loginUser.user_name})[0]
-        logger.debug(f"userObject={userObject}")
+            userObjects = self.findByFilter({"user_name": loginUser.user_name})
+        logger.debug(f"userObjects={userObjects}")
+        # validate user exists either by email or username
+        if not (userObjects and len(userObjects) > 0):
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User is not registered!")
 
-        # authenticate user
-        # load user's details
-        userSecuritySchema = self.userSecurityRepository.filter({"user_id": userObject.id})[0]
+        # authenticate user by loading user's credentials
+        userObject = userObjects[0]
+        userSecuritySchema = self.userSecurityRepository.findById({"user_id": userObject.id})[0]
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
 
         # validate password
         passwordHashCode = HashUtils.hashCode(loginUser.password)
         logger.debug(f"loginUser.password={loginUser.password}, passwordHashCode={passwordHashCode}")
+        # check the hashed-auth-token and password-auth-token are same
         if userSecuritySchema.hashed_auth_token != passwordHashCode:
             raise AuthenticationException(HTTPStatus.UNAUTHORIZED, f"Either username or password is wrong!")
 
@@ -235,14 +249,20 @@ class UserService(AbstractService):
         if not userObject.isAuthenticated():
             raise AuthenticationException(HTTPStatus.UNAUTHORIZED, f"Either username or password is wrong!")
 
-        # build auth-token
-        authModel = AuthModel(user_id=userObject.id, auth_token=loginUser.password,
+        # build auth-token model
+        authModel = AuthModel(user_id=userObject.id,
+                              auth_token=loginUser.password,
                               iat=int(datetime.now(timezone.utc).timestamp()))
+
+        # encrypt authModel for security purpose
         authModelEncrypted = CryptoUtils.encrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, authModel.to_json())
         logger.debug(f"authModelEncrypted={authModelEncrypted}")
 
-        authUser = AuthenticatedUser(user_id=authModel.user_id, token_type=TokenType.AUTH.name,
-                                     token=authModelEncrypted, user_exists=True)
+        # build authenticate user object model
+        authUser = AuthenticatedUser(user_id=authModel.user_id,
+                                     token_type=TokenType.AUTH.name,
+                                     token=authModelEncrypted,
+                                     user_exists=True)
         logger.debug(f"-login(), authUser={authUser}")
         return authUser
 

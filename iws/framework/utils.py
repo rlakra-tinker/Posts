@@ -18,6 +18,10 @@ logger = logging.getLogger(__name__)
 
 # Upper-case letters
 CAPITALS = re.compile('([A-Z])')
+# MAX 1128 chars
+EMAIL_REGEX = re.compile(r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$")
+# Allows alphanumeric characters, underscores, and hyphens, between 1 and 64 characters
+USERNAME_REGEX = r"^[a-zA-Z0-9_-]{1,64}$"
 
 
 class Utils(BaseEnum):
@@ -80,3 +84,31 @@ class Utils(BaseEnum):
 
         logger.debug(f"-measure_ttfb(), url={url}, ttfb={ttfb}")
         return ttfb
+
+    @classmethod
+    def is_valid_email(cls, email):
+        """
+        Checks if the given string is a valid email address.
+
+        Args:
+            email: The string to check.
+
+        Returns:
+            True if the string is a valid email address, False otherwise.
+        """
+        # email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
+        return re.match(EMAIL_REGEX, email) is not None
+
+    @classmethod
+    def is_valid_username(cls, username):
+        """
+        Checks if the given string is a valid username.
+
+        Args:
+            username: The string to check.
+
+        Returns:
+            True if the string is a valid username, False otherwise.
+        """
+        # username_regex = r"^[a-zA-Z0-9_-]{3,20}$"  # Allows alphanumeric characters, underscores, and hyphens, between 3 and 20 characters
+        return re.match(USERNAME_REGEX, username) is not None

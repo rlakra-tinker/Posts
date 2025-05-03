@@ -11,18 +11,17 @@ from flask import session, g
 
 from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
 from framework.http import HTTPStatus
-from framework.orm.pydantic.model import ErrorModel
 from framework.orm.pydantic.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
-from rest.user.model import User
+from rest.user.model import User, LoginUser
 from rest.user.service import UserService
-from rest.user.v1 import bp as bp_account_v1
+from rest.user.v1 import bp as bp_user_v1
 
 logger = logging.getLogger(__name__)
 
 
-@bp_account_v1.before_app_request
-def loadLoggedInUser():
+@bp_user_v1.before_app_request
+def getLoggedInUser():
     """Load LoggedIn User"""
     user_id = session.get('user_id')
     if user_id is None:
@@ -32,7 +31,7 @@ def loadLoggedInUser():
         g.user = None
 
 
-@bp_account_v1.post("/register")
+@bp_user_v1.post("/register")
 def register():
     """Register User"""
     logger.debug(
@@ -83,40 +82,50 @@ def register():
     return make_response(response.to_json(), response.status)
 
 
-@bp_account_v1.post("/login")
+@bp_user_v1.post("/login")
 def login():
     """Login User"""
-    logger.debug(f"+login() => request={request}, args={request.args}, is_json:{request.is_json}")
-    if request.is_json:
-        user = request.get_json()
-        print(f"user:{user}")
-        # if not accounts:
-        #     for user in accounts:
-        #         if user['user_name'] == user.user_name:
-        #             return make_response(HTTPStatus.OK, user)
+    logger.debug(f"+login() => request={request}, is_json:{request.is_json}")
+    try:
+        body = request.get_json()
+        logger.debug(f"type={type(body)}, body={body}")
+        loginUser = LoginUser(**body)
+        # login user
+        userService = UserService()
+        loginUser = userService.login(loginUser)
 
-    response = ErrorModel.buildError(HTTPStatus.NOT_FOUND, "Account is not registered!")
-    print(response)
+        # build success response
+        response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="User is logged-in successfully.")
+        response.addInstance(loginUser)
+    except ValidationException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+    except DuplicateRecordException as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+        # return redirect(url_for("iws.api.login"), response)
+    except Exception as ex:
+        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
-    return make_response(response)
+    # flash(error)
+    logger.debug(f"-login() <= response={response}")
+    return make_response(response.to_json(), response.status)
 
 
 # Logout Page
-@bp_account_v1.post("/logout")
+@bp_user_v1.post("/logout")
 def logout():
     """Logout User"""
     logger.debug(f"+logout() => request={request}, args={request.args}, is_json:{request.is_json}")
     session.clear()
 
 
-@bp_account_v1.post("/forgot-password")
+@bp_user_v1.post("/forgot-password")
 def forgot_password():
     """Forgot User's Password"""
     logger.debug(f"+forgot_password() => request={request}, args={request.args}, is_json:{request.is_json}")
     pass
 
 
-@bp_account_v1.post("/batch")
+@bp_user_v1.post("/batch")
 def bulkCreate():
     """Create/Register Bulk Users"""
     logger.debug(f"+bulkCreate() => request={request}, args={request.args}, is_json:{request.is_json}")
@@ -152,7 +161,7 @@ def bulkCreate():
     return make_response(response.to_json(), response.status)
 
 
-@bp_account_v1.get("/")
+@bp_user_v1.get("/")
 def get():
     """Get User"""
     logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
@@ -173,7 +182,7 @@ def get():
     return make_response(response.to_json(), response.status)
 
 
-@bp_account_v1.put("/")
+@bp_user_v1.put("/")
 def update():
     """Update User"""
     logger.debug(f"+update() => request={request}, args={request.args}, is_json:{request.is_json}")
@@ -203,7 +212,7 @@ def update():
     return make_response(response.to_json(), response.status)
 
 
-@bp_account_v1.delete("/<id>")
+@bp_user_v1.delete("/<id>")
 def delete(id: int):
     """Delete a User"""
     logger.debug(f"+delete({id}) => request={request}, args={request.args}, is_json:{request.is_json}")
