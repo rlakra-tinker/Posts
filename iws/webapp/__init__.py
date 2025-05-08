@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Any
 
 from dotenv import load_dotenv
-from flask import Flask, Blueprint, make_response, request, Response
+from flask import Flask, Blueprint, make_response, request
 from flask_cors import CORS
 # https://flask.palletsprojects.com/en/3.0.x/deploying/proxy_fix/
 from werkzeug.middleware.proxy_fix import ProxyFix
@@ -27,20 +27,6 @@ from rest import bp as rest_bp
 from webapp.routes import bp as webapp_bp
 
 logger = logging.getLogger(__name__)
-
-
-class JsonResponse(Response):
-    """Custom JSON Response"""
-    # set default mime-type of all requests.
-    default_mimetype = "application/json; charset=utf-8"
-
-    # @classmethod
-    # def force_type(cls, response, environ=None):
-    #     """Enforce that the WSGI response is a response object of the current type."""
-    #     if isinstance(response, dict):
-    #         response = jsonify(response)
-    #
-    #     return super(JsonResponse, cls).force_type(response, environ)
 
 
 class WebApp:
@@ -112,7 +98,7 @@ class WebApp:
         # app.add_api("swagger.yml")
 
         # customize the default response class of your Flask application
-        app.response_class = JsonResponse
+        # app.response_class = JsonResponse
 
         # use custom logger adapter
         app.logger = DefaultLogger(app)

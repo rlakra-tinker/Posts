@@ -11,13 +11,24 @@ from datetime import datetime
 from enum import unique, auto
 from typing import Optional, Dict, List, Any, Union
 
-from pydantic import BaseModel as PydanticBaseModel, ValidationError, ConfigDict, model_validator, \
+from pydantic import (
+    BaseModel as PydanticBaseModel,
+    ValidationError,
+    ConfigDict,
+    model_validator,
     field_validator
+)
 # from pydantic.alias_generators import to_camel, to_snake
 from typing_extensions import Self
 
 from framework.enums import BaseEnum
-from framework.exception import AbstractException, ValidationException, DuplicateRecordException, NoRecordFoundException
+from framework.exception import (
+    AbstractException,
+    ValidationException,
+    DuplicateRecordException,
+    NoRecordFoundException,
+    AuthenticationException
+)
 from framework.http import HTTPStatus
 from framework.utils import Utils
 
@@ -459,11 +470,6 @@ class ResponseModel(AbstractModel):
                 response.addInstance(instance)
             else:
                 response.addInstance(ErrorModel.buildError(httpStatus, message, exception, is_critical))
-        elif exception:
-            logger.debug(f"elif exception => type={type(exception)}, exception={exception}")
-            response = ResponseModel(status=httpStatus.statusCode)
-            # build errorModel response, if exception is provided
-            response.addInstance(ErrorModel.buildError(httpStatus, message, exception, is_critical))
         elif not HTTPStatus.isStatusSuccess(httpStatus):
             logger.debug(f"not HTTPStatus.isStatusSuccess() => {HTTPStatus.isStatusSuccess(httpStatus)}")
             response = ResponseModel(status=httpStatus.statusCode)
@@ -472,6 +478,10 @@ class ResponseModel(AbstractModel):
         else:
             logger.debug(f"else => ")
             response = ResponseModel(status=httpStatus.statusCode)
+            if exception:
+                logger.debug(f"if exception => type={type(exception)}, exception={exception}")
+                # build errorModel response, if exception is provided
+                response.addInstance(ErrorModel.buildError(httpStatus, message, exception, is_critical))
 
         logger.debug(f"-buildResponse(), response={response}")
         return response
@@ -488,15 +498,19 @@ class ResponseModel(AbstractModel):
         elif isinstance(exception, DuplicateRecordException):
             logger.debug(f"DuplicateRecordException => {isinstance(exception, DuplicateRecordException)}")
             response = ResponseModel(status=exception.httpStatus.statusCode)
-            response.addInstance(
-                ErrorModel.buildError(httpStatus=exception.httpStatus, message=exception.messages[:-1]))
+            lastMessage = exception.messages[-1] if exception.messages else None
+            response.addInstance(ErrorModel.buildError(httpStatus=exception.httpStatus, message=lastMessage))
         elif isinstance(exception, NoRecordFoundException):
             logger.debug(f"NoRecordFoundException => {isinstance(exception, NoRecordFoundException)}")
             response = ResponseModel(status=exception.httpStatus.statusCode)
-            response.addInstance(
-                ErrorModel.buildError(httpStatus=exception.httpStatus, message=exception.messages[:-1])
-            )
+            lastMessage = exception.messages[-1] if exception.messages else None
+            response.addInstance(ErrorModel.buildError(httpStatus=exception.httpStatus, message=lastMessage))
             # response = ResponseModel.buildResponse(HTTPStatus.CONFLICT, message=str(exception))
+        elif isinstance(exception, AuthenticationException):
+            logger.debug(f"NoRecordFoundException => {isinstance(exception, NoRecordFoundException)}")
+            response = ResponseModel(status=exception.httpStatus.statusCode)
+            lastMessage = exception.messages[-1] if exception.messages else None
+            response.addInstance(ErrorModel.buildError(httpStatus=exception.httpStatus, message=lastMessage))
         elif isinstance(exception, AbstractException):
             logger.debug(f"isinstance(exception, AbstractException) => {isinstance(exception, AbstractException)}")
             response = ResponseModel(status=exception.httpStatus.statusCode)

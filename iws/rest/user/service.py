@@ -6,12 +6,17 @@ from datetime import datetime, timezone
 from typing import List, Optional, Dict, Any
 
 from common.config import Config
-from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException, \
+from framework.exception import (
+    DuplicateRecordException,
+    ValidationException,
+    NoRecordFoundException,
     AuthenticationException
+)
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import BaseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
 from framework.security.crypto import CryptoUtils
+from framework.security.crypto import SecurityException
 from framework.security.hash import HashUtils
 from framework.security.jwt import AuthModel, AuthenticatedUser, TokenType
 from framework.service import AbstractService
@@ -172,7 +177,11 @@ class UserService(AbstractService):
             if TokenType.JWT == TokenType:
                 raise AuthenticationException(HTTPStatus.UNAUTHORIZED, "Not yet supported!")
             else:
-                authModelDecrypted = CryptoUtils.decrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, auth_token)
+                try:
+                    authModelDecrypted = CryptoUtils.decrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, auth_token)
+                except SecurityException as ex:
+                    raise AuthenticationException(HTTPStatus.INTERNAL_SERVER_ERROR, messages=[str(ex)])
+
                 logger.debug(f"type={type(authModelDecrypted)}, authModelDecrypted={authModelDecrypted}")
                 authModel = AuthModel(**authModelDecrypted)
 
@@ -194,6 +203,7 @@ class UserService(AbstractService):
                     # load authenticated user
                     schemaObject = self.userRepository.filter({"id": authModel.user_id})[0]
                     userObject = UserMapper.fromSchema(schemaObject)
+                    userObject.authenticated = True
 
         except Exception as e:
             logger.error(f"Auth token {auth_token} seems to have been tampered!, Error:{e}")
@@ -204,17 +214,17 @@ class UserService(AbstractService):
 
     def login(self, loginUser: LoginUser) -> AuthenticatedUser:
         """Login a registered user"""
-        logger.debug(f"+login({loginUser})")
+        logger.debug(f"+{self.__class__.__name__}.login({loginUser})")
         # validate login-info
         error_messages = []
 
         # validate either an email or user_name is provided
         if not (loginUser and (Utils.is_valid_email(loginUser.email) or Utils.is_valid_username(loginUser.user_name))):
-            error_messages.append("Either email or user_id is required!")
+            error_messages.append("Either email or user_name is required!")
 
-        logger.debug(f"error_messages={error_messages}")
         # throw an error if any validation error
         if error_messages and len(error_messages) > 0:
+            logger.error(f"error_messages={error_messages}")
             error = ValidationException(httpStatus=HTTPStatus.INVALID_DATA, messages=error_messages)
             logger.debug(f"-validate(), {type(error)} = exception={error}")
             raise error
@@ -225,14 +235,14 @@ class UserService(AbstractService):
             userObjects = self.findByFilter({"email": loginUser.email})
         elif loginUser.user_name:
             userObjects = self.findByFilter({"user_name": loginUser.user_name})
-        logger.debug(f"userObjects={userObjects}")
+
         # validate user exists either by email or username
         if not (userObjects and len(userObjects) > 0):
-            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, f"User is not registered!")
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, messages=["User is not registered!"])
 
         # authenticate user by loading user's credentials
         userObject = userObjects[0]
-        userSecuritySchema = self.userSecurityRepository.findById({"user_id": userObject.id})[0]
+        userSecuritySchema = self.userSecurityRepository.filter({"user_id": userObject.id})[0]
         logger.debug(f"userSecuritySchema={userSecuritySchema}")
 
         # validate password
@@ -240,14 +250,14 @@ class UserService(AbstractService):
         logger.debug(f"loginUser.password={loginUser.password}, passwordHashCode={passwordHashCode}")
         # check the hashed-auth-token and password-auth-token are same
         if userSecuritySchema.hashed_auth_token != passwordHashCode:
-            raise AuthenticationException(HTTPStatus.UNAUTHORIZED, f"Either username or password is wrong!")
+            raise AuthenticationException(HTTPStatus.UNAUTHORIZED, messages=["Either username or password is wrong!"])
 
         # check other patterns
         saltHashCode, hashCode = HashUtils.hashCodeWithSalt(passwordHashCode, userSecuritySchema.salt)
         userObject.authenticated = HashUtils.checkHashCode(loginUser.password, saltHashCode, hashCode)
         logger.debug(f"userObject={userObject}")
         if not userObject.isAuthenticated():
-            raise AuthenticationException(HTTPStatus.UNAUTHORIZED, f"Either username or password is wrong!")
+            raise AuthenticationException(HTTPStatus.UNAUTHORIZED, messages=["Either username or password is wrong!"])
 
         # build auth-token model
         authModel = AuthModel(user_id=userObject.id,
@@ -255,15 +265,19 @@ class UserService(AbstractService):
                               iat=int(datetime.now(timezone.utc).timestamp()))
 
         # encrypt authModel for security purpose
-        authModelEncrypted = CryptoUtils.encrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, authModel.to_json())
-        logger.debug(f"authModelEncrypted={authModelEncrypted}")
+        try:
+            authModelEncrypted = CryptoUtils.encrypt_with_aesgcm(Config.ENC_KEY, Config.ENC_NONCE, authModel.to_json())
+        except SecurityException as ex:
+            raise AuthenticationException(HTTPStatus.INTERNAL_SERVER_ERROR, messages=[str(ex)])
 
+        logger.debug(f"authModelEncrypted={authModelEncrypted}")
         # build authenticate user object model
         authUser = AuthenticatedUser(user_id=authModel.user_id,
                                      token_type=TokenType.AUTH.name,
                                      token=authModelEncrypted,
                                      user_exists=True)
-        logger.debug(f"-login(), authUser={authUser}")
+
+        logger.debug(f"-{self.__class__.__name__}.login(), authUser={authUser}")
         return authUser
 
     def update(self, user: User) -> User:

@@ -154,7 +154,8 @@ class HTTPStatus(AutoUpperCase):
 
     @staticmethod
     def isStatusSuccess(httpStatus) -> bool:
-        return isinstance(httpStatus, HTTPStatus) and HTTPStatus.getSuccessStatuses().__contains__(httpStatus)
+        # return isinstance(httpStatus, HTTPStatus) and HTTPStatus.getSuccessStatuses().__contains__(httpStatus)
+        return isinstance(httpStatus, HTTPStatus) and httpStatus in HTTPStatus.getSuccessStatuses()
 
 
 class HTTPUtils:

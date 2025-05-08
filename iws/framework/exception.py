@@ -17,13 +17,13 @@ class AbstractException(Exception):
         # logger.debug(f"+__init__ => type={type(self)},  httpStatus={httpStatus}, messages={messages}, kwargs={kwargs}")
         self.httpStatus = httpStatus
         self.messages = messages
-        super().__init__(kwargs)
+        super().__init__(messages, kwargs)
         # logger.debug(f"-__init__ ()")
 
     @classmethod
     def __new__(cls, *args, **kwargs):
         # logger.debug(f"+__new__ => type={type(cls)},  args={args}, kwargs={kwargs}")
-        instance = super(AbstractException, cls).__new__(cls)
+        instance = super(AbstractException, cls).__new__(cls, args)
         # logger.debug(f"instance => type={type(instance)}")
         # instance.__init__(*args, **kwargs)
 
@@ -59,6 +59,7 @@ class AuthorizationException(AbstractException):
 
 class DuplicateRecordException(AbstractException):
     """ Duplicate Record Exception """
+    pass
 
     # @staticmethod  # known case of __new__
     # def __new__(*args, **kwargs):  # real signature unknown
@@ -77,12 +78,13 @@ class DuplicateRecordException(AbstractException):
 
 
 class NoRecordFoundException(AbstractException):
-    """ Duplicate Record exception """
+    """ No Record Found Exception """
+    pass
 
-    # def __init__(self, message):
+    # def __init__(self, *args, **kwargs):
     #     # Call the base class constructor with the parameters it needs
-    #     super().__init__(message)
-    #
+    #     super().__init__(args, kwargs)
+
     # @staticmethod  # known case of __new__
     # def __new__(*args, **kwargs):  # real signature unknown
     #     """ Create and return a new object.  See help(type) for accurate signature. """
@@ -91,14 +93,4 @@ class NoRecordFoundException(AbstractException):
 
 class ValidationException(AbstractException):
     """ Record Validation Exception """
-
-    # def __init__(self, httpStatus: HTTPStatus, errors: List[Optional[str]] = None):
-    #     super().__init__()
-    #     self.httpStatus = httpStatus
-    #     self.errors = errors
-    #
-    # @classmethod
-    # def __new__(cls, *args, **kws):
-    #     instance = super(ValidationException, cls).__new__(cls)
-    #     instance.__init__(*args, **kws)
-    #     return instance
+    pass

@@ -14,7 +14,7 @@ app_config = None
 
 class Config:
     """Configuration file."""
-    
+
     __APP_CONFIG_FILE_PATH = 'tests/data/app-configs.json'
     __CORS_ENABLED = 'CORS_ENABLED'
 
@@ -54,6 +54,7 @@ class Config:
     # env configs
     CORS_ENABLED = bool(os.getenv(__CORS_ENABLED))
 
+    # load ENV specific configs
     if EnvType.is_testing(EnvType.get_env_type()):
         # loads app's config file
         with open(__APP_CONFIG_FILE_PATH) as config_file:
@@ -86,6 +87,9 @@ class Config:
         ENCRYPTION_CONFIGS = SECURITY_CONFIGS.get(__ENCRYPTION_CONFIGS)
         ENC_KEY = ENCRYPTION_CONFIGS.get(__ENC_KEY)
         ENC_NONCE = ENCRYPTION_CONFIGS.get(__ENC_NONCE)
+    else:
+        ENC_KEY = os.getenv(__ENC_KEY)
+        ENC_NONCE = os.getenv(__ENC_NONCE)
 
     @staticmethod
     def is_cors_enabled():

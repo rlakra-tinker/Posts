@@ -158,6 +158,6 @@ class CompanyService(AbstractService):
         if self.existsByFilter(filter):
             self.repository.delete(filter)
         else:
-            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, "Company doesn't exist!")
+            raise NoRecordFoundException(HTTPStatus.NOT_FOUND, ["Company doesn't exist!"])
 
         logger.debug(f"-delete()")

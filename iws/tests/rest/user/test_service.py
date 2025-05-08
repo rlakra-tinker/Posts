@@ -167,6 +167,7 @@ class UserServiceTest(AbstractTestCase):
         logger.debug(f"userObject={userObject}")
         self.assertIsNotNone(userObject)
         self.assertEqual(userObject.id, self.user.id)
+        self.assertTrue(userObject.authenticated)
 
         logger.debug("-test_login_user()")
         print()

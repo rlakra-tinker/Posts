@@ -97,7 +97,7 @@ class Utils(BaseEnum):
             True if the string is a valid email address, False otherwise.
         """
         # email_regex = r"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$"
-        return re.match(EMAIL_REGEX, email) is not None
+        return email and re.match(EMAIL_REGEX, email) is not None
 
     @classmethod
     def is_valid_username(cls, username):
@@ -111,4 +111,4 @@ class Utils(BaseEnum):
             True if the string is a valid username, False otherwise.
         """
         # username_regex = r"^[a-zA-Z0-9_-]{3,20}$"  # Allows alphanumeric characters, underscores, and hyphens, between 3 and 20 characters
-        return re.match(USERNAME_REGEX, username) is not None
+        return username and re.match(USERNAME_REGEX, username) is not None

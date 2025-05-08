@@ -16,6 +16,7 @@ from framework.orm.sqlalchemy.schema import SchemaOperation
 from rest.user.model import User, LoginUser
 from rest.user.service import UserService
 from rest.user.v1 import bp as bp_user_v1
+from rest.auth import auth
 
 logger = logging.getLogger(__name__)
 
@@ -97,13 +98,8 @@ def login():
         # build success response
         response = ResponseModel(status=HTTPStatus.CREATED.statusCode, message="User is logged-in successfully.")
         response.addInstance(loginUser)
-    except ValidationException as ex:
-        response = ResponseModel.buildResponseWithException(ex)
-    except DuplicateRecordException as ex:
-        response = ResponseModel.buildResponseWithException(ex)
-        # return redirect(url_for("iws.api.login"), response)
     except Exception as ex:
-        response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
+        response = ResponseModel.buildResponseWithException(ex)
 
     # flash(error)
     logger.debug(f"-login() <= response={response}")
@@ -162,6 +158,7 @@ def bulkCreate():
 
 
 @bp_user_v1.get("/")
+@auth
 def get():
     """Get User"""
     logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")

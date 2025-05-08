@@ -15,6 +15,11 @@ logger = logging.getLogger(__name__)
 UTF_8 = 'utf-8'
 
 
+class SecurityException(Exception):
+    """ Security Exception """
+    pass
+
+
 class CryptoUtils:
     """"""
 
@@ -47,6 +52,9 @@ class CryptoUtils:
     @staticmethod
     def encrypt_with_aesgcm(enc_key: str, enc_nonce: str, data: str) -> str:
         logger.debug(f"+encrypt_with_aesgcm({enc_key}, {enc_nonce}, {data})")
+        if not (enc_key or enc_nonce):
+            raise SecurityException("Either security key or nonce is wrong!")
+
         aesgcm = AESGCM(enc_key.encode(UTF_8))
         data_bytes = aesgcm.encrypt(enc_nonce.encode(UTF_8), data.encode(UTF_8), CryptoUtils.extra_data)
         encrypted = base64.b64encode(data_bytes).decode(UTF_8)
@@ -56,6 +64,9 @@ class CryptoUtils:
     @staticmethod
     def decrypt_with_aesgcm(enc_key: str, enc_nonce: str, data: str) -> dict:
         logger.debug(f"+decrypt_with_aesgcm({enc_key}, {enc_nonce}, {data})")
+        if not (enc_key or enc_nonce):
+            raise SecurityException("Either security key or nonce is wrong!")
+
         aesgcm = AESGCM(enc_key.encode(UTF_8))
         data_bytes = base64.b64decode(data)
         decrypted = aesgcm.decrypt(enc_nonce.encode(UTF_8), data_bytes, CryptoUtils.extra_data).decode(UTF_8)
