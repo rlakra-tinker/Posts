@@ -9,7 +9,7 @@ import logging
 from flask import make_response, request
 from flask import session, g
 
-from framework.exception import DuplicateRecordException, ValidationException, NoRecordFoundException
+from framework.exception import DuplicateRecordException, ValidationException, RecordNotFoundException
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
@@ -214,7 +214,7 @@ def update():
         response.addInstance(user)
     except ValidationException as ex:
         response = ResponseModel.buildResponseWithException(ex)
-    except NoRecordFoundException as ex:
+    except RecordNotFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
@@ -239,7 +239,7 @@ def delete(id: int):
 
         # build success response
         response = ResponseModel(status=HTTPStatus.OK.statusCode, message="User is successfully deleted.")
-    except NoRecordFoundException as ex:
+    except RecordNotFoundException as ex:
         response = ResponseModel.buildResponseWithException(ex)
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)

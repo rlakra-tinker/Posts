@@ -6,7 +6,7 @@ from flask import request, make_response, Response
 from framework.exception import AuthenticationException
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import ResponseModel
-from framework.security.jwt import TokenType
+from framework.security.jwt import TokenTypeEnum
 from rest.user.service import UserService
 
 logger = logging.getLogger(__name__)
@@ -38,7 +38,7 @@ def auth(func_name=None, role=None):
                 return authErrorResponse("Invalid Token!")
 
             userService = UserService()
-            userObject = userService.authenticate(TokenType.AUTH, auth_token)
+            userObject = userService.authenticate(TokenTypeEnum.AUTH, auth_token)
             logger.debug(f"userObject={userObject}")
             if userObject and userObject.isAuthenticated():
                 logger.debug(f"AUTH userObject={userObject}")
