@@ -13,10 +13,10 @@ from framework.exception import DuplicateRecordException, ValidationException, N
 from framework.http import HTTPStatus
 from framework.orm.pydantic.model import ResponseModel
 from framework.orm.sqlalchemy.schema import SchemaOperation
+from rest.auth import auth
 from rest.user.model import User, LoginUser
 from rest.user.service import UserService
 from rest.user.v1 import bp as bp_user_v1
-from rest.auth import auth
 
 logger = logging.getLogger(__name__)
 
@@ -106,19 +106,33 @@ def login():
     return make_response(response.to_json(), response.status)
 
 
-# Logout Page
 @bp_user_v1.post("/logout")
 def logout():
     """Logout User"""
     logger.debug(f"+logout() => request={request}, args={request.args}, is_json:{request.is_json}")
-    session.clear()
+    # session.clear()
+    try:
+        # build success response
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="User is logged-out successfully.")
+    except Exception as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+
+    logger.debug(f"-logout() <= response={response}")
+    return make_response(response.to_json(), response.status)
 
 
 @bp_user_v1.post("/forgot-password")
-def forgot_password():
+def forgotPassword():
     """Forgot User's Password"""
-    logger.debug(f"+forgot_password() => request={request}, args={request.args}, is_json:{request.is_json}")
-    pass
+    logger.debug(f"+forgotPassword() => request={request}, args={request.args}, is_json:{request.is_json}")
+    try:
+        # build success response
+        response = ResponseModel(status=HTTPStatus.OK.statusCode, message="Forgot password link sent successfully.")
+    except Exception as ex:
+        response = ResponseModel.buildResponseWithException(ex)
+
+    logger.debug(f"-forgotPassword() <= response={response}")
+    return make_response(response.to_json(), response.status)
 
 
 @bp_user_v1.post("/batch")
@@ -159,23 +173,23 @@ def bulkCreate():
 
 @bp_user_v1.get("/")
 @auth
-def get():
-    """Get User"""
-    logger.debug(f"+get() => request={request}, args={request.args}, is_json:{request.is_json}")
+def findByFilter():
+    """Find User's by Filter"""
+    logger.debug(f"+findByFilter) => request={request}, args={request.args}, is_json:{request.is_json}")
     try:
         userService = UserService()
-        roles = userService.findByFilter(request.args)
+        userObjects = userService.findByFilter(request.args)
 
         # build success response
         response = ResponseModel.buildResponse(HTTPStatus.OK)
-        if roles:
-            response.addInstances(roles)
+        if userObjects:
+            response.addInstances(userObjects)
         else:
             response.message = "No Records Exist!"
     except Exception as ex:
         response = ResponseModel.buildResponse(HTTPStatus.INTERNAL_SERVER_ERROR, message=str(ex), exception=ex)
 
-    logger.debug(f"-get() <= response={response}")
+    logger.debug(f"-findByFilter() <= response={response}")
     return make_response(response.to_json(), response.status)
 
 

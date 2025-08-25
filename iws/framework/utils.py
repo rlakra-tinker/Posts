@@ -11,7 +11,7 @@ import uuid
 import requests
 
 from framework.enums import BaseEnum
-from framework.time import StopWatch
+from framework.datetime import StopWatch
 
 # logger
 logger = logging.getLogger(__name__)

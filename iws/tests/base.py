@@ -4,7 +4,7 @@
 import json
 import unittest
 
-from framework.time import timeMillis
+from framework.datetime import nowMillis
 from tests import app
 
 
@@ -88,4 +88,4 @@ class AbstractTestCase(unittest.TestCase):
     #     print("-test_webapp()")
 
     def getTestEmail(self, isAdmin: bool = False):
-        return f"{'admin' if isAdmin else 'user'}{timeMillis()}@lakra.com"
+        return f"{'admin' if isAdmin else 'user'}{nowMillis()}@lakra.com"
